@@ -64,7 +64,10 @@ final readonly class RefreshTokenAction implements RequestHandlerInterface
 
         return $this->cookieManager->apply(
             response: $response,
-            context: new CookieContext(refreshToken: $result->refreshToken),
+            context: new CookieContext(
+                refreshToken: $result->refreshToken,
+                loggedIn: '1'
+            ),
         );
     }
 }

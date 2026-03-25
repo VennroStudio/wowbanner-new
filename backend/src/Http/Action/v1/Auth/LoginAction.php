@@ -76,7 +76,10 @@ final readonly class LoginAction implements RequestHandlerInterface
 
         return $this->cookieManager->apply(
             response: $response,
-            context: new CookieContext(refreshToken: $result->refreshToken),
+            context: new CookieContext(
+                refreshToken: $result->refreshToken,
+                loggedIn: '1'
+            ),
         );
     }
 }

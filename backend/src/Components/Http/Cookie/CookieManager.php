@@ -19,7 +19,13 @@ final readonly class CookieManager
             /** @var string $value */
             $value = $context->{$property};
             if ($value !== '') {
-                $response = $this->set($response, $meta['name'], $value, $meta['ttl']);
+                $response = $this->set(
+                    $response,
+                    $meta['name'],
+                    $value,
+                    $meta['ttl'],
+                    $meta['httpOnly'] ?? true
+                );
             }
         }
 
@@ -29,7 +35,7 @@ final readonly class CookieManager
     public function discard(ResponseInterface $response, CookieContext $context): ResponseInterface
     {
         foreach ($context->getDefinition() as $meta) {
-            $response = $this->delete($response, $meta['name']);
+            $response = $this->delete($response, $meta['name'], $meta['httpOnly'] ?? true);
         }
 
         return $response;
@@ -39,18 +45,23 @@ final readonly class CookieManager
         ResponseInterface $response,
         string $name,
         string $value,
-        int $ttl
+        int $ttl,
+        bool $httpOnly = true,
     ): ResponseInterface {
         $expires = time() + $ttl;
         $date = gmdate('D, d M Y H:i:s \G\M\T', $expires);
 
         $cookie = \sprintf(
-            '%s=%s; Expires=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=Lax',
+            '%s=%s; Expires=%s; Max-Age=%d; Path=/; SameSite=Lax',
             $name,
             $value,
             $date,
             $ttl
         );
+
+        if ($httpOnly) {
+            $cookie .= '; HttpOnly';
+        }
 
         $cookie .= '; Domain=' . $this->domain;
 
@@ -61,12 +72,16 @@ final readonly class CookieManager
         return $response->withAddedHeader('Set-Cookie', $cookie);
     }
 
-    public function delete(ResponseInterface $response, string $name): ResponseInterface
+    public function delete(ResponseInterface $response, string $name, bool $httpOnly = true): ResponseInterface
     {
         $cookie = \sprintf(
-            '%s=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/; HttpOnly; SameSite=Lax',
+            '%s=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Path=/; SameSite=Lax',
             $name
         );
+
+        if ($httpOnly) {
+            $cookie .= '; HttpOnly';
+        }
 
         $cookie .= '; Domain=' . $this->domain;
 

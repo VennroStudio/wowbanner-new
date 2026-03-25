@@ -13,6 +13,12 @@ interface AuthContextType {
   apiFetch: (endpoint: string, options?: RequestInit) => Promise<any>;
 }
 
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+};
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -101,6 +107,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Тихий рефреш при загрузке приложения
   useEffect(() => {
     const initAuth = async () => {
+      // Если сигнальной куки нет (ставится бэкендом) — мы гость, запрос не делаем
+      if (!getCookie('logged_in')) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const res = await fetch(`${API_URL}/auth/refresh`, {
           method: 'POST',
