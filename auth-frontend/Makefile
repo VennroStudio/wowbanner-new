@@ -18,10 +18,10 @@ docker-up:
 	docker compose up -d $(SERVICE)
 
 docker-down:
-	docker compose down --remove-orphans
+	docker compose down
 
 docker-clear:
-	docker compose down -v --remove-orphans
+	docker compose down -v
 
 docker-build:
 	docker compose build --pull $(SERVICE)

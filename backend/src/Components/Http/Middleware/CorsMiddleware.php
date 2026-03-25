@@ -41,11 +41,11 @@ final readonly class CorsMiddleware implements MiddlewareInterface
 
     private function isAllowedOrigin(string $origin): bool
     {
-        $domains = ['vennro.ru'];
+        $domains = ['wowbanner.local'];
 
         foreach ($domains as $domain) {
             $escaped = preg_quote($domain, '~');
-            $pattern = '~^https?://(.+\.)?' . $escaped . '$~i';
+            $pattern = '~^http?://(.+\.)?' . $escaped . '$~i';
 
             if (preg_match($pattern, $origin) === 1) {
                 return true;

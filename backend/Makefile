@@ -11,9 +11,9 @@ fix: php-linter-fix
 docker-up:
 	docker-compose up -d nginx php-fpm php-cli
 docker-down:
-	docker-compose down --remove-orphans
+	docker-compose down
 docker-clear:
-	docker-compose down -v --remove-orphans
+	docker-compose down -v
 docker-build:
 	docker-compose build --pull nginx php-fpm php-cli
 
