@@ -1,0 +1,20 @@
+name: wowbanner-new
+
+services:
+  auth-app-wowbanner:
+    container_name: auth-frontend-wowbanner
+    build:
+      context: .
+      dockerfile: docker/development/Dockerfile
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    env_file: .env
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

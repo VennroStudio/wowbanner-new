@@ -1,0 +1,14 @@
+name: wowbanner-new
+
+services:
+  auth-app-wowbanner:
+    image: ${REGISTRY}/auth-frontend-wowbanner:${IMAGE_TAG}
+    container_name: auth-frontend-wowbanner
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
