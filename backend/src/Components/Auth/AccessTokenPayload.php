@@ -12,6 +12,7 @@ use UnexpectedValueException;
 final readonly class AccessTokenPayload
 {
     public function __construct(
+        public string $jti,
         public int $userId,
         public string $firstName,
         public UserRole $role,
@@ -31,6 +32,7 @@ final readonly class AccessTokenPayload
         $issuedAt = UtcClock::now()->getTimestamp();
 
         return new self(
+            jti: bin2hex(random_bytes(16)),
             userId: $userId,
             firstName: $firstName,
             role: $role,
@@ -42,6 +44,7 @@ final readonly class AccessTokenPayload
     public function toClaims(): array
     {
         return [
+            'jti'        => $this->jti,
             'sub'        => (string)$this->userId,
             'first_name' => $this->firstName,
             'role'       => $this->role->value,
@@ -59,6 +62,7 @@ final readonly class AccessTokenPayload
         $role = UserRole::from(self::requirePositiveInt($payload->role ?? null));
 
         return new self(
+            jti: self::requireNonEmptyString($payload->jti ?? null),
             userId: $userId,
             firstName: $firstName,
             role: $role,

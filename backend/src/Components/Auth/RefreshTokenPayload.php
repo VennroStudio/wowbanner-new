@@ -11,6 +11,7 @@ use UnexpectedValueException;
 final readonly class RefreshTokenPayload
 {
     public function __construct(
+        public string $jti,
         public int $userId,
         public int $issuedAt,
         public int $expiresAt,
@@ -24,6 +25,7 @@ final readonly class RefreshTokenPayload
         $issuedAt = UtcClock::now()->getTimestamp();
 
         return new self(
+            jti: bin2hex(random_bytes(16)),
             userId: $userId,
             issuedAt: $issuedAt,
             expiresAt: $issuedAt + $ttl,
@@ -33,6 +35,7 @@ final readonly class RefreshTokenPayload
     public function toClaims(): array
     {
         return [
+            'jti' => $this->jti,
             'sub' => (string)$this->userId,
             'iat' => $this->issuedAt,
             'exp' => $this->expiresAt,
@@ -42,6 +45,7 @@ final readonly class RefreshTokenPayload
     public static function fromObject(object $payload): self
     {
         return new self(
+            jti: self::requireNonEmptyString($payload->jti ?? null),
             userId: self::requirePositiveInt($payload->sub ?? null),
             issuedAt: self::requirePositiveInt($payload->iat ?? null),
             expiresAt: self::requirePositiveInt($payload->exp ?? null),
@@ -57,5 +61,14 @@ final readonly class RefreshTokenPayload
         }
 
         return $intValue;
+    }
+
+    private static function requireNonEmptyString(mixed $value): string
+    {
+        if (!\is_string($value) || trim($value) === '') {
+            throw new UnexpectedValueException('error.invalid_claim');
+        }
+
+        return $value;
     }
 }

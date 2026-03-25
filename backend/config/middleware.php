@@ -35,6 +35,6 @@ return static function (App $app): void {
     $app->add(MethodNotAllowedExceptionHandler::class);
     $app->add(InvalidArgumentExceptionHandler::class);
     $app->add(ErrorMiddleware::class);
-    $app->add(CorsMiddleware::class);
     $app->addRoutingMiddleware();
+    $app->add(CorsMiddleware::class);
 };
