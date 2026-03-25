@@ -45,7 +45,7 @@ final readonly class CorsMiddleware implements MiddlewareInterface
 
         foreach ($domains as $domain) {
             $escaped = preg_quote($domain, '~');
-            $pattern = '~^http?://(.+\.)?' . $escaped . '$~i';
+            $pattern = '~^https?://(.+\.)?' . $escaped . '$~i';
 
             if (preg_match($pattern, $origin) === 1) {
                 return true;

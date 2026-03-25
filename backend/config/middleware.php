@@ -22,7 +22,6 @@ use Slim\Middleware\ErrorMiddleware;
 /** @param App<ContainerInterface> $app */
 return static function (App $app): void {
     $app->addBodyParsingMiddleware();
-    $app->add(CorsMiddleware::class);
     $app->add(TranslatorLocale::class);
     $app->add(ClearEmptyInput::class);
     $app->add(DenormalizationExceptionHandler::class);
@@ -36,5 +35,6 @@ return static function (App $app): void {
     $app->add(MethodNotAllowedExceptionHandler::class);
     $app->add(InvalidArgumentExceptionHandler::class);
     $app->add(ErrorMiddleware::class);
+    $app->add(CorsMiddleware::class);
     $app->addRoutingMiddleware();
 };
