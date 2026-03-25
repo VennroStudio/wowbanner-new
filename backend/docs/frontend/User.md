@@ -6,7 +6,7 @@
 
 ## Базовые вещи
 
-- Base URL API: `https://api.vennro.ru/v1`
+- Base URL API: `https://auth-wowban.vennro.ru/v1`
 - Для всех запросов с телом использовать `Content-Type: application/json`
 - Успешные ответы с данными идут в формате `{ "data": { ... } }`
 - Успешные ответы без данных:
@@ -17,7 +17,7 @@
 - Для защищённых endpoint нужен заголовок `Authorization: Bearer <access_token>`
 
 ### Важное дополнение: Cookies и SSO
-Для работы авторизации между поддоменами (например, `auth.vennro.ru` и `vennro.ru`) бэкенд использует **HttpOnly Cookies** для хранения `refresh_token`.
+Для работы авторизации между поддоменами (например, `auth-wowban.vennro.ru` и `vennro.ru`) бэкенд использует **HttpOnly Cookies** для хранения `refresh_token`.
 - Браузер сам сохраняет и отправляет `refresh_token`.
 - JS-код не имеет доступа к этому токену (защита от XSS).
 - Для всех запросов к API фронтенд должен использовать `{ credentials: 'include' }` в fetch или `withCredentials: true` в axios.
