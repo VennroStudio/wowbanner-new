@@ -1,7 +1,5 @@
 # Environment files
-.env
-.env.deploy
-.env.prod
+.env*
 
 # Composer
 /vendor/
