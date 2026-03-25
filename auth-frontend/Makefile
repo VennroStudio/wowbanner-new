@@ -1,12 +1,18 @@
 -include .env.deploy
 export
 
-SERVICE = auth-app
+SERVICE = auth-app-wowbanner
 VERSION := $(IMAGE_TAG).$(BUILD_NUMBER)
+
+# ─── Setup ────────────────────────────────────────────────────────────────────
+create:
+	npm create vite@latest . -- --template react-ts
+	@echo "✅ Vite проект создан. Теперь выполни: make init"
 
 # ─── Development ──────────────────────────────────────────────────────────────
 init: docker-clear docker-build docker-up
 restart: docker-down docker-up
+rebuild: docker-down docker-build docker-up
 
 docker-up:
 	docker compose up -d $(SERVICE)
@@ -24,11 +30,20 @@ docker-build:
 install:
 	docker compose run --rm $(SERVICE) npm install
 
+npm-add:
+	docker compose run --rm $(SERVICE) npm install $(PACK)
+
+npm-remove:
+	docker compose run --rm $(SERVICE) npm uninstall $(PACK)
+
 dev:
 	npm run dev
 
 build-local:
 	npm run build
+
+preview:
+	npm run preview
 
 lint:
 	docker compose run --rm $(SERVICE) npm run lint
@@ -90,14 +105,20 @@ clean-v:
 # ─── Help ─────────────────────────────────────────────────────────────────────
 help:
 	@echo "======================================"
+	@echo "-SETUP:"
+	@echo "  make create            - Создать Vite React+TS проект"
+	@echo "  make init              - Первый запуск (сборка + поднятие контейнеров)"
+	@echo ""
 	@echo "-DEVELOPMENT:"
-	@echo "  make init              - Инициализация проекта"
 	@echo "  make restart           - Рестарт dev-контейнеров"
+	@echo "  make rebuild           - Пересборка и перезапуск"
 	@echo "  make docker-logs       - Логи контейнера"
 	@echo "  make docker-shell      - Войти в контейнер"
 	@echo ""
-	@echo "-LOCAL:"
-	@echo "  make install           - npm install внутри контейнера"
+	@echo "-NPM:"
+	@echo "  make install           - Установить зависимости"
+	@echo "  make npm-add PACK=     - Добавить пакет"
+	@echo "  make npm-remove PACK=  - Удалить пакет"
 	@echo "  make lint              - Проверка ESLint"
 	@echo "  make format            - Форматирование Prettier"
 	@echo ""
@@ -115,6 +136,6 @@ help:
 	@echo "  make clean-v           - Очистка старых версий"
 	@echo "======================================"
 
-.PHONY: help init restart docker-up docker-down docker-clear docker-build \
-        docker-logs docker-shell install dev build-local lint format \
+.PHONY: help create init restart rebuild docker-up docker-down docker-clear docker-build \
+        docker-logs docker-shell install npm-add npm-remove dev build-local preview lint format \
         docker-login server-login server-logout build push deploy rollback list-v clean-v
