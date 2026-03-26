@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserRoundPlus } from 'lucide-react';
-import { AdminActionButton } from './AdminActionButton';
+import { PanelActionButton } from '../PanelActionButton';
 import { useRouter } from '@/shared/hooks';
 
 export const AdminPanel: React.FC = () => {
@@ -8,16 +8,16 @@ export const AdminPanel: React.FC = () => {
   return (
     <div className="mb-8 text-left">
       <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 px-1">
-        Панель управления
+        Админ панель
       </h3>
       <div className="grid grid-cols-2 gap-3">
-        <AdminActionButton
+        <PanelActionButton
           icon={UserRoundPlus}
           label="Пригласить"
           onClick={() => navigate('/register')}
         />
 
-        <AdminActionButton
+        <PanelActionButton
           label="Управление"
           disabled
         />

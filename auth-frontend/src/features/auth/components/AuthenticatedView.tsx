@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
 import { UserAvatar } from '@/shared/components';
 import { AdminPanel } from './AdminPanel/AdminPanel';
+import { NavigationPanel } from './NavigationPanel/NavigationPanel';
 
 export const AuthenticatedView: React.FC = () => {
   const { navigate } = useRouter();
@@ -24,6 +25,7 @@ export const AuthenticatedView: React.FC = () => {
       </h2>
       <p className="text-slate-500 mb-6">{user?.email}</p>
 
+      <NavigationPanel />
       {isAdmin && <AdminPanel />}
 
       <button

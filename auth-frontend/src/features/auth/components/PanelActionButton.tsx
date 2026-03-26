@@ -1,14 +1,14 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 
-interface AdminActionButtonProps {
+interface PanelActionButtonProps {
   icon?: LucideIcon;
   label: string;
   onClick?: () => void;
   disabled?: boolean;
 }
 
-export const AdminActionButton: React.FC<AdminActionButtonProps> = ({
+export const PanelActionButton: React.FC<PanelActionButtonProps> = ({
   icon: Icon,
   label,
   onClick,
