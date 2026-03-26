@@ -11,4 +11,16 @@ export const userApi = {
 
   getUser: (apiFetch: ApiFetchFn, userId: string | number) =>
     apiFetch(API_ENDPOINTS.USERS.BY_ID(userId), { method: 'GET' }),
+
+  uploadAvatar: (apiFetch: ApiFetchFn, userId: string | number, file: File) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return apiFetch(API_ENDPOINTS.USERS.AVATAR(userId), {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  deleteAvatar: (apiFetch: ApiFetchFn, userId: string | number) =>
+    apiFetch(API_ENDPOINTS.USERS.AVATAR(userId), { method: 'DELETE' }),
 };

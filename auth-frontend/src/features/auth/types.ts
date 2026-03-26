@@ -7,6 +7,7 @@ export interface AuthContextType {
   isLoading: boolean;
   login: (accessToken: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (data: Partial<User>) => void;
   apiFetch: (endpoint: string, options?: RequestInit) => Promise<unknown>;
 }
 

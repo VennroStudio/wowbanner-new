@@ -80,6 +80,10 @@ export const useAuthProvider = (): AuthContextType => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const updateUser = useCallback((data: Partial<User>) => {
+    setUser((prev) => (prev ? { ...prev, ...data } : null));
+  }, []);
+
   return {
     user,
     isAuthenticated: !!user,
@@ -87,6 +91,7 @@ export const useAuthProvider = (): AuthContextType => {
     isLoading,
     login,
     logout,
+    updateUser,
     apiFetch,
   };
 };

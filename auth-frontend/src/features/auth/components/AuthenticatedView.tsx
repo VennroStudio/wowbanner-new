@@ -1,16 +1,18 @@
-import React from 'react';
-import { LogOut } from 'lucide-react';
+import React, { useState } from 'react';
+import { LogOut, Camera } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
 import { UserAvatar } from '@/shared/components';
 import { AdminPanel } from './AdminPanel/AdminPanel';
 import { NavigationPanel } from './NavigationPanel/NavigationPanel';
+import { AvatarManager } from './AvatarManager';
 
 import { ROUTES } from '@/shared/constants';
 
 export const AuthenticatedView: React.FC = () => {
   const { navigate } = useRouter();
   const { user, isAdmin, logout } = useAuth();
+  const [isAvatarManagerOpen, setIsAvatarManagerOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -19,8 +21,19 @@ export const AuthenticatedView: React.FC = () => {
 
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 text-center">
-      <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
-        <UserAvatar avatarUrl={user?.avatar} />
+      {/* Avatar Section */}
+      <div className="flex flex-col items-center mb-6 mt-4">
+        <button
+          onClick={() => setIsAvatarManagerOpen(true)}
+          className="relative w-24 h-24 ring-4 ring-blue-50/50 rounded-full hover:ring-blue-100/80 transition-all group overflow-hidden cursor-pointer"
+        >
+          <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform duration-500">
+            <UserAvatar avatarUrl={user?.avatar} />
+          </div>
+          <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/20 transition-colors flex items-center justify-center">
+            <Camera className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24} />
+          </div>
+        </button>
       </div>
       <h2 className="text-2xl font-bold text-slate-800 mb-1">
         Здравствуйте, {user?.first_name }!
@@ -36,6 +49,11 @@ export const AuthenticatedView: React.FC = () => {
       >
         <LogOut size={16} /> Выйти из аккаунта
       </button>
+
+      <AvatarManager
+        isOpen={isAvatarManagerOpen}
+        onClose={() => setIsAvatarManagerOpen(false)}
+      />
     </div>
   );
 };
