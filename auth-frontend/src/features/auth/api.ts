@@ -1,14 +1,12 @@
 import { API_URL } from '@/shared/constants';
-
-type ApiFetchFn = (endpoint: string, options?: RequestInit) => Promise<unknown>;
+import type { LoginDto } from './types';
+import type { ApiFetchFn } from '@/shared/api/client';
 
 export const authApi = {
-  login: (email: string, password: string) =>
-    fetch(`${API_URL}/auth/login`, {
+  login: (apiFetch: ApiFetchFn, data: LoginDto) =>
+    apiFetch('/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(data),
     }),
 
   refresh: () =>

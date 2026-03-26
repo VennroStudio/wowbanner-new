@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/features/auth';
+import { useAuth, authApi } from '@/features/auth';
 import { Input, Button, Alert, BackButton } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
@@ -20,7 +20,7 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ navigate
     setLoading(true);
     setError(null);
     try {
-      await apiFetch('/auth/password-reset', { method: 'POST', body: JSON.stringify({ email }) });
+      await authApi.requestPasswordReset(apiFetch, email);
       setSuccess(true);
     } catch (err: unknown) {
       setError(err as ApiError);

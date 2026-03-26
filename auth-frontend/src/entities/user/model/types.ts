@@ -8,3 +8,10 @@ export interface User {
   avatar: string | null;
   created_at: string;
 }
+
+export interface RegisterDto {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}

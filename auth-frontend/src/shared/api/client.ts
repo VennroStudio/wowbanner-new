@@ -1,6 +1,6 @@
 import { API_URL } from '@/shared/constants';
 
-type ApiFetchFn = (endpoint: string, options?: RequestInit) => Promise<unknown>;
+export type ApiFetchFn = (endpoint: string, options?: RequestInit) => Promise<any>;
 
 let apiFetchInstance: ApiFetchFn | null = null;
 

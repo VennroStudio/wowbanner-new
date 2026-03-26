@@ -3,6 +3,7 @@ import type { User } from '@/entities/user';
 export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   isLoading: boolean;
   login: (accessToken: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -10,13 +11,6 @@ export interface AuthContextType {
 }
 
 export interface LoginDto {
-  email: string;
-  password: string;
-}
-
-export interface RegisterDto {
-  firstName: string;
-  lastName: string;
   email: string;
   password: string;
 }

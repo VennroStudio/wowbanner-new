@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, UserIcon, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
+import { userApi } from '@/entities/user';
 import { Input, Button, Alert, BackButton } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
@@ -20,7 +21,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ navigate }) => {
     setLoading(true);
     setError(null);
     try {
-      await apiFetch('/users/create', { method: 'POST', body: JSON.stringify(form) });
+      await userApi.register(apiFetch, form);
       setSuccess(true);
     } catch (err: unknown) {
       setError(err as ApiError);

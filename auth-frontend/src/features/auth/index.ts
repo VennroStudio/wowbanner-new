@@ -1,3 +1,6 @@
+// API
+export { authApi } from './api';
+
 // Components
 export { LoginForm } from './components/LoginForm';
 export { RegisterForm } from './components/RegisterForm';
@@ -10,7 +13,9 @@ export { AuthenticatedView } from './components/AuthenticatedView';
 export { useAuth } from './hooks/useAuth';
 
 // Store
-export { AuthProvider } from './store/authStore';
+export { AuthProvider } from './store/AuthProvider';
 
 // Types
-export type { AuthContextType, LoginDto, RegisterDto, ResetPasswordDto } from './types';
+export type { AuthContextType, LoginDto, ResetPasswordDto } from './types';
+export type { RegisterDto } from '@/entities/user';
+export type { ApiFetchFn } from '@/shared/api/client';

@@ -8,11 +8,12 @@ import {
   ForgotPasswordPage,
   ResetPasswordPage,
   AuthenticatedPage,
+  NotFoundPage,
 } from '@/pages';
 
 export const AppRouter = () => {
   const { path, navigate, query } = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -31,19 +32,25 @@ export const AppRouter = () => {
       return <ResetPasswordPage token={query.get('token')} navigate={navigate} />;
     }
 
-    // Если уже авторизован — показываем заглушку (основной app на другом домене)
+    // Роуты для авторизованных
     if (isAuthenticated) {
+      if (path === '/register') {
+        if (isAdmin) return <RegisterPage navigate={navigate} />;
+        return <NotFoundPage navigate={navigate} type="403" />;
+      }
       return <AuthenticatedPage navigate={navigate} />;
     }
 
     // Неавторизованные роуты
     switch (path) {
-      case '/register':
-        return <RegisterPage navigate={navigate} />;
       case '/forgot-password':
         return <ForgotPasswordPage navigate={navigate} />;
       default:
-        return <LoginPage navigate={navigate} />;
+        if (path === '/' || path === '') {
+          if (isAuthenticated) return <AuthenticatedPage navigate={navigate} />;
+          return <LoginPage navigate={navigate} />;
+        }
+        return <NotFoundPage navigate={navigate} />;
     }
   };
 

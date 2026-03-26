@@ -1,5 +1,5 @@
 import React from 'react';
-import { User as LogOut } from 'lucide-react';
+import { LogOut, UserRoundPlus } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { UserAvatar } from '@/shared/components';
 
@@ -8,11 +8,11 @@ interface AuthenticatedViewProps {
 }
 
 export const AuthenticatedView: React.FC<AuthenticatedViewProps> = ({ navigate }) => {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
@@ -21,9 +21,18 @@ export const AuthenticatedView: React.FC<AuthenticatedViewProps> = ({ navigate }
         <UserAvatar avatarUrl={user?.avatar} />
       </div>
       <h2 className="text-2xl font-bold text-slate-800 mb-1">
-        Здравствуйте, {user?.first_name || 'пользователь'}!
+        Здравствуйте, {user?.first_name }!
       </h2>
       <p className="text-slate-500 mb-6">{user?.email}</p>
+
+        { isAdmin &&
+            <button
+                onClick={() => navigate('/register')}
+                className="flex items-center text-slate-500 hover:text-red-500 transition-colors bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium mx-auto border cursor-pointer">
+                <UserRoundPlus size={24} />
+            </button>
+        }
+
       <button
         onClick={handleLogout}
         className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium mx-auto"

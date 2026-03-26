@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { useAuth } from '@/features/auth';
+import { useAuth, authApi } from '@/features/auth';
 import { Button } from '@/shared/components';
 
 interface VerifyEmailProps {
@@ -19,7 +19,7 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token, navigate }) => 
     if (!token || hasRun.current) return;
     hasRun.current = true;
 
-    apiFetch('/auth/confirm-email', { method: 'POST', body: JSON.stringify({ token }) })
+    authApi.confirmEmail(apiFetch, token)
       .then(() => setStatus('success'))
       .catch(() => setStatus('error'));
   }, [apiFetch, token]);

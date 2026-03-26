@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth, authApi } from '@/features/auth';
 import { Input, Button, Alert } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
@@ -35,10 +35,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token, nav
     setLoading(true);
     setError(null);
     try {
-      await apiFetch('/auth/password-reset/confirm', {
-        method: 'POST',
-        body: JSON.stringify({ token, password }),
-      });
+      await authApi.confirmPasswordReset(apiFetch, token, password);
       setSuccess(true);
     } catch (err: unknown) {
       setError(err as ApiError);
