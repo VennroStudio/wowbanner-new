@@ -54,10 +54,12 @@ final readonly class CreateUserHandler
 
         $this->assertEmailNotRegistered($email);
 
-        $user = $this->createUser($command, $email);
+        $password = bin2hex(random_bytes(6)); // 12 characters
+
+        $user = $this->createUser($command, $email, $password);
 
         $plainToken = $this->createEmailVerificationToken((int)$user->id);
-        $this->sendVerificationEmail($user, $plainToken, $command->locale);
+        $this->sendVerificationEmail($user, $plainToken, $password, $command->locale);
     }
 
     /**
@@ -77,13 +79,13 @@ final readonly class CreateUserHandler
     /**
      * @throws DateMalformedStringException
      */
-    private function createUser(CreateUserCommand $command, string $email): User
+    private function createUser(CreateUserCommand $command, string $email, string $password): User
     {
         $user = User::create(
             lastName: $this->normalizeName($command->lastName),
             firstName: $this->normalizeName($command->firstName),
             email: $email,
-            password: $this->passwordHasher->hash($command->password),
+            password: $this->passwordHasher->hash($password),
         );
 
         $this->userRepository->add($user);
@@ -120,12 +122,13 @@ final readonly class CreateUserHandler
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    private function sendVerificationEmail(User $user, string $plainToken, string $locale): void
+    private function sendVerificationEmail(User $user, string $plainToken, string $password, string $locale): void
     {
         $this->emailVerificationHandler->handle(new EmailVerificationCommand(
             email: $user->email,
             firstName: $user->firstName,
             token: $plainToken,
+            password: $password,
             locale: $locale,
         ));
     }

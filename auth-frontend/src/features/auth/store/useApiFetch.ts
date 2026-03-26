@@ -1,5 +1,5 @@
 import { authApi } from '../api';
-import { API_URL } from '@/shared/constants';
+import { API_URL, API_ENDPOINTS } from '@/shared/constants';
 
 export type ApiFetchFn = (endpoint: string, options?: RequestInit) => Promise<any>;
 
@@ -35,8 +35,8 @@ export const useApiFetch = ({
     // Перехват 401: пытаемся обновить токен
     if (
       response.status === 401 &&
-      !endpoint.includes('/auth/refresh') &&
-      !endpoint.includes('/auth/login')
+      endpoint !== API_ENDPOINTS.AUTH.REFRESH &&
+      endpoint !== API_ENDPOINTS.AUTH.LOGIN
     ) {
       try {
         const refreshRes = await authApi.refresh();

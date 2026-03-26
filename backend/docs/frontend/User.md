@@ -37,8 +37,7 @@
 {
   "lastName": "Иванов",
   "firstName": "Иван",
-  "email": "user@example.com",
-  "password": "Secret123!"
+  "email": "user@example.com"
 }
 ```
 
@@ -295,12 +294,15 @@ Query-параметры:
           "id": 1,
           "label": "Администратор"
         },
+        "status": {
+          "id": 1,
+          "label": "Активен"
+        },
         "first_name": "Иван",
         "last_name": "Иванов",
         "email": "user@example.com",
         "avatar": null,
-        "created_at": "2024-01-01 12:00:00",
-        "is_active": true
+        "created_at": "2024-01-01 12:00:00"
       }
     ]
   }
@@ -331,12 +333,15 @@ Query-параметры:
       "id": 1,
       "label": "Администратор"
     },
+    "status": {
+      "id": 1,
+      "label": "Активен"
+    },
     "first_name": "Иван",
     "last_name": "Иванов",
     "email": "user@example.com",
     "avatar": "https://storage.vennro.ru/vs-project/avatars/1/abc123.jpg",
-    "created_at": "2024-01-01 12:00:00",
-    "is_active": true
+    "created_at": "2024-01-01 12:00:00"
   }
 }
 ```

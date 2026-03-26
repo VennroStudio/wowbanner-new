@@ -2,6 +2,7 @@ import React from 'react';
 import { UserRoundPlus } from 'lucide-react';
 import { PanelActionButton } from '../PanelActionButton';
 import { useRouter } from '@/shared/hooks';
+import { ROUTES } from '@/shared/constants';
 
 export const AdminPanel: React.FC = () => {
   const { navigate } = useRouter();
@@ -14,7 +15,7 @@ export const AdminPanel: React.FC = () => {
         <PanelActionButton
           icon={UserRoundPlus}
           label="Пригласить"
-          onClick={() => navigate('/register')}
+          onClick={() => navigate(ROUTES.REGISTER)}
         />
 
         <PanelActionButton

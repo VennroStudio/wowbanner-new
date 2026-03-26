@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth, authApi } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
+import { ROUTES } from '@/shared/constants';
 import { Input, Button, Alert, BackButton } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
@@ -39,7 +40,7 @@ export const ForgotPasswordForm: React.FC = () => {
         <p className="text-slate-600 mb-6">
           Мы отправили инструкции по сбросу пароля на <strong>{email}</strong>. Проверьте почту.
         </p>
-        <Button variant="secondary" onClick={() => navigate('/login')}>
+        <Button variant="secondary" onClick={() => navigate(ROUTES.HOME)}>
           Вернуться ко входу
         </Button>
       </div>
@@ -48,7 +49,7 @@ export const ForgotPasswordForm: React.FC = () => {
 
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50">
-      <BackButton onClick={() => navigate('/login')} />
+      <BackButton onClick={() => navigate(ROUTES.HOME)} />
 
       <div className="text-center mb-8">
         <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">

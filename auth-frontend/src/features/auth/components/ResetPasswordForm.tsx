@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth, authApi } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
+import { ROUTES } from '@/shared/constants';
 import { Input, Button, Alert } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
@@ -24,7 +25,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token }) =
         <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
         <h2 className="text-2xl font-bold text-slate-800 mb-2">Недействительная ссылка</h2>
         <p className="text-slate-500 mb-6">Токен отсутствует или ссылка устарела.</p>
-        <Button variant="secondary" onClick={() => navigate('/login')}>
+        <Button variant="secondary" onClick={() => navigate(ROUTES.HOME)}>
           Вернуться назад
         </Button>
       </div>
@@ -57,7 +58,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token }) =
         <p className="text-slate-600 mb-6">
           Теперь вы можете войти с новым паролем. Все старые сессии были завершены.
         </p>
-        <Button onClick={() => navigate('/login')}>Перейти ко входу</Button>
+        <Button onClick={() => navigate(ROUTES.HOME)}>Перейти ко входу</Button>
       </div>
     );
   }

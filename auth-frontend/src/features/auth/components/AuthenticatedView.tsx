@@ -6,13 +6,15 @@ import { UserAvatar } from '@/shared/components';
 import { AdminPanel } from './AdminPanel/AdminPanel';
 import { NavigationPanel } from './NavigationPanel/NavigationPanel';
 
+import { ROUTES } from '@/shared/constants';
+
 export const AuthenticatedView: React.FC = () => {
   const { navigate } = useRouter();
   const { user, isAdmin, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate(ROUTES.HOME);
   };
 
   return (

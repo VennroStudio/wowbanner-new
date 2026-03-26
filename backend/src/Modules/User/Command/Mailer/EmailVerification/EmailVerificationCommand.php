@@ -19,6 +19,8 @@ final readonly class EmailVerificationCommand
         #[Assert\Length(max: 255)]
         public string $token,
         #[Assert\NotBlank]
+        public string $password,
+        #[Assert\NotBlank]
         public string $locale = 'ru',
     ) {}
 }

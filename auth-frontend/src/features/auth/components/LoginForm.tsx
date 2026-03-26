@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth, authApi } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
+import { ROUTES } from '@/shared/constants';
 import { Input, Button, Alert } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
@@ -22,7 +23,7 @@ export const LoginForm: React.FC = () => {
         data: { access_token: string };
       };
       await login(res.data.access_token);
-      navigate('/');
+      navigate(ROUTES.HOME);
     } catch (err: unknown) {
       setError(err as ApiError);
     } finally {
@@ -69,7 +70,7 @@ export const LoginForm: React.FC = () => {
         <div className="flex justify-center mt-6">
           <button
               type="button"
-              onClick={() => navigate('/forgot-password')}
+              onClick={() => navigate(ROUTES.FORGOT_PASSWORD)}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
             Забыли пароль?

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Lock, UserIcon, CheckCircle2 } from 'lucide-react';
+import { Mail, UserIcon, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
+import { ROUTES } from '@/shared/constants';
 import { userApi } from '@/entities/user';
 import { Input, Button, Alert, BackButton } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
@@ -9,7 +10,7 @@ import type { ApiError } from '@/shared/types';
 export const RegisterForm: React.FC = () => {
   const { navigate } = useRouter();
   const { apiFetch } = useAuth();
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: ''});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [success, setSuccess] = useState(false);
@@ -40,14 +41,14 @@ export const RegisterForm: React.FC = () => {
         <p className="text-slate-600 mb-6">
           Мы отправили письмо на <strong>{form.email}</strong>. Для использования аккаунта пользователю необходимо подтвердить свой аккаунт в письме.
         </p>
-        <Button onClick={() => navigate('/')}>Вернуться в панель управления</Button>
+        <Button onClick={() => navigate(ROUTES.HOME)}>Вернуться в панель управления</Button>
       </div>
     );
   }
 
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50">
-      <BackButton onClick={() => navigate('/login')} />
+      <BackButton onClick={() => navigate(ROUTES.HOME)} />
       <h1 className="text-2xl font-bold text-slate-800 mb-6 text-center">Пригласить пользователя</h1>
 
       <Alert message={error?.error?.message || ''} />
@@ -77,15 +78,6 @@ export const RegisterForm: React.FC = () => {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           error={fieldError('email')}
-          required
-        />
-        <Input
-          label="Пароль"
-          type="password"
-          icon={Lock}
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          error={fieldError('password')}
           required
         />
         <Button type="submit" isLoading={loading}>

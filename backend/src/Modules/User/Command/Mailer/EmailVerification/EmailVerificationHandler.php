@@ -63,6 +63,7 @@ final readonly class EmailVerificationHandler
     {
         return $this->twig->render('email/email-verification.html.twig', [
             'firstName'       => $command->firstName,
+            'password'        => $command->password,
             'confirmationUrl' => $this->buildConfirmationUrl($command->token),
             'locale'          => $command->locale,
         ]);

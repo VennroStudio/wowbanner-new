@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
+import { ROUTES } from '@/shared/constants';
 import {
   LoginPage,
   RegisterPage,
@@ -24,21 +25,21 @@ export const AppRouter = () => {
   }
 
   const renderRoute = () => {
-    if (path === '/email-verification')
+    if (path === ROUTES.VERIFY_EMAIL)
       return <VerifyEmailPage token={query.get('token')} />;
-    if (path === '/password-reset-confirm')
+    if (path === ROUTES.RESET_PASSWORD)
       return <ResetPasswordPage token={query.get('token')} />;
 
     if (isAuthenticated) {
-      if (path === '/register')
+      if (path === ROUTES.REGISTER)
         return isAdmin
             ? <RegisterPage />
             : <NotFoundPage type="403" />;
       return <AuthenticatedPage />;
     }
 
-    if (path === '/forgot-password') return <ForgotPasswordPage />;
-    if (path === '/' || path === '') return <LoginPage />;
+    if (path === ROUTES.FORGOT_PASSWORD) return <ForgotPasswordPage />;
+    if (path === ROUTES.HOME || path === '') return <LoginPage />;
     return <NotFoundPage />;
   };
 

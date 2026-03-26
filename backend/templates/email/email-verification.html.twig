@@ -107,6 +107,7 @@
             <div class="card__body">
                 <p class="greeting">{{ trans('mail.email_verification.greeting', {'%name%': firstName}, 'emailVerification') }}</p>
                 <p class="intro">{{ trans('mail.email_verification.intro', [], 'emailVerification') }}</p>
+                <p class="intro">{{ trans('mail.email_verification.password', {'%password%': password}, 'emailVerification')|raw }}</p>
 
                 <div class="button-wrap">
                     <a href="{{ confirmationUrl }}" class="button">{{ trans('mail.email_verification.button', [], 'emailVerification') }}</a>

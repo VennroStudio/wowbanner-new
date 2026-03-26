@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileQuestion, AlertCircle, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/shared/components';
+import { ROUTES } from '@/shared/constants';
 import { useRouter } from '@/shared/hooks';
 
 interface NotFoundPageProps {
@@ -30,7 +31,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ type = '404' }) => {
       </p>
 
       <div className="space-y-3">
-        <Button onClick={() => navigate('/')} className="w-full">
+        <Button onClick={() => navigate(ROUTES.HOME)} className="w-full">
           <Home size={18} /> На главную
         </Button>
         
