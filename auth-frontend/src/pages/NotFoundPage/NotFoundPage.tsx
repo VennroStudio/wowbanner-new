@@ -1,13 +1,14 @@
 import React from 'react';
 import { FileQuestion, AlertCircle, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/shared/components';
+import { useRouter } from '@/shared/hooks';
 
 interface NotFoundPageProps {
-  navigate: (path: string) => void;
   type?: '404' | '403';
 }
 
-export const NotFoundPage: React.FC<NotFoundPageProps> = ({ navigate, type = '404' }) => {
+export const NotFoundPage: React.FC<NotFoundPageProps> = ({ type = '404' }) => {
+  const { navigate } = useRouter();
   const is403 = type === '403';
 
   return (

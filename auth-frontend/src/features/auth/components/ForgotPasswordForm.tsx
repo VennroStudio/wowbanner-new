@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth, authApi } from '@/features/auth';
+import { useRouter } from '@/shared/hooks';
 import { Input, Button, Alert, BackButton } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
-interface ForgotPasswordFormProps {
-  navigate: (path: string) => void;
-}
-
-export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ navigate }) => {
+export const ForgotPasswordForm: React.FC = () => {
+  const { navigate } = useRouter();
   const { apiFetch } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

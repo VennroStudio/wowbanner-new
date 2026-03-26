@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth, authApi } from '@/features/auth';
+import { useRouter } from '@/shared/hooks';
 import { Input, Button, Alert } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
-interface LoginFormProps {
-  navigate: (path: string) => void;
-}
-
-export const LoginForm: React.FC<LoginFormProps> = ({ navigate }) => {
+export const LoginForm: React.FC = () => {
+  const { navigate } = useRouter();
   const { apiFetch, login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

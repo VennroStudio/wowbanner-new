@@ -1,13 +1,12 @@
 import React from 'react';
-import { LogOut, UserRoundPlus } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useAuth } from '@/features/auth';
+import { useRouter } from '@/shared/hooks';
 import { UserAvatar } from '@/shared/components';
+import { AdminPanel } from './AdminPanel/AdminPanel';
 
-interface AuthenticatedViewProps {
-  navigate: (path: string) => void;
-}
-
-export const AuthenticatedView: React.FC<AuthenticatedViewProps> = ({ navigate }) => {
+export const AuthenticatedView: React.FC = () => {
+  const { navigate } = useRouter();
   const { user, isAdmin, logout } = useAuth();
 
   const handleLogout = async () => {
@@ -25,19 +24,13 @@ export const AuthenticatedView: React.FC<AuthenticatedViewProps> = ({ navigate }
       </h2>
       <p className="text-slate-500 mb-6">{user?.email}</p>
 
-        { isAdmin &&
-            <button
-                onClick={() => navigate('/register')}
-                className="flex items-center text-slate-500 hover:text-red-500 transition-colors bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium mx-auto border cursor-pointer">
-                <UserRoundPlus size={24} />
-            </button>
-        }
+      {isAdmin && <AdminPanel />}
 
       <button
         onClick={handleLogout}
-        className="flex items-center gap-2 text-slate-500 hover:text-red-500 transition-colors bg-slate-50 px-4 py-2 rounded-xl text-sm font-medium mx-auto"
+        className="flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors text-sm font-medium mx-auto px-4 py-2"
       >
-        <LogOut size={16} /> Выйти
+        <LogOut size={16} /> Выйти из аккаунта
       </button>
     </div>
   );

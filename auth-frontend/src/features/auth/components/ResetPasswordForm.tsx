@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth, authApi } from '@/features/auth';
+import { useRouter } from '@/shared/hooks';
 import { Input, Button, Alert } from '@/shared/components';
 import type { ApiError } from '@/shared/types';
 
 interface ResetPasswordFormProps {
   token: string | null;
-  navigate: (path: string) => void;
 }
 
-export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token, navigate }) => {
+export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token }) => {
+  const { navigate } = useRouter();
   const { apiFetch } = useAuth();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

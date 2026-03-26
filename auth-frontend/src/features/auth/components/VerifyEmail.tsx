@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth, authApi } from '@/features/auth';
+import { useRouter } from '@/shared/hooks';
 import { Button } from '@/shared/components';
 
 interface VerifyEmailProps {
   token: string | null;
-  navigate: (path: string) => void;
 }
 
-export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token, navigate }) => {
+export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token }) => {
+  const { navigate } = useRouter();
   const { apiFetch } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>(() =>
     !token ? 'error' : 'loading',
