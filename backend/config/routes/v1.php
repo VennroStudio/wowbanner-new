@@ -16,6 +16,7 @@ use App\Http\Action\v1\User\CreateUserAction;
 use App\Http\Action\v1\User\DeleteAvatarAction;
 use App\Http\Action\v1\User\DeleteUserAction;
 use App\Http\Action\v1\User\GetUserByIdAction;
+use App\Http\Action\v1\User\GetUserRolesAction;
 use App\Http\Action\v1\User\GetUsersAction;
 use App\Http\Action\v1\User\UploadAvatarAction;
 use App\Http\Action\v1\User\UserUpdateAction;
@@ -31,7 +32,8 @@ return static function (App $app): void {
         $group->group('/users', new Group(static function (RouteCollectorProxy $group): void {
             $group->get('', GetUsersAction::class)->add(Authenticate::class);
             $group->post('/create', CreateUserAction::class);
-            $group->get('/{id}', GetUserByIdAction::class);
+            $group->get('/roles', GetUserRolesAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetUserByIdAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UserUpdateAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeleteUserAction::class)->add(Authenticate::class);
             $group->post('/{id}/avatar', UploadAvatarAction::class)->add(Authenticate::class);

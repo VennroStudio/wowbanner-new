@@ -21,6 +21,7 @@ use Psr\Http\Server\RequestHandlerInterface;
     path: '/users/{id}',
     description: 'Получение данных пользователя по ID (публичный доступ)',
     summary: 'Просмотр пользователя',
+    security: [['bearerAuth' => []]],
     tags: ['Users'],
     parameters: [
         new OA\Parameter(
@@ -40,7 +41,7 @@ final readonly class GetUserByIdAction implements RequestHandlerInterface
 {
     public function __construct(
         private UserGetByIdFetcher $fetcher,
-        private UserUnifier $transformer,
+        private UserUnifier $unifier,
     ) {}
 
     /**
@@ -54,6 +55,6 @@ final readonly class GetUserByIdAction implements RequestHandlerInterface
 
         $user = $this->fetcher->fetch(new UserGetByIdQuery($id));
 
-        return new JsonDataResponse($this->transformer->unifyOne(null, $user));
+        return new JsonDataResponse($this->unifier->unifyOne(null, $user));
     }
 }

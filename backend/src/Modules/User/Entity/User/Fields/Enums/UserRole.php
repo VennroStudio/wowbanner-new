@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Entity\User\Fields\Enums;
 
-enum UserRole: int
+use App\Components\Enum\EnumInterface;
+
+enum UserRole: int implements EnumInterface
 {
     case ADMIN = 1;
     case DEVELOPER = 2;
