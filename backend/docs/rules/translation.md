@@ -14,7 +14,7 @@
 
 - Файлы по категориям: `errors.{locale}.php`, `validators.{locale}.php`, и отдельные файлы для писем (например, `emailVerification.{locale}.php`)
 - **Домен** = имя файла без `.{locale}.php` (например, `errors.en.php` → домен `errors`)
-- **`DomainExceptionModule`** — домен = параметр `module` исключения; middleware переводит через `trans($message, [], $module)`
+- **`DomainExceptionModule`** — домен = параметр `module` исключения; транслятор автоматически ищет ключи во всех файлах папки `src/Modules/{Module}/Translation/` (модуль приводится к нижнему регистру)
 - Исключения из слоя компонентов — указывать `module: 'components'`; ключи хранить в `src/Components/Translation/`
 - **Валидация** — домен `validators`; ключи совпадают с `message` в Assert атрибутах
 - **Письма** — отдельный файл на каждый сценарий, домен совпадает с именем файла; в Twig — через функцию `trans()`

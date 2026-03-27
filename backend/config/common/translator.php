@@ -59,8 +59,11 @@ return [
 
                 foreach ($locales as $locale) {
                     foreach (glob($moduleDir . '/*.' . $locale . '.php') ?: [] as $file) {
-                        $domain = basename($file, '.' . $locale . '.php');
-                        $resources[] = ['php', $file, $locale, $domain];
+                        $filename = basename($file, '.' . $locale . '.php');
+                        $moduleDomain = mb_strtolower($module);
+
+                        $resources[] = ['php', $file, $locale, $filename];
+                        $resources[] = ['php', $file, $locale, $moduleDomain];
                     }
                 }
             }
