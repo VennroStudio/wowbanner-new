@@ -9,6 +9,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => void;
   apiFetch: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+  accessToken: string | null;
 }
 
 export interface LoginDto {

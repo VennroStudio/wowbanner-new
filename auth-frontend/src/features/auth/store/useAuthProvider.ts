@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { User } from '@/entities/user';
 import { userApi } from '@/entities/user';
 import { getCookie } from '@/shared/api/client';
@@ -8,17 +8,24 @@ import type { AuthContextType } from '../types';
 import { useApiFetch } from './useApiFetch';
 
 export const useAuthProvider = (): AuthContextType => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, _setAccessToken] = useState<string | null>(null);
+  const tokenRef = useRef<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Синхронная установка токена для моментального доступа в асинхронных функциях
+  const setAccessToken = useCallback((token: string | null) => {
+    tokenRef.current = token;
+    _setAccessToken(token);
+  }, []);
 
   const onSessionExpired = useCallback(() => {
     setAccessToken(null);
     setUser(null);
-  }, []);
+  }, [setAccessToken]);
 
   const apiFetch = useApiFetch({
-    accessToken,
+    tokenRef,
     setAccessToken,
     onSessionExpired,
   });
@@ -93,5 +100,6 @@ export const useAuthProvider = (): AuthContextType => {
     logout,
     updateUser,
     apiFetch,
+    accessToken,
   };
 };

@@ -4,21 +4,22 @@ import { API_URL, API_ENDPOINTS } from '@/shared/constants';
 export type ApiFetchFn = (endpoint: string, options?: RequestInit) => Promise<any>;
 
 interface UseApiFetchProps {
-  accessToken: string | null;
+  tokenRef: React.MutableRefObject<string | null>;
   setAccessToken: (token: string | null) => void;
   onSessionExpired: () => void;
 }
 
 export const useApiFetch = ({
-  accessToken,
+  tokenRef,
   setAccessToken,
   onSessionExpired,
 }: UseApiFetchProps): ApiFetchFn => {
   const apiFetch = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
     const headers = new Headers(options.headers || {});
 
-    if (accessToken) {
-      headers.set('Authorization', `Bearer ${accessToken}`);
+    const currentToken = tokenRef.current;
+    if (currentToken) {
+      headers.set('Authorization', `Bearer ${currentToken}`);
     }
     if (!(options.body instanceof FormData)) {
       headers.set('Content-Type', 'application/json');

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Components\Storage\FileUploaderService;
+use App\Components\Storage\ImageCompressor;
+use App\Components\Storage\ImageCompressorConfig;
 use App\Components\Storage\S3Storage;
 use App\Components\Storage\S3Transformer;
 use App\Components\Storage\StorageInterface;
@@ -34,6 +37,19 @@ return [
             client: $client,
             bucket: env('S3_BUCKET'),
             publicUrl: env('S3_PUBLIC_URL'),
+        );
+    },
+
+    ImageCompressor::class => static fn (): ImageCompressor => new ImageCompressor(
+        quality:   ImageCompressorConfig::QUALITY,
+        maxWidth:  ImageCompressorConfig::MAX_WIDTH,
+        maxHeight: ImageCompressorConfig::MAX_HEIGHT,
+    ),
+
+    FileUploaderService::class => static function (ContainerInterface $container): FileUploaderService {
+        return new FileUploaderService(
+            storage:    $container->get(StorageInterface::class),
+            compressor: $container->get(ImageCompressor::class),
         );
     },
 ];

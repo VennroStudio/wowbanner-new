@@ -2,20 +2,19 @@
 
 declare(strict_types=1);
 
-use App\Components\Storage\PhotoFileValidator;
+use App\Components\Storage\ImageFileValidator;
 use App\Components\Storage\VideoFileValidator;
 
 return [
-    PhotoFileValidator::class => static fn (): PhotoFileValidator => new PhotoFileValidator(
+    ImageFileValidator::class => static fn (): ImageFileValidator => new ImageFileValidator(
         allowedMimeTypes: [
             'image/jpeg' => 'jpg',
             'image/png'  => 'png',
             'image/gif'  => 'gif',
             'image/webp' => 'webp',
-            'image/heic' => 'heic',
-            'image/heif' => 'heif',
+            'image/avif' => 'avif',
         ],
-        maxFileSize: 30 * 1024 * 1024,
+        maxFileSize: 2 * 1024 * 1024,
     ),
 
     VideoFileValidator::class => static fn (): VideoFileValidator => new VideoFileValidator(

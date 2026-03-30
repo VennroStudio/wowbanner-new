@@ -8,7 +8,7 @@ use App\Components\Cacher\Cacher;
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
 use App\Components\Storage\FileUploaderService;
-use App\Components\Storage\PhotoFileValidator;
+use App\Components\Storage\ImageFileValidator;
 use App\Components\Storage\StorageInterface;
 use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 use App\Modules\User\Entity\User\UserRepository;
@@ -20,13 +20,13 @@ use Random\RandomException;
 final readonly class UploadAvatarHandler
 {
     public function __construct(
-        private UserRepository $userRepository,
+        private UserRepository        $userRepository,
         private UserPermissionService $userPermissionService,
-        private FileUploaderService $uploader,
-        private StorageInterface $storage,
-        private FlusherInterface $flusher,
-        private PhotoFileValidator $fileValidator,
-        private Cacher $cacher,
+        private FileUploaderService   $uploader,
+        private StorageInterface      $storage,
+        private FlusherInterface      $flusher,
+        private ImageFileValidator    $fileValidator,
+        private Cacher                $cacher,
     ) {}
 
     /**
