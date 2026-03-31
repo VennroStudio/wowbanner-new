@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileQuestion, AlertCircle, Home, ArrowLeft } from 'lucide-react';
-import { Button } from '@/shared/components';
+import { Button, PageCard } from '@/shared/components';
 import { ROUTES } from '@/shared/constants';
 import { useRouter } from '@/shared/hooks';
 
@@ -13,7 +13,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ type = '404' }) => {
   const is403 = type === '403';
 
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 text-center">
+    <PageCard align="center">
       <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${
         is403 ? 'bg-amber-50 text-amber-500' : 'bg-slate-50 text-slate-400'
       }`}>
@@ -42,6 +42,6 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ type = '404' }) => {
           <ArrowLeft size={16} /> Вернуться назад
         </button>
       </div>
-    </div>
+    </PageCard>
   );
 };

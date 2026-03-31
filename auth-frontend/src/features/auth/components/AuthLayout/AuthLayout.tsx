@@ -1,5 +1,5 @@
 import React from 'react';
-import { BackButton } from '@/shared/components';
+import { BackButton, PageCard } from '@/shared/components';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -15,7 +15,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
   showLogo = true 
 }) => {
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50">
+    <PageCard>
       {onBack && <BackButton onClick={onBack} />}
       
       {showLogo && (
@@ -33,6 +33,6 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
       {title && <h1 className="text-2xl font-bold text-slate-800 mb-6 text-center">{title}</h1>}
 
       {children}
-    </div>
+    </PageCard>
   );
 };

@@ -7,6 +7,7 @@ import { AdminPanel } from './AdminPanel/AdminPanel';
 import { NavigationPanel } from './NavigationPanel/NavigationPanel';
 import { AvatarManager } from './AvatarManager';
 
+import { PageCard } from '@/shared/components';
 import { ROUTES } from '@/shared/constants';
 
 export const DashboardView: React.FC = () => {
@@ -24,7 +25,7 @@ export const DashboardView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 text-center">
+    <PageCard align="center">
       {/* Avatar Section */}
       <div className="flex flex-col items-center mb-6 mt-4">
         <button
@@ -59,6 +60,6 @@ export const DashboardView: React.FC = () => {
         isOpen={isAvatarManagerOpen}
         onClose={() => setIsAvatarManagerOpen(false)}
       />
-    </div>
+    </PageCard>
   );
 };
