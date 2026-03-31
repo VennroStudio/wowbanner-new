@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserRoundPlus } from 'lucide-react';
+import { UserRoundPlus, Users } from 'lucide-react';
 import { PanelActionButton } from '../PanelActionButton';
 import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
@@ -19,8 +19,9 @@ export const AdminPanel: React.FC = () => {
         />
 
         <PanelActionButton
+          icon={Users}
           label="Управление"
-          disabled
+          onClick={() => navigate(ROUTES.ADMIN_USERS)}
         />
       </div>
     </div>

@@ -9,6 +9,7 @@ import {
   ForgotPasswordPage,
   ResetPasswordPage,
   DashboardPage,
+  AdminUsersPage,
   NotFoundPage,
 } from '@/pages';
 
@@ -35,6 +36,8 @@ export const AppRouter = () => {
         return isAdmin
             ? <RegisterPage />
             : <NotFoundPage type="403" />;
+      if (path === ROUTES.ADMIN_USERS)
+        return isAdmin ? <AdminUsersPage /> : <NotFoundPage type="403" />;
       return <DashboardPage />;
     }
 

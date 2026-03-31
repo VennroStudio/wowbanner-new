@@ -1,7 +1,9 @@
 export type { User, RegisterDto } from './model/types';
+export type { UpdateUserBody, UsersListParams } from './api/api';
 export { userApi } from './api/api';
 export { authApi } from './api/authApi';
 export { useUserQuery } from './hooks/useUserQuery';
+export { useUsersQuery } from './hooks/useUsersQuery';
 export { useUpdateUserCommand } from './hooks/useUpdateUserCommand';
 export { useDeleteUserCommand } from './hooks/useDeleteUserCommand';
 export { useUploadAvatarCommand } from './hooks/useUploadAvatarCommand';

@@ -6,6 +6,7 @@ export const ROUTES = {
   RESET_PASSWORD: '/password-reset-confirm',
   VERIFY_EMAIL: '/email-verification',
   HOME: '/',
+  ADMIN_USERS: '/admin/users',
 } as const;
 
 export const API_ENDPOINTS = {
@@ -18,9 +19,12 @@ export const API_ENDPOINTS = {
     PASSWORD_RESET_CONFIRM: '/auth/password-reset/confirm',
   },
   USERS: {
+    LIST: '/users',
     CREATE: '/users/create',
     BASE: '/users',
     BY_ID: (id: string | number) => `/users/${id}`,
+    UPDATE: (id: string | number) => `/users/update/${id}`,
+    DELETE: (id: string | number) => `/users/delete/${id}`,
     AVATAR: (id: string | number) => `/users/${id}/avatar`,
   },
 } as const;

@@ -5,3 +5,4 @@ export { ResetPasswordPage } from './ResetPasswordPage';
 export { VerifyEmailPage } from './VerifyEmailPage';
 export { NotFoundPage } from './NotFoundPage/NotFoundPage';
 export { DashboardPage } from './DashboardPage';
+export { AdminUsersPage } from './AdminUsersPage/AdminUsersPage';
