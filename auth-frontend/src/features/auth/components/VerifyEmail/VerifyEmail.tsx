@@ -3,7 +3,7 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useConfirmEmailCommand } from '@/features/auth/hooks/useConfirmEmailCommand';
 import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
-import { Button, PageCard } from '@/shared/components';
+import { Button, PageCard, PageCardHeader } from '@/shared/components';
 
 interface VerifyEmailProps {
   token: string | null;
@@ -31,17 +31,25 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token }) => {
         )}
         {isSuccess && (
           <>
-            <CheckCircle2 className="mx-auto text-emerald-500 mb-4" size={48} />
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Email подтверждён!</h2>
-            <p className="text-slate-500 mb-6">Теперь вы можете войти в свой аккаунт.</p>
+            <PageCardHeader
+              icon={CheckCircle2}
+              accent="emerald"
+              title="Email подтверждён!"
+              description="Теперь вы можете войти в свой аккаунт."
+              className="mb-6"
+            />
             <Button onClick={() => navigate(ROUTES.HOME)}>Перейти ко входу</Button>
           </>
         )}
         {!isPending && !isSuccess && (isError || !token) && (
           <>
-            <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Ошибка подтверждения</h2>
-            <p className="text-slate-500 mb-6">Ссылка недействительна или устарела.</p>
+            <PageCardHeader
+              icon={AlertCircle}
+              accent="red"
+              title="Ошибка подтверждения"
+              description="Ссылка недействительна или устарела."
+              className="mb-6"
+            />
             <Button variant="secondary" onClick={() => navigate(ROUTES.HOME)}>
               Вернуться назад
             </Button>

@@ -35,14 +35,16 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token }) =
   if (!token) {
     return (
       <PageCard align="center">
-        <div className="text-center">
-          <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Недействительная ссылка</h2>
-          <p className="text-slate-500 mb-6">Токен отсутствует или ссылка устарела.</p>
-          <Button variant="secondary" onClick={() => navigate(ROUTES.HOME)}>
-            Вернуться назад
-          </Button>
-        </div>
+        <PageCardHeader
+          icon={AlertCircle}
+          accent="red"
+          title="Недействительная ссылка"
+          description="Токен отсутствует или ссылка устарела."
+          className="mb-6"
+        />
+        <Button variant="secondary" onClick={() => navigate(ROUTES.HOME)}>
+          Вернуться назад
+        </Button>
       </PageCard>
     );
   }
