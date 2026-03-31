@@ -2,4 +2,3 @@ export { Button } from './Button';
 export { Input } from './Input';
 export { Alert } from './Alert';
 export { BackButton } from './BackButton';
-export { UserAvatar } from './UserAvatar';

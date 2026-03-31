@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { LogOut, Camera } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { useRouter } from '@/shared/hooks';
-import { UserAvatar } from '@/shared/components';
+import { UserAvatar } from './UserAvatar';
 import { AdminPanel } from './AdminPanel/AdminPanel';
 import { NavigationPanel } from './NavigationPanel/NavigationPanel';
 import { AvatarManager } from './AvatarManager';
