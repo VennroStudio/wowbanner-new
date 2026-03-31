@@ -1,8 +1,11 @@
-import React, { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Camera, Trash2, X } from 'lucide-react';
-import { useAuth } from '@/features/auth';
-import { userApi } from '@/entities/user';
+import { useAuthStore } from '@/features/auth/store/authStore';
+import { useUploadAvatarCommand } from '@/entities/user/hooks/useUploadAvatarCommand';
+import { useDeleteAvatarCommand } from '@/entities/user/hooks/useDeleteAvatarCommand';
 import { Button } from '@/shared/components';
+import type { AxiosError } from 'axios';
+import type { ApiError } from '@/shared/types';
 
 interface AvatarManagerProps {
   isOpen: boolean;
@@ -10,10 +13,10 @@ interface AvatarManagerProps {
 }
 
 export const AvatarManager: React.FC<AvatarManagerProps> = ({ isOpen, onClose }) => {
-  const { user, apiFetch, updateUser } = useAuth();
+  const { user, updateUser } = useAuthStore();
+  const uploadAvatar = useUploadAvatarCommand();
+  const deleteAvatar = useDeleteAvatarCommand();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen || !user) return null;
 
@@ -21,36 +24,34 @@ export const AvatarManager: React.FC<AvatarManagerProps> = ({ isOpen, onClose })
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setLoading(true);
-    setError(null);
     try {
-      const res = (await userApi.uploadAvatar(apiFetch, user.id, file)) as {
-        data: { avatar: string };
-      };
-      updateUser({ avatar: res.data.avatar });
+      const response = await uploadAvatar.mutateAsync({ id: user.id, file });
+      const avatar = response.data?.avatar;
+
+      if (avatar) {
+        updateUser({ avatar });
+      }
       onClose();
-    } catch (err: any) {
-      setError(err?.error?.message || 'Ошибка при загрузке аватара');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('Upload avatar error', err);
     }
   };
 
   const handleDelete = async () => {
     if (!window.confirm('Вы уверены, что хотите удалить аватар?')) return;
 
-    setLoading(true);
-    setError(null);
     try {
-      await userApi.deleteAvatar(apiFetch, user.id);
+      await deleteAvatar.mutateAsync(user.id);
       updateUser({ avatar: null });
       onClose();
-    } catch (err: any) {
-      setError(err?.error?.message || 'Ошибка при удалении аватара');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error('Delete avatar error', err);
     }
   };
+
+  const loading = uploadAvatar.isPending || deleteAvatar.isPending;
+  const error = (uploadAvatar.error as AxiosError<ApiError>)?.response?.data?.error?.message || 
+                (deleteAvatar.error as AxiosError<ApiError>)?.response?.data?.error?.message;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">

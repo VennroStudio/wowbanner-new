@@ -9,14 +9,18 @@ import { AvatarManager } from './AvatarManager';
 
 import { ROUTES } from '@/shared/constants';
 
-export const AuthenticatedView: React.FC = () => {
+export const DashboardView: React.FC = () => {
   const { navigate } = useRouter();
   const { user, isAdmin, logout } = useAuth();
   const [isAvatarManagerOpen, setIsAvatarManagerOpen] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
-    navigate(ROUTES.HOME);
+    try {
+      await logout.mutateAsync();
+      navigate(ROUTES.HOME);
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
   };
 
   return (
@@ -45,9 +49,10 @@ export const AuthenticatedView: React.FC = () => {
 
       <button
         onClick={handleLogout}
-        className="flex items-center gap-2 text-slate-400 hover:text-red-500 transition-colors text-sm font-medium mx-auto px-4 py-2"
+        disabled={logout.isPending}
+        className="flex items-center gap-2 text-slate-400 hover:text-red-500 disabled:opacity-50 transition-colors text-sm font-medium mx-auto px-4 py-2"
       >
-        <LogOut size={16} /> Выйти из аккаунта
+        <LogOut size={16} /> {logout.isPending ? 'Выход...' : 'Выйти из аккаунта'}
       </button>
 
       <AvatarManager

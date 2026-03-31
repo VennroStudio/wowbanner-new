@@ -1,24 +1,22 @@
+import axios from 'axios';
 import { API_URL } from '@/shared/constants';
+import { useAuthStore } from '@/features/auth/store/authStore';
 
-export type ApiFetchFn = (endpoint: string, options?: RequestInit) => Promise<any>;
+export const apiClient = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-let apiFetchInstance: ApiFetchFn | null = null;
-
-export const setApiFetch = (fn: ApiFetchFn) => {
-  apiFetchInstance = fn;
-};
-
-export const apiClient = async (endpoint: string, options?: RequestInit): Promise<unknown> => {
-  if (!apiFetchInstance) {
-    throw new Error('API client not initialized. Call setApiFetch() first.');
+apiClient.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().accessToken;
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return apiFetchInstance(endpoint, options);
-};
-
-export const getCookie = (name: string): string | undefined => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-};
+  return config;
+});
 
 export { API_URL };
+export { getCookie } from './cookie';

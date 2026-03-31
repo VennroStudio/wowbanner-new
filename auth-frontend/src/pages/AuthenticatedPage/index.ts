@@ -1,1 +1,0 @@
-export { AuthenticatedPage } from './AuthenticatedPage';

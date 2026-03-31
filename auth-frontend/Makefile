@@ -27,6 +27,9 @@ docker-build:
 	docker compose build --pull $(SERVICE)
 
 # ─── Local ────────────────────────────────────────────────────────────────────
+node-install:
+	docker run --rm -v "$(CURDIR):/app" -w /app node:20-alpine npm install
+
 install:
 	docker compose run --rm $(SERVICE) npm install
 

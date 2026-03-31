@@ -7,15 +7,22 @@ export { RegisterForm } from './components/RegisterForm';
 export { ForgotPasswordForm } from './components/ForgotPasswordForm';
 export { ResetPasswordForm } from './components/ResetPasswordForm';
 export { VerifyEmail } from './components/VerifyEmail';
-export { AuthenticatedView } from './components/AuthenticatedView';
+export { AuthLayout } from './components/AuthLayout';
 
 // Hooks
 export { useAuth } from './hooks/useAuth';
+export { useLoginCommand } from './hooks/useLoginCommand';
+export { useLogoutCommand } from './hooks/useLogoutCommand';
+export { useRegisterCommand } from './hooks/useRegisterCommand';
+export { useRefreshCommand } from './hooks/useRefreshCommand';
+export { useConfirmEmailCommand } from './hooks/useConfirmEmailCommand';
+export { useRequestResetCommand } from './hooks/useRequestResetCommand';
+export { useConfirmResetCommand } from './hooks/useConfirmResetCommand';
+export { useSessionQuery } from './hooks/useSessionQuery';
 
 // Store
-export { AuthProvider } from './store/AuthProvider';
+export { useAuthStore } from './store/authStore';
 
 // Types
-export type { AuthContextType, LoginDto, ResetPasswordDto } from './types';
+export type { LoginDto, ResetPasswordDto } from './types';
 export type { RegisterDto } from '@/entities/user';
-export type { ApiFetchFn } from '@/shared/api/client';
