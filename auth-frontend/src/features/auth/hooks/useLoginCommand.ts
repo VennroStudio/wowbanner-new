@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authApi } from '../api';
-import { useAuthStore } from '../store/authStore';
+import { authApi } from '@/entities/user';
+import { useAuthStore } from '@/features/auth';
 import { userApi } from '@/entities/user';
 import { parseJwtId } from '@/shared/utils';
 import type { LoginDto } from '../types';

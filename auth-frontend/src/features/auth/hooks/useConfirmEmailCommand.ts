@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { authApi } from '../api';
+import { authApi } from '@/entities/user';
 
 export const useConfirmEmailCommand = () => {
   return useMutation({

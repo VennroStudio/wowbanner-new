@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '@/features/auth';
 import { userApi } from '@/entities/user';
 
 export const useSessionQuery = () => {

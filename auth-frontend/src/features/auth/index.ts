@@ -1,5 +1,5 @@
 // API
-export { authApi } from './api';
+export { authApi } from '@/entities/user';
 
 // Components
 export { LoginForm } from './components/LoginForm';

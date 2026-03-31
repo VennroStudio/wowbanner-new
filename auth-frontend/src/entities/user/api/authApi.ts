@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '@/shared/constants';
 import { apiClient } from '@/shared/api/client';
-import type { LoginDto } from './types';
+import type { LoginDto } from '@/shared/types';
 
 export const authApi = {
   login: (data: LoginDto) =>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { User } from '@/entities/user';
 import { getCookie } from '@/shared/api/cookie';
+import { setAccessToken as setApiAccessToken } from '@/shared/api/accessToken';
 
 interface AuthState {
   user: User | null;
@@ -26,7 +27,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     set((state) => ({
       user: state.user ? { ...state.user, ...data } : null,
     })),
-  setAccessToken: (accessToken) => set({ accessToken }),
+  setAccessToken: (accessToken) => {
+    setApiAccessToken(accessToken);
+    set({ accessToken });
+  },
   setIsLoading: (isLoading) => set({ isLoading }),
-  logout: () => set({ user: null, accessToken: null, isAuthenticated: false }),
+  logout: () => {
+    setApiAccessToken(null);
+    set({ user: null, accessToken: null, isAuthenticated: false });
+  },
 }));
