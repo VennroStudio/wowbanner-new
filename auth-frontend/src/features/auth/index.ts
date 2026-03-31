@@ -7,7 +7,6 @@ export { RegisterForm } from './components/RegisterForm';
 export { ForgotPasswordForm } from './components/ForgotPasswordForm';
 export { ResetPasswordForm } from './components/ResetPasswordForm';
 export { VerifyEmail } from './components/VerifyEmail';
-export { AuthLayout } from './components/AuthLayout';
 
 // Hooks
 export { useAuth } from './hooks/useAuth';

@@ -1,6 +1,7 @@
 import React from 'react';
+import { Users } from 'lucide-react';
 import { AdminUsersTable } from '@/features/user/components/AdminUsersTable';
-import { BackButton, PageCard } from '@/shared/components';
+import { BackButton, PageCard, PageCardHeader } from '@/shared/components';
 import { ROUTES } from '@/shared/constants';
 import { useRouter } from '@/shared/hooks';
 
@@ -10,8 +11,11 @@ export const AdminUsersPage: React.FC = () => {
   return (
     <PageCard>
       <BackButton onClick={() => navigate(ROUTES.HOME)} />
-      <h1 className="text-2xl font-bold text-slate-800 mb-1">Управление пользователями</h1>
-      <p className="text-slate-500 text-sm mb-6">Список пользователей, роли и статусы</p>
+      <PageCardHeader
+        icon={Users}
+        title="Управление пользователями"
+        description="Список пользователей, роли и статусы"
+      />
       <AdminUsersTable />
     </PageCard>
   );

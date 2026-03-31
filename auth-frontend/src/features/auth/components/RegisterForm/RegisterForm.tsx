@@ -2,12 +2,11 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Mail, UserIcon, CheckCircle2 } from 'lucide-react';
+import { Mail, UserIcon, CheckCircle2, UserRoundPlus } from 'lucide-react';
 import { useRegisterCommand } from '@/features/auth/hooks/useRegisterCommand';
 import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
-import { Input, Button, Alert } from '@/shared/components';
-import { AuthLayout } from '@/features/auth/components/AuthLayout';
+import { Input, Button, Alert, PageCard, BackButton, PageCardHeader } from '@/shared/components';
 import type { AxiosError } from 'axios';
 import type { ApiError } from '@/shared/types';
 
@@ -33,28 +32,36 @@ export const RegisterForm: React.FC = () => {
 
   if (registerMutation.isSuccess) {
     return (
-      <AuthLayout showLogo={false}>
+      <PageCard align="center">
         <div className="text-center">
-          <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
-            <CheckCircle2 size={32} />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Успешно!</h2>
-          <p className="text-slate-600 mb-6">
-            Приглашение отправлено.
-          </p>
+          <PageCardHeader
+            icon={CheckCircle2}
+            title="Успешно!"
+            description="Приглашение отправлено."
+            accent="emerald"
+            className="mb-6"
+          />
           <Button onClick={() => navigate(ROUTES.HOME)}>Вернуться</Button>
         </div>
-      </AuthLayout>
+      </PageCard>
     );
   }
 
   const serverError = (registerMutation.error as AxiosError<ApiError>)?.response?.data?.error?.message;
 
   return (
-    <AuthLayout title="Пригласить пользователя" onBack={() => navigate(ROUTES.HOME)}>
+    <PageCard align="center">
+      <BackButton onClick={() => navigate(ROUTES.HOME)} />
+
+      <PageCardHeader
+        icon={UserRoundPlus}
+        title="Пригласить пользователя"
+        description="Укажите данные — мы отправим приглашение на email"
+      />
+
       <Alert message={serverError || ''} />
 
-      <form onSubmit={handleSubmit((data) => registerMutation.mutate(data))} className="space-y-4">
+      <form onSubmit={handleSubmit((data) => registerMutation.mutate(data))} className="space-y-4 text-left">
         <div className="grid grid-cols-2 gap-4">
           <Input
             label="Имя"
@@ -82,6 +89,6 @@ export const RegisterForm: React.FC = () => {
           Пригласить
         </Button>
       </form>
-    </AuthLayout>
+    </PageCard>
   );
 };

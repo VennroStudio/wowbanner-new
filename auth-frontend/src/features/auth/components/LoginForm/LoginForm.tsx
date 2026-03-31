@@ -6,10 +6,11 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useLoginCommand } from '@/features/auth/hooks/useLoginCommand';
 import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
-import { Input, Button, Alert } from '@/shared/components';
-import { AuthLayout } from '@/features/auth/components/AuthLayout';
+import { Input, Button, Alert, PageCard, PageCardHeader } from '@/shared/components';
 import type { AxiosError } from 'axios';
 import type { ApiError } from '@/shared/types';
+
+const LOGO_URL = 'https://storage.vennro.ru/vs-project/assets/logo-wowbanner.png';
 
 const loginSchema = z.object({
   email: z.string().email('Некорректный email'),
@@ -21,7 +22,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export const LoginForm: React.FC = () => {
   const { navigate } = useRouter();
   const login = useLoginCommand();
-  
+
   const {
     register,
     handleSubmit,
@@ -48,10 +49,16 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <AuthLayout>
+    <PageCard align="center">
+      <PageCardHeader
+        logo={{ src: LOGO_URL, alt: 'WoWBanner' }}
+        title="Авторизация"
+        description="Чтобы продолжить, введите email и пароль от вашего аккаунта"
+      />
+
       <Alert message={serverError || ''} />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
         <Input
           label="Email"
           type="email"
@@ -83,6 +90,6 @@ export const LoginForm: React.FC = () => {
           </button>
         </div>
       </form>
-    </AuthLayout>
+    </PageCard>
   );
 };

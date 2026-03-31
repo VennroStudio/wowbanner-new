@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useConfirmEmailCommand } from '@/features/auth/hooks/useConfirmEmailCommand';
 import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
-import { Button } from '@/shared/components';
-import { AuthLayout } from '@/features/auth/components/AuthLayout';
+import { Button, PageCard } from '@/shared/components';
 
 interface VerifyEmailProps {
   token: string | null;
@@ -22,9 +21,9 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token }) => {
   }, [token, mutate]);
 
   return (
-    <AuthLayout showLogo={false}>
+    <PageCard align="center">
       <div className="text-center">
-        {(isPending || !token) && !isError && (
+        {isPending && token && (
           <>
             <Loader2 className="animate-spin mx-auto text-blue-600 mb-4" size={32} />
             <p className="text-slate-500">Подтверждаем ваш email...</p>
@@ -38,7 +37,7 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token }) => {
             <Button onClick={() => navigate(ROUTES.HOME)}>Перейти ко входу</Button>
           </>
         )}
-        {(isError || !token) && (
+        {!isPending && !isSuccess && (isError || !token) && (
           <>
             <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
             <h2 className="text-2xl font-bold text-slate-800 mb-2">Ошибка подтверждения</h2>
@@ -49,6 +48,6 @@ export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token }) => {
           </>
         )}
       </div>
-    </AuthLayout>
+    </PageCard>
   );
 };
