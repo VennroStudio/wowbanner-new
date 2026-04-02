@@ -53,7 +53,6 @@ final readonly class CreateMaterialAction implements RequestHandlerInterface
     /**
      * @throws ExceptionInterface
      * @throws AccessDeniedException
-     * @throws JsonException
      */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
