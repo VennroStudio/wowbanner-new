@@ -11,6 +11,7 @@
 - `final readonly class`, свойства `public` в конструкторе
 - Валидация через `#[Assert\...]`, ключи сообщений — `'validation.field_rule'` (ссылаются на переводы)
 - Технические поля (`userId`, `currentUserId`, `currentUserRole`) — базовые Assert без кастомного message
+- Если команда требует авторизации, те же технические поля добавляются ко **всем** write-командам (включая create), не только к update/delete
 - Лимиты — константы в классе
 - Внутренние команды (вызов из Handler'а) — без Assert
 
@@ -86,7 +87,7 @@ final readonly class Create{Entity}Command
 - Декомпозиция в приватные методы — `handle()` читается как сценарий верхнего уровня
 - Зависимости через конструктор: Repository, Fetcher, Service, Flusher, другие Handler'ы
 - `flush()` — после всех изменений через Repository. Если Handler только вызывает другой Handler, который сам делает flush — свой Flusher не нужен
-- Проверка прав — в самом начале `handle()`, через `PermissionService->check()`
+- Проверка прав — через `PermissionService->check()`: для **create** — в начале `handle()`; для **update/delete** — по образцу User: сначала `getById`, затем `check`, затем изменения
 - Инвалидация кеша — после изменения сущности, перед `flush()`
 
 ### Принцип: каждая Entity — свои Handler'ы

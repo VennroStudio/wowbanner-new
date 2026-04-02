@@ -75,6 +75,7 @@ final readonly class {Name}TokenHasherService
 ```php
 enum {Module}Permission: string
 {
+    case CREATE = '{module}.create';
     case UPDATE = '{module}.update';
     case DELETE = '{module}.delete';
 }
@@ -82,7 +83,9 @@ enum {Module}Permission: string
 
 ### PermissionService
 
-Логика: `$currentUserId === $resourceOwnerId` → доступ разрешён (свой ресурс). Иначе — проверка роли через `getAllowedRolesForAction()`.
+**Ресурс с владельцем:** `$currentUserId === $resourceOwnerId` → доступ разрешён (свой ресурс). Иначе — проверка роли через `getAllowedRolesForAction()`.
+
+**Справочник без владельца** (у сущности нет поля владельца): проверка только по роли — упрощённая сигнатура `check(UserRole $currentUserRole, {Module}Permission $action)` (или общий `UserRole` из модуля User); в `match` перечисляются роли для `CREATE`, `UPDATE`, `DELETE`.
 
 ```php
 final readonly class {Module}PermissionService
@@ -108,6 +111,7 @@ final readonly class {Module}PermissionService
     private function getAllowedRolesForAction({Module}Permission $action): array
     {
         return match ($action) {
+            {Module}Permission::CREATE,
             {Module}Permission::UPDATE,
             {Module}Permission::DELETE => [{Module}Role::ADMIN],
         };

@@ -11,7 +11,17 @@ use App\Http\Action\v1\Auth\LogoutAction;
 use App\Http\Action\v1\Auth\PasswordResetAction;
 use App\Http\Action\v1\Auth\PasswordResetConfirmAction;
 use App\Http\Action\v1\Auth\RefreshTokenAction;
+use App\Http\Action\v1\Material\CreateMaterialAction;
+use App\Http\Action\v1\Material\DeleteMaterialAction;
+use App\Http\Action\v1\Material\GetMaterialByIdAction;
+use App\Http\Action\v1\Material\GetMaterialsAction;
+use App\Http\Action\v1\Material\UpdateMaterialAction;
 use App\Http\Action\v1\OpenApiAction;
+use App\Http\Action\v1\Printing\CreatePrintingAction;
+use App\Http\Action\v1\Printing\DeletePrintingAction;
+use App\Http\Action\v1\Printing\GetPrintingByIdAction;
+use App\Http\Action\v1\Printing\GetPrintingsAction;
+use App\Http\Action\v1\Printing\UpdatePrintingAction;
 use App\Http\Action\v1\User\CreateUserAction;
 use App\Http\Action\v1\User\DeleteAvatarAction;
 use App\Http\Action\v1\User\DeleteUserAction;
@@ -38,6 +48,22 @@ return static function (App $app): void {
             $group->delete('/delete/{id}', DeleteUserAction::class)->add(Authenticate::class);
             $group->post('/{id}/avatar', UploadAvatarAction::class)->add(Authenticate::class);
             $group->delete('/{id}/avatar', DeleteAvatarAction::class)->add(Authenticate::class);
+        }));
+
+        $group->group('/materials', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('', GetMaterialsAction::class)->add(Authenticate::class);
+            $group->post('/create', CreateMaterialAction::class)->add(Authenticate::class);
+            $group->patch('/update/{id}', UpdateMaterialAction::class)->add(Authenticate::class);
+            $group->delete('/delete/{id}', DeleteMaterialAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetMaterialByIdAction::class)->add(Authenticate::class);
+        }));
+
+        $group->group('/printings', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('', GetPrintingsAction::class)->add(Authenticate::class);
+            $group->post('/create', CreatePrintingAction::class)->add(Authenticate::class);
+            $group->patch('/update/{id}', UpdatePrintingAction::class)->add(Authenticate::class);
+            $group->delete('/delete/{id}', DeletePrintingAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetPrintingByIdAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/auth', new Group(static function (RouteCollectorProxy $group): void {
