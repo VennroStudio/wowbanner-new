@@ -84,6 +84,9 @@ migrations-diff:
 migrations-migrate:
 	docker compose run --rm php-cli composer app -- migrations:migrate --no-interaction
 
+migrations-rollback:
+	docker compose run --rm php-cli composer app -- migrations:migrate prev --no-interaction
+
 composer-update:
 	docker compose run --rm php-cli composer update $(PACK)
 
