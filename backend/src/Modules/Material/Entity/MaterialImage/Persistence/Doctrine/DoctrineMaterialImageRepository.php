@@ -29,6 +29,12 @@ final class DoctrineMaterialImageRepository implements MaterialImageRepository
     }
 
     #[Override]
+    public function remove(MaterialImage $image): void
+    {
+        $this->em->remove($image);
+    }
+
+    #[Override]
     public function getById(int $id): MaterialImage
     {
         if (!$image = $this->findById($id)) {

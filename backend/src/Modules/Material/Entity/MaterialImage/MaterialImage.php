@@ -42,4 +42,9 @@ class MaterialImage
     ): self {
         return new self($materialId, $path, $alt);
     }
+
+    public function edit(?string $alt): void
+    {
+        $this->alt = $alt;
+    }
 }

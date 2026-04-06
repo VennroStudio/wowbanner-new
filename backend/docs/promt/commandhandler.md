@@ -4,23 +4,22 @@
 После этого приступай к работе над задачей.
 
 Согласно пункту 4. Command / Handler, правил docs/agent-rules.md: 
-1) Cоздай command/handler сущности Entity для:
-- создания, 
-- обновления,
-- удаления.
+1) Cоздай command/handler сущности MaterialImages для:
+- создания записи, 
+- обновления alt,
+- удаления записи.
 
-Command/Entity/:
-CreateEntityHandler/Command
-DeleteEntityHandler/Command
-UpdateEntityHandler/Command
+Command/MaterialImages/:
+CreateMaterialImagesHandler/Command
+DeleteMaterialImagesHandler/Command
+UpdateMaterialImagesHandler/Command
 
 Согласно пункту 9. Translation, правил docs/agent-rules.md: 
-Создай нужные для сущности Entity переводы
+Создай нужные для сущности MaterialImages переводы
 
-Согласно пункту 7. Service / Permission, правил docs/agent-rules.md: 
-1) Создай Service и Permission для сущности Entity (вариант сущности без владельца, пример src/Modules/Printing/Service/PrintingPermissionService.php).
+Permission не нужен, эта сущность дополняет сущность Material
 
 Для обновления нужно добавить функцию edit в сущности. 
 
-За пример бери реализованный в проекте модуль Primer, но подстраивайся под ситуацию с сущностью и опирайся на правила.
+За пример бери реализованный в проекте модуль User, но подстраивайся под ситуацию с сущностью и опирайся на правила.
 ```
