@@ -11,6 +11,7 @@ final readonly class UpdateMaterialImageCommand
     public function __construct(
         #[Assert\NotBlank(message: 'validation.material_image_id_required')]
         public int $id,
+        public ?string $tmpFilePath = null,
         public ?string $alt = null,
     ) {}
 }

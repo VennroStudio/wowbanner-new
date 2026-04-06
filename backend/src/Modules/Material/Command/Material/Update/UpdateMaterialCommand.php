@@ -31,5 +31,8 @@ final readonly class UpdateMaterialCommand
         public string $name,
         #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'validation.material_description_too_long')]
         public string $description = '',
+        public ?int $imageId = null,
+        public ?string $tmpFilePath = null,
+        public ?string $imageAlt = null,
     ) {}
 }

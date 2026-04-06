@@ -13,4 +13,9 @@ interface MaterialImageRepository
     public function getById(int $id): MaterialImage;
 
     public function findById(int $id): ?MaterialImage;
+
+    /**
+     * @return MaterialImage[]
+     */
+    public function findByMaterialId(int $materialId): array;
 }

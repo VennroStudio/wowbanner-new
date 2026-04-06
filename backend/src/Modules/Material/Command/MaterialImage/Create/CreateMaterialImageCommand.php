@@ -12,7 +12,7 @@ final readonly class CreateMaterialImageCommand
         #[Assert\NotBlank(message: 'validation.material_id_required')]
         public int $materialId,
         #[Assert\NotBlank(message: 'validation.material_image_path_required')]
-        public string $path,
+        public string $tmpFilePath,
         public ?string $alt = null,
     ) {}
 }

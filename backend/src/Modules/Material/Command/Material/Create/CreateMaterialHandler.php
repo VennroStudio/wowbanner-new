@@ -6,13 +6,10 @@ namespace App\Modules\Material\Command\Material\Create;
 
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
-use App\Components\Storage\FileUploaderService;
-use App\Components\Storage\ImageFileValidator;
 use App\Modules\Material\Command\MaterialImage\Create\CreateMaterialImageCommand;
 use App\Modules\Material\Command\MaterialImage\Create\CreateMaterialImageHandler;
 use App\Modules\Material\Entity\Material\Material;
 use App\Modules\Material\Entity\Material\MaterialRepository;
-use App\Modules\Material\Entity\MaterialImage\Fields\Enums\MaterialImageDirectory;
 use App\Modules\Material\Permission\MaterialPermission;
 use App\Modules\Material\Service\MaterialPermissionService;
 use App\Modules\User\Entity\User\Fields\Enums\UserRole;
@@ -24,8 +21,6 @@ final readonly class CreateMaterialHandler
         private MaterialRepository $materialRepository,
         private MaterialPermissionService $materialPermissionService,
         private CreateMaterialImageHandler $createMaterialImageHandler,
-        private FileUploaderService $uploader,
-        private ImageFileValidator $fileValidator,
         private FlusherInterface $flusher,
     ) {}
 
@@ -60,15 +55,9 @@ final readonly class CreateMaterialHandler
 
     private function uploadImage(int $materialId, string $tmpFilePath, ?string $imageAlt): void
     {
-        $path = $this->uploader->upload(
-            tmpFilePath: $tmpFilePath,
-            destinationDir: MaterialImageDirectory::MATERIAL->value,
-            validator: $this->fileValidator,
-        );
-
         $this->createMaterialImageHandler->handle(new CreateMaterialImageCommand(
             materialId: $materialId,
-            path: $path,
+            tmpFilePath: $tmpFilePath,
             alt: $imageAlt,
         ));
     }
