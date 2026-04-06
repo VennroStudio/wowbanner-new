@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Material\Query\MaterialImage\FindByMaterialIds;
 
 use App\Modules\Material\ReadModel\MaterialImage\MaterialImageByMaterial;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -30,7 +31,7 @@ final readonly class MaterialImageFindByMaterialIdsFetcher
             ->select('id', 'material_id', 'path', 'alt')
             ->from(self::TABLE)
             ->where('material_id IN (:ids)')
-            ->setParameter('ids', $query->materialIds, Connection::PARAM_INT_ARRAY)
+            ->setParameter('ids', $query->materialIds, ArrayParameterType::INTEGER)
             ->orderBy('id', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();

@@ -8,6 +8,7 @@ use App\Components\Exception\AccessDeniedException;
 use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Request\RequestFile;
 use App\Components\Http\Response\JsonDataSuccessResponse;
+use App\Components\Router\Route;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Material\Command\MaterialImage\Create\CreateMaterialImageCommand;
@@ -97,6 +98,7 @@ final readonly class CreateMaterialImageAction implements RequestHandlerInterfac
 
         $command = $this->denormalizer->denormalize(
             array_merge($body, [
+                'materialId'      => Route::getArgumentToInt($request, 'id'),
                 'currentUserId'   => $identity->id,
                 'currentUserRole' => $identity->role->value,
                 'images'          => $images,

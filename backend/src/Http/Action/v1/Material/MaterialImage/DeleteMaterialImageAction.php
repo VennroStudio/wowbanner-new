@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Action\v1\Material\MaterialImage;
 
+use App\Components\Exception\AccessDeniedException;
 use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Response\JsonDataSuccessResponse;
 use App\Components\Router\Route;
@@ -20,7 +21,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[OA\Delete(
-    path: '/materials/{id}/images/{imageId}',
+    path: '/materials/images/{imageId}',
     description: 'Удаление изображения материала.',
     summary: 'Удалить изображение материала',
     security: [['bearerAuth' => []]],
@@ -54,6 +55,7 @@ final readonly class DeleteMaterialImageAction implements RequestHandlerInterfac
      * @return ResponseInterface
      * @throws ExceptionInterface
      * @throws JsonException
+     * @throws AccessDeniedException
      */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
