@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Material\Command\Material;
+namespace App\Modules\Material\ReadModel\MaterialImage;
 
 use App\Components\Http\Request\RequestFile;
 use App\Components\Http\Request\RequestFileItemInterface;

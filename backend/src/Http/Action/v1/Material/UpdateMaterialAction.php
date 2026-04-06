@@ -11,9 +11,9 @@ use App\Components\Http\Response\JsonDataSuccessResponse;
 use App\Components\Router\Route;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
-use App\Modules\Material\Command\Material\MaterialImageItem;
 use App\Modules\Material\Command\Material\Update\UpdateMaterialCommand;
 use App\Modules\Material\Command\Material\Update\UpdateMaterialHandler;
+use App\Modules\Material\ReadModel\MaterialImage\MaterialImageItem;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
@@ -87,6 +87,7 @@ final readonly class UpdateMaterialAction implements RequestHandlerInterface
     /**
      * @throws ExceptionInterface
      * @throws AccessDeniedException
+     * @throws \JsonException
      */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface

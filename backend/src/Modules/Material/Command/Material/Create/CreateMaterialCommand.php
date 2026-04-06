@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\Material\Create;
 
-use App\Modules\Material\Command\Material\MaterialImageItem;
+use App\Modules\Material\ReadModel\MaterialImage\MaterialImageItem;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreateMaterialCommand

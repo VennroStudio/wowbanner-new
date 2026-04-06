@@ -12,7 +12,7 @@ use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Material\Command\Material\Create\CreateMaterialCommand;
 use App\Modules\Material\Command\Material\Create\CreateMaterialHandler;
-use App\Modules\Material\Command\Material\MaterialImageItem;
+use App\Modules\Material\ReadModel\MaterialImage\MaterialImageItem;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
