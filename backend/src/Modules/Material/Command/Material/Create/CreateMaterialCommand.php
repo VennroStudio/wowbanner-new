@@ -28,7 +28,9 @@ final readonly class CreateMaterialCommand
         public string $name,
         #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'validation.material_description_too_long')]
         public string $description = '',
-        public ?string $tmpFilePath = null,
-        public ?string $imageAlt = null,
+        /** @var MaterialImageItem[] */
+        #[Assert\All([new Assert\Type(MaterialImageItem::class)])]
+        public array $images = [],
     ) {}
 }
+

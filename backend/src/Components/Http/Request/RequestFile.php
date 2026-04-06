@@ -41,6 +41,27 @@ final readonly class RequestFile
         return new self($file);
     }
 
+    /** @return self[] */
+    public static function extractList(ServerRequestInterface $request, string $name): array
+    {
+        $files = $request->getUploadedFiles()[$name] ?? [];
+
+        if (!is_array($files)) {
+            $file = self::extract($request, $name);
+            return $file ? [$file] : [];
+        }
+
+        $result = [];
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFileInterface && $file->getError() === UPLOAD_ERR_OK) {
+                $result[] = new self($file);
+            }
+        }
+
+        return $result;
+    }
+
+
     public function getPath(): string
     {
         return $this->path;

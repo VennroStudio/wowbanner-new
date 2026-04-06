@@ -44,11 +44,11 @@ final readonly class CreateMaterialHandler
             throw new RuntimeException('Material ID is null after creation.');
         }
 
-        if ($command->tmpFilePath !== null) {
+        foreach ($command->images as $image) {
             $this->uploadImage(
                 materialId: $material->id,
-                tmpFilePath: $command->tmpFilePath,
-                imageAlt: $command->imageAlt,
+                tmpFilePath: $image->tmpFilePath,
+                imageAlt: $image->alt,
             );
         }
     }
@@ -62,3 +62,4 @@ final readonly class CreateMaterialHandler
         ));
     }
 }
+
