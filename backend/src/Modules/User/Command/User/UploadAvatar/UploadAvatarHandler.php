@@ -10,6 +10,7 @@ use App\Components\Flusher\FlusherInterface;
 use App\Components\Storage\FileUploaderService;
 use App\Components\Storage\ImageFileValidator;
 use App\Components\Storage\StorageInterface;
+use App\Modules\User\Entity\User\Fields\Enums\UserDirectory;
 use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 use App\Modules\User\Entity\User\UserRepository;
 use App\Modules\User\Permission\UserPermission;
@@ -47,7 +48,7 @@ final readonly class UploadAvatarHandler
 
         $newAvatarPath = $this->uploader->upload(
             tmpFilePath: $command->tmpFilePath,
-            destinationDir: "user/{$command->userId}/avatar",
+            destinationDir: UserDirectory::AVATAR->getPath($command->userId),
             validator: $this->fileValidator,
             oldFilePath: $user->avatar
         );
