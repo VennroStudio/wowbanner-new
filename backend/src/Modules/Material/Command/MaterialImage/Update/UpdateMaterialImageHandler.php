@@ -4,38 +4,32 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialImage\Update;
 
+use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
-use App\Components\Storage\FileUploaderService;
-use App\Components\Storage\ImageFileValidator;
-use App\Components\Storage\StorageInterface;
-use App\Modules\Material\Entity\MaterialImage\Fields\Enums\MaterialImageDirectory;
 use App\Modules\Material\Entity\MaterialImage\MaterialImageRepository;
+use App\Modules\Material\Permission\MaterialPermission;
+use App\Modules\Material\Service\MaterialPermissionService;
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 
 final readonly class UpdateMaterialImageHandler
 {
     public function __construct(
         private MaterialImageRepository $materialImageRepository,
-        private FileUploaderService $uploader,
-        private ImageFileValidator $fileValidator,
-        private StorageInterface $storage,
+        private MaterialPermissionService $materialPermissionService,
         private FlusherInterface $flusher,
     ) {}
 
+    /** @throws AccessDeniedException */
     public function handle(UpdateMaterialImageCommand $command): void
     {
-        $image = $this->materialImageRepository->getById($command->id);
-        $newPath = null;
+        $this->materialPermissionService->check(
+            currentUserRole: UserRole::from($command->currentUserRole),
+            action: MaterialPermission::UPDATE,
+        );
 
-        if ($command->tmpFilePath !== null) {
-            $this->storage->delete($image->path);
-            $newPath = $this->uploader->upload(
-                tmpFilePath: $command->tmpFilePath,
-                destinationDir: MaterialImageDirectory::MATERIAL->value,
-                validator: $this->fileValidator,
-            );
-        }
+        $image = $this->materialImageRepository->getById($command->materialImageId);
 
-        $image->edit($newPath, $command->alt);
+        $image->edit(null, $command->alt);
 
         $this->flusher->flush();
     }

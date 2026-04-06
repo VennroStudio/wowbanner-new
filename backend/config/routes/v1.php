@@ -15,6 +15,9 @@ use App\Http\Action\v1\Material\CreateMaterialAction;
 use App\Http\Action\v1\Material\DeleteMaterialAction;
 use App\Http\Action\v1\Material\GetMaterialByIdAction;
 use App\Http\Action\v1\Material\GetMaterialsAction;
+use App\Http\Action\v1\Material\MaterialImage\CreateMaterialImageAction;
+use App\Http\Action\v1\Material\MaterialImage\DeleteMaterialImageAction;
+use App\Http\Action\v1\Material\MaterialImage\UpdateMaterialImageAction;
 use App\Http\Action\v1\Material\UpdateMaterialAction;
 use App\Http\Action\v1\OpenApiAction;
 use App\Http\Action\v1\Printing\CreatePrintingAction;
@@ -56,6 +59,11 @@ return static function (App $app): void {
             $group->patch('/update/{id}', UpdateMaterialAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeleteMaterialAction::class)->add(Authenticate::class);
             $group->get('/{id}', GetMaterialByIdAction::class)->add(Authenticate::class);
+
+            // MaterialImage
+            $group->post('/{id}/images', CreateMaterialImageAction::class)->add(Authenticate::class);
+            $group->patch('/images/{imageId}', UpdateMaterialImageAction::class)->add(Authenticate::class);
+            $group->delete('/images/{imageId}', DeleteMaterialImageAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/printings', new Group(static function (RouteCollectorProxy $group): void {

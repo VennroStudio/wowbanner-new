@@ -9,9 +9,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 final readonly class UpdateMaterialImageCommand
 {
     public function __construct(
-        #[Assert\NotBlank(message: 'validation.material_image_id_required')]
-        public int $id,
-        public ?string $tmpFilePath = null,
+        #[Assert\NotBlank]
+        #[Assert\GreaterThan(0)]
+        public int $materialImageId,
+        #[Assert\NotBlank]
+        #[Assert\GreaterThan(0)]
+        public int $currentUserId,
+        #[Assert\NotBlank]
+        public int $currentUserRole,
         public ?string $alt = null,
     ) {}
 }

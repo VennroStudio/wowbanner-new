@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\Material\Create;
 
-use App\Modules\Material\ReadModel\MaterialImage\MaterialImageItem;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreateMaterialCommand
@@ -29,9 +28,5 @@ final readonly class CreateMaterialCommand
         public string $name,
         #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'validation.material_description_too_long')]
         public string $description = '',
-        /** @var MaterialImageItem[] */
-        #[Assert\All([new Assert\Type(MaterialImageItem::class)])]
-        public array $images = [],
     ) {}
 }
-

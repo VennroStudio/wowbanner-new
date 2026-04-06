@@ -10,9 +10,14 @@ final readonly class CreateMaterialImageCommand
 {
     public function __construct(
         #[Assert\NotBlank(message: 'validation.material_id_required')]
+        #[Assert\GreaterThan(0)]
         public int $materialId,
+        #[Assert\NotBlank]
+        #[Assert\GreaterThan(0)]
+        public int $currentUserId,
+        #[Assert\NotBlank]
+        public int $currentUserRole,
         #[Assert\NotBlank(message: 'validation.material_image_path_required')]
-        public string $tmpFilePath,
-        public ?string $alt = null,
+        public array $images,
     ) {}
 }

@@ -7,9 +7,9 @@ namespace App\Modules\Material\Command\Material\Delete;
 use App\Components\Cacher\Cacher;
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
-use App\Modules\Material\Command\MaterialImage\Delete\DeleteMaterialImageCommand;
-use App\Modules\Material\Command\MaterialImage\Delete\DeleteMaterialImageHandler;
+use App\Components\Storage\StorageInterface;
 use App\Modules\Material\Entity\Material\MaterialRepository;
+use App\Modules\Material\Entity\MaterialImage\MaterialImageRepository;
 use App\Modules\Material\Permission\MaterialPermission;
 use App\Modules\Material\Service\MaterialPermissionService;
 use App\Modules\User\Entity\User\Fields\Enums\UserRole;
@@ -18,8 +18,9 @@ final readonly class DeleteMaterialHandler
 {
     public function __construct(
         private MaterialRepository $materialRepository,
-        private DeleteMaterialImageHandler $deleteMaterialImageHandler,
+        private MaterialImageRepository $materialImageRepository,
         private MaterialPermissionService $materialPermissionService,
+        private StorageInterface $storage,
         private FlusherInterface $flusher,
         private Cacher $cacher,
     ) {}
@@ -34,9 +35,12 @@ final readonly class DeleteMaterialHandler
             action: MaterialPermission::DELETE,
         );
 
-        $this->deleteMaterialImageHandler->handle(new DeleteMaterialImageCommand(
-            materialId: $command->materialId
-        ));
+        $images = $this->materialImageRepository->findByMaterialId($command->materialId);
+
+        foreach ($images as $image) {
+            $this->storage->delete($image->path);
+            $this->materialImageRepository->remove($image);
+        }
 
         $this->materialRepository->remove($material);
 

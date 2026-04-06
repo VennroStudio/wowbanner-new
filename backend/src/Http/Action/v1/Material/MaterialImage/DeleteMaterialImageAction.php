@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Action\v1\Material;
+namespace App\Http\Action\v1\Material\MaterialImage;
 
-use App\Components\Exception\AccessDeniedException;
 use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Response\JsonDataSuccessResponse;
 use App\Components\Router\Route;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
-use App\Modules\Material\Command\Material\Delete\DeleteMaterialCommand;
-use App\Modules\Material\Command\Material\Delete\DeleteMaterialHandler;
+use App\Modules\Material\Command\MaterialImage\Delete\DeleteMaterialImageCommand;
+use App\Modules\Material\Command\MaterialImage\Delete\DeleteMaterialImageHandler;
 use JsonException;
 use OpenApi\Attributes as OA;
 use Override;
@@ -21,38 +20,39 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[OA\Delete(
-    path: '/materials/delete/{id}',
-    description: 'Удаление материала',
-    summary: 'Удалить материал',
+    path: '/materials/{id}/images/{imageId}',
+    description: 'Удаление изображения материала.',
+    summary: 'Удалить изображение материала',
     security: [['bearerAuth' => []]],
     tags: ['Materials'],
     parameters: [
         new OA\Parameter(
-            name: 'id',
-            description: 'ID материала',
+            name: 'imageId',
+            description: 'ID изображения',
             in: 'path',
             required: true,
             schema: new OA\Schema(type: 'integer')
         ),
     ],
     responses: [
-        new OA\Response(response: 200, description: 'Материал удалён'),
+        new OA\Response(response: 200, description: 'Изображение удалено'),
         new OA\Response(response: 401, description: 'Не авторизован'),
         new OA\Response(response: 403, description: 'Доступ запрещён'),
-        new OA\Response(response: 404, description: 'Материал не найден'),
+        new OA\Response(response: 404, description: 'Изображение не найдено'),
     ]
 )]
-final readonly class DeleteMaterialAction implements RequestHandlerInterface
+final readonly class DeleteMaterialImageAction implements RequestHandlerInterface
 {
     public function __construct(
         private Denormalizer $denormalizer,
         private Validator $validator,
-        private DeleteMaterialHandler $handler,
+        private DeleteMaterialImageHandler $handler,
     ) {}
 
     /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
      * @throws ExceptionInterface
-     * @throws AccessDeniedException
      * @throws JsonException
      */
     #[Override]
@@ -61,10 +61,10 @@ final readonly class DeleteMaterialAction implements RequestHandlerInterface
         $identity = RequestIdentity::get($request);
 
         $command = $this->denormalizer->denormalize([
-            'materialId'      => Route::getArgumentToInt($request, 'id'),
+            'materialImageId'      => Route::getArgumentToInt($request, 'imageId'),
             'currentUserId'   => $identity->id,
             'currentUserRole' => $identity->role->value,
-        ], DeleteMaterialCommand::class);
+        ], DeleteMaterialImageCommand::class);
 
         $this->validator->validate($command);
 

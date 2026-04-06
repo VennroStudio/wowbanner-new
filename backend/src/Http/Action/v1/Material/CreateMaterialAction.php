@@ -6,13 +6,12 @@ namespace App\Http\Action\v1\Material;
 
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Http\Middleware\Identity\RequestIdentity;
-use App\Components\Http\Request\RequestFile;
 use App\Components\Http\Response\JsonDataSuccessResponse;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Material\Command\Material\Create\CreateMaterialCommand;
 use App\Modules\Material\Command\Material\Create\CreateMaterialHandler;
-use App\Modules\Material\ReadModel\MaterialImage\MaterialImageItem;
+use JsonException;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
@@ -21,34 +20,18 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[OA\Post(
-// ... (OpenAPI continues)
     path: '/materials/create',
-    description: 'Создание материала (только администратор). Поддерживает загрузку нескольких изображений (multipart/form-data).',
+    description: 'Создание материала',
     summary: 'Создать материал',
     security: [['bearerAuth' => []]],
     requestBody: new OA\RequestBody(
         required: true,
-        content: new OA\MediaType(
-            mediaType: 'multipart/form-data',
-            schema: new OA\Schema(
-                required: ['name'],
-                properties: [
-                    new OA\Property(property: 'name', type: 'string', example: 'Баннер'),
-                    new OA\Property(property: 'description', type: 'string', example: 'Описание материала'),
-                    new OA\Property(
-                        property: 'images[]',
-                        description: 'Массив файлов изображений',
-                        type: 'array',
-                        items: new OA\Items(type: 'string', format: 'binary'),
-                    ),
-                    new OA\Property(
-                        property: 'imageAlts[]',
-                        description: 'Массив альтернативных текстов для изображений (в том же порядке)',
-                        type: 'array',
-                        items: new OA\Items(type: 'string', example: 'Красивый баннер'),
-                    ),
-                ]
-            )
+        content: new OA\JsonContent(
+            required: ['name'],
+            properties: [
+                new OA\Property(property: 'name', type: 'string', example: 'Баннер'),
+                new OA\Property(property: 'description', type: 'string', example: 'Описание материала'),
+            ]
         )
     ),
     tags: ['Materials'],
@@ -68,28 +51,20 @@ final readonly class CreateMaterialAction implements RequestHandlerInterface
     ) {}
 
     /**
-     * @throws ExceptionInterface
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
      * @throws AccessDeniedException
+     * @throws ExceptionInterface
      */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);
-        $body = (array)$request->getParsedBody();
-
-        $images = RequestFile::extractItems(
-            request: $request,
-            fileKey: 'images',
-            metaKey: 'imageAlts',
-            itemClass: MaterialImageItem::class,
-            body: $body,
-        );
 
         $command = $this->denormalizer->denormalize(
-            array_merge($body, [
+            array_merge((array)$request->getParsedBody(), [
                 'currentUserId'   => $identity->id,
                 'currentUserRole' => $identity->role->value,
-                'images'          => $images,
             ]),
             CreateMaterialCommand::class,
         );
