@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\Material\Update;
 
-use App\Modules\Material\Command\Material\Create\MaterialImageItem;
+use App\Modules\Material\Command\Material\MaterialImageItem;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class UpdateMaterialCommand

@@ -25,7 +25,12 @@ final readonly class RequestFile
 
     public function __destruct()
     {
-        if (file_exists($this->path)) {
+        $this->cleanup();
+    }
+
+    public function cleanup(): void
+    {
+        if (isset($this->path) && file_exists($this->path)) {
             unlink($this->path);
         }
     }
@@ -45,11 +50,7 @@ final readonly class RequestFile
     public static function extractList(ServerRequestInterface $request, string $name): array
     {
         $files = $request->getUploadedFiles()[$name] ?? [];
-
-        if (!is_array($files)) {
-            $file = self::extract($request, $name);
-            return $file ? [$file] : [];
-        }
+        $files = is_array($files) ? $files : [$files];
 
         $result = [];
         foreach ($files as $file) {
@@ -61,6 +62,40 @@ final readonly class RequestFile
         return $result;
     }
 
+    /**
+     * @template T of RequestFileItemInterface
+     * @param class-string<T> $itemClass
+     * @param array<string, mixed> $body
+     * @return T[]
+     */
+    public static function extractItems(
+        ServerRequestInterface $request,
+        string $fileKey,
+        string $metaKey,
+        string $itemClass,
+        array $body,
+    ): array {
+        $files = self::extractList($request, $fileKey);
+        $meta = $body[$metaKey] ?? [];
+
+        $items = [];
+        foreach ($files as $index => $file) {
+            $items[] = $itemClass::fromRequest($file, $meta[$index] ?? null);
+        }
+
+        return $items;
+    }
+
+    /**
+     * @param array<string, mixed> $body
+     * @return int[]
+     */
+    public static function extractIds(string $key, array $body): array
+    {
+        $ids = $body[$key] ?? [];
+
+        return array_map('intval', (array)$ids);
+    }
 
     public function getPath(): string
     {

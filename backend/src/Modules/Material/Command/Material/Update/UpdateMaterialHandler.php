@@ -7,6 +7,7 @@ namespace App\Modules\Material\Command\Material\Update;
 use App\Components\Cacher\Cacher;
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
+use App\Modules\Material\Command\Material\MaterialImageItem;
 use App\Modules\Material\Command\MaterialImage\Create\CreateMaterialImageCommand;
 use App\Modules\Material\Command\MaterialImage\Create\CreateMaterialImageHandler;
 use App\Modules\Material\Command\MaterialImage\Delete\DeleteMaterialImageCommand;
@@ -52,7 +53,7 @@ final readonly class UpdateMaterialHandler
         foreach ($command->newImages as $image) {
             $this->createMaterialImageHandler->handle(new CreateMaterialImageCommand(
                 materialId: $command->materialId,
-                tmpFilePath: $image->tmpFilePath,
+                tmpFilePath: $image->file->getPath(),
                 alt: $image->alt,
             ));
         }

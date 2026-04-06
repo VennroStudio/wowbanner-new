@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Action\v1\Material;
 
 use App\Components\Exception\AccessDeniedException;
+use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Request\RequestFile;
 use App\Components\Http\Response\JsonDataSuccessResponse;
 use App\Components\Router\Route;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
-use App\Modules\Material\Command\Material\Create\MaterialImageItem;
+use App\Modules\Material\Command\Material\MaterialImageItem;
 use App\Modules\Material\Command\Material\Update\UpdateMaterialCommand;
 use App\Modules\Material\Command\Material\Update\UpdateMaterialHandler;
-use JsonException;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
@@ -22,6 +22,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[OA\Patch(
+// ... (OpenAPI continues)
     path: '/materials/update/{id}',
     description: 'Обновление материала (только администратор). Поддерживает добавление новых изображений и удаление существующих.',
     summary: 'Обновить материал',
@@ -86,24 +87,22 @@ final readonly class UpdateMaterialAction implements RequestHandlerInterface
     /**
      * @throws ExceptionInterface
      * @throws AccessDeniedException
-     * @throws JsonException
      */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);
-        $newFiles = RequestFile::extractList($request, 'newImages');
         $body = (array)$request->getParsedBody();
-        $newImageAlts = $body['newImageAlts'] ?? [];
-        $imagesToDelete = $body['imagesToDelete'] ?? [];
 
-        $newImages = [];
-        foreach ($newFiles as $index => $file) {
-            $newImages[] = new MaterialImageItem(
-                tmpFilePath: $file->getPath(),
-                alt: $newImageAlts[$index] ?? null,
-            );
-        }
+        $newImages = RequestFile::extractItems(
+            request: $request,
+            fileKey: 'images',
+            metaKey: 'imageAlts',
+            itemClass: MaterialImageItem::class,
+            body: $body,
+        );
+
+        $imagesToDelete = RequestFile::extractIds('imagesToDelete', $body);
 
         $command = $this->denormalizer->denormalize(
             array_merge($body, [
@@ -111,7 +110,7 @@ final readonly class UpdateMaterialAction implements RequestHandlerInterface
                 'currentUserId'   => $identity->id,
                 'currentUserRole' => $identity->role->value,
                 'newImages'       => $newImages,
-                'imagesToDelete'  => array_map('intval', (array)$imagesToDelete),
+                'imagesToDelete'  => $imagesToDelete,
             ]),
             UpdateMaterialCommand::class,
         );

@@ -12,8 +12,7 @@ use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Material\Command\Material\Create\CreateMaterialCommand;
 use App\Modules\Material\Command\Material\Create\CreateMaterialHandler;
-use App\Modules\Material\Command\Material\Create\MaterialImageItem;
-use JsonException;
+use App\Modules\Material\Command\Material\MaterialImageItem;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
@@ -22,6 +21,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[OA\Post(
+// ... (OpenAPI continues)
     path: '/materials/create',
     description: 'Создание материала (только администратор). Поддерживает загрузку нескольких изображений (multipart/form-data).',
     summary: 'Создать материал',
@@ -75,17 +75,15 @@ final readonly class CreateMaterialAction implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);
-        $files = RequestFile::extractList($request, 'images');
         $body = (array)$request->getParsedBody();
-        $imageAlts = $body['imageAlts'] ?? [];
 
-        $images = [];
-        foreach ($files as $index => $file) {
-            $images[] = new MaterialImageItem(
-                tmpFilePath: $file->getPath(),
-                alt: $imageAlts[$index] ?? null,
-            );
-        }
+        $images = RequestFile::extractItems(
+            request: $request,
+            fileKey: 'images',
+            metaKey: 'imageAlts',
+            itemClass: MaterialImageItem::class,
+            body: $body,
+        );
 
         $command = $this->denormalizer->denormalize(
             array_merge($body, [

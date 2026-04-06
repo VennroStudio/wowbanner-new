@@ -6,6 +6,7 @@ namespace App\Modules\Material\Command\Material\Create;
 
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
+use App\Modules\Material\Command\Material\MaterialImageItem;
 use App\Modules\Material\Command\MaterialImage\Create\CreateMaterialImageCommand;
 use App\Modules\Material\Command\MaterialImage\Create\CreateMaterialImageHandler;
 use App\Modules\Material\Entity\Material\Material;
@@ -47,7 +48,7 @@ final readonly class CreateMaterialHandler
         foreach ($command->images as $image) {
             $this->uploadImage(
                 materialId: $material->id,
-                tmpFilePath: $image->tmpFilePath,
+                tmpFilePath: $image->file->getPath(),
                 imageAlt: $image->alt,
             );
         }
