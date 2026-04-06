@@ -96,8 +96,8 @@ final readonly class UpdateMaterialAction implements RequestHandlerInterface
 
         $newImages = RequestFile::extractItems(
             request: $request,
-            fileKey: 'images',
-            metaKey: 'imageAlts',
+            fileKey: 'newImages',
+            metaKey: 'newImageAlts',
             itemClass: MaterialImageItem::class,
             body: $body,
         );
