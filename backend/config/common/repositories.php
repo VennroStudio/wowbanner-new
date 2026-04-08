@@ -14,6 +14,11 @@ use App\Modules\User\Entity\User\Persistence\Doctrine\DoctrineUserRepository;
 use App\Modules\User\Entity\User\UserRepository;
 use App\Modules\User\Entity\UserToken\Persistence\Doctrine\DoctrineUserTokenRepository;
 use App\Modules\User\Entity\UserToken\UserTokenRepository;
+use App\Modules\Processing\Entity\Processing\Persistence\Doctrine\DoctrineProcessingRepository;
+use App\Modules\Processing\Entity\Processing\ProcessingRepository;
+use App\Modules\Processing\Entity\ProcessingImage\Persistence\Doctrine\DoctrineProcessingImageRepository;
+use App\Modules\Processing\Entity\ProcessingImage\ProcessingImageRepository;
+
 
 use function DI\get;
 
@@ -24,4 +29,7 @@ return [
     PrintingRepository::class      => get(DoctrinePrintingRepository::class),
     UserRepository::class      => get(DoctrineUserRepository::class),
     UserTokenRepository::class => get(DoctrineUserTokenRepository::class),
+    ProcessingRepository::class      => get(DoctrineProcessingRepository::class),
+    ProcessingImageRepository::class => get(DoctrineProcessingImageRepository::class),
+
 ];

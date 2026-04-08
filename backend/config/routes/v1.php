@@ -25,7 +25,17 @@ use App\Http\Action\v1\Printing\DeletePrintingAction;
 use App\Http\Action\v1\Printing\GetPrintingByIdAction;
 use App\Http\Action\v1\Printing\GetPrintingsAction;
 use App\Http\Action\v1\Printing\UpdatePrintingAction;
+use App\Http\Action\v1\Processing\CreateProcessingAction;
+use App\Http\Action\v1\Processing\DeleteProcessingAction;
+use App\Http\Action\v1\Processing\GetProcessingByIdAction;
+use App\Http\Action\v1\Processing\GetProcessingsAction;
+use App\Http\Action\v1\Processing\GetProcessingTypesAction;
+use App\Http\Action\v1\Processing\ProcessingImage\CreateProcessingImageAction;
+use App\Http\Action\v1\Processing\ProcessingImage\DeleteProcessingImageAction;
+use App\Http\Action\v1\Processing\ProcessingImage\UpdateProcessingImageAction;
+use App\Http\Action\v1\Processing\UpdateProcessingAction;
 use App\Http\Action\v1\User\CreateUserAction;
+
 use App\Http\Action\v1\User\DeleteAvatarAction;
 use App\Http\Action\v1\User\DeleteUserAction;
 use App\Http\Action\v1\User\GetUserByIdAction;
@@ -72,6 +82,20 @@ return static function (App $app): void {
             $group->patch('/update/{id}', UpdatePrintingAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeletePrintingAction::class)->add(Authenticate::class);
             $group->get('/{id}', GetPrintingByIdAction::class)->add(Authenticate::class);
+        }));
+
+        $group->group('/processings', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('', GetProcessingsAction::class)->add(Authenticate::class);
+            $group->post('/create', CreateProcessingAction::class)->add(Authenticate::class);
+            $group->patch('/update/{id}', UpdateProcessingAction::class)->add(Authenticate::class);
+            $group->delete('/delete/{id}', DeleteProcessingAction::class)->add(Authenticate::class);
+            $group->get('/types', GetProcessingTypesAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetProcessingByIdAction::class)->add(Authenticate::class);
+
+            // ProcessingImage
+            $group->post('/{id}/images', CreateProcessingImageAction::class)->add(Authenticate::class);
+            $group->patch('/images/{imageId}', UpdateProcessingImageAction::class)->add(Authenticate::class);
+            $group->delete('/images/{imageId}', DeleteProcessingImageAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/auth', new Group(static function (RouteCollectorProxy $group): void {
