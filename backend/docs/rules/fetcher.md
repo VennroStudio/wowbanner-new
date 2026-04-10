@@ -212,10 +212,62 @@ final readonly class {Entity}FindAllFetcher
             ->executeQuery()
             ->fetchAllAssociative();
 
-        return new ModelCountItemsResult(
-            items: {Entity}FindAll::fromRows($rows),
-            count: $total,
         );
     }
 }
+
+---
+
+## Модульные JOIN (для фильтрации)
+
+Если нужно фильтровать основной список по полям связанных таблиц (например, поиск по номеру телефона или названию компании), используется метод `joinForFilter()`.
+
+- **`ALIAS`** — публичная константа с алиасом таблицы (чтобы избежать «магических строк» в основном фетчере).
+- **`joinForFilter(QueryBuilder $qb, string $targetAlias)`** — метод, который добавляет `LEFT JOIN` к переданному QueryBuilder.
+- В основном фетчере обязательно использовать **`groupBy()`** и **`COUNT(DISTINCT ...)`**, чтобы избежать дублей при связи один-ко-многим.
+
+### Пример фетчера-сателлита
+
+```php
+final readonly class {RelatedEntity}FindBy{Field}Fetcher
+{
+    private const string TABLE = '{related_table}';
+    public const string ALIAS = '{rt}';
+
+    public function joinForFilter(QueryBuilder $qb, string $targetAlias): void
+    {
+        $qb->leftJoin(
+            $targetAlias, 
+            self::TABLE, 
+            self::ALIAS, 
+            self::ALIAS . '.{foreign_id} = ' . $targetAlias . '.id'
+        );
+    }
+}
+```
+
+### Использование в основном фетчере
+
+```php
+$qb = $this->connection->createQueryBuilder()
+    ->from(self::TABLE, 'c');
+
+// Подключаем джоин
+$this->relatedFetcher->joinForFilter($qb, 'c');
+
+if ($query->search) {
+    $qb->andWhere(
+        $qb->expr()->or(
+            'c.name ILIKE :search',
+            {RelatedEntity}Fetcher::ALIAS . '.{field} ILIKE :search'
+        )
+    )->setParameter('search', '%' . $query->search . '%');
+}
+
+// Обязательно группируем по ID основной сущности
+$qb->groupBy('c.id');
+
+// Считаем общее количество уникальных записей
+$total = (int)$countQb->select('COUNT(DISTINCT c.id)')->executeQuery()->fetchOne();
+```
 ```

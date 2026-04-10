@@ -21,7 +21,7 @@ use Throwable;
     description: 'Получение обработки по ID',
     summary: 'Получить обработку по ID',
     tags: ['Processings'],
-    params: [
+    parameters: [
         new OA\Parameter(
             name: 'id',
             in: 'path',

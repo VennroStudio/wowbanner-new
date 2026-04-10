@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
     summary: 'Удалить обработку',
     security: [['bearerAuth' => []]],
     tags: ['Processings'],
-    params: [
+    parameters: [
         new OA\Parameter(
             name: 'id',
             in: 'path',

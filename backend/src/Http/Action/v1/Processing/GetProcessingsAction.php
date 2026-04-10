@@ -23,7 +23,7 @@ use Throwable;
     description: 'Получение списка обработок',
     summary: 'Получить список обработок',
     tags: ['Processings'],
-    params: [
+    parameters: [
         new OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer', default: 1)),
         new OA\Parameter(name: 'perPage', in: 'query', schema: new OA\Schema(type: 'integer', default: 20)),
         new OA\Parameter(name: 'search', in: 'query', schema: new OA\Schema(type: 'string', nullable: true)),

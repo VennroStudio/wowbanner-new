@@ -38,7 +38,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
         )
     ),
     tags: ['Processings'],
-    params: [
+    parameters: [
         new OA\Parameter(
             name: 'id',
             in: 'path',

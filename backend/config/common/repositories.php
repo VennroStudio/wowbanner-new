@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Modules\Gallery\Entity\Gallery\GalleryRepository;
-use App\Modules\Gallery\Entity\Gallery\Persistence\Doctrine\DoctrineGalleryRepository;
 use App\Modules\Material\Entity\Material\MaterialRepository;
 use App\Modules\Material\Entity\Material\Persistence\Doctrine\DoctrineMaterialRepository;
 use App\Modules\Material\Entity\MaterialImage\MaterialImageRepository;
@@ -18,12 +16,15 @@ use App\Modules\Processing\Entity\Processing\Persistence\Doctrine\DoctrineProces
 use App\Modules\Processing\Entity\Processing\ProcessingRepository;
 use App\Modules\Processing\Entity\ProcessingImage\Persistence\Doctrine\DoctrineProcessingImageRepository;
 use App\Modules\Processing\Entity\ProcessingImage\ProcessingImageRepository;
+use App\Modules\Client\Entity\Client\Persistence\Doctrine\DoctrineClientRepository;
+use App\Modules\Client\Entity\Client\ClientRepository;
+use App\Modules\Client\Entity\ClientCompany\Persistence\Doctrine\DoctrineClientCompanyRepository;
+use App\Modules\Client\Entity\ClientCompany\ClientCompanyRepository;
 
 
 use function DI\get;
 
 return [
-    GalleryRepository::class   => get(DoctrineGalleryRepository::class),
     MaterialRepository::class      => get(DoctrineMaterialRepository::class),
     MaterialImageRepository::class => get(DoctrineMaterialImageRepository::class),
     PrintingRepository::class      => get(DoctrinePrintingRepository::class),
@@ -31,5 +32,6 @@ return [
     UserTokenRepository::class => get(DoctrineUserTokenRepository::class),
     ProcessingRepository::class      => get(DoctrineProcessingRepository::class),
     ProcessingImageRepository::class => get(DoctrineProcessingImageRepository::class),
-
+    ClientRepository::class   => get(DoctrineClientRepository::class),
+    ClientCompanyRepository::class => get(DoctrineClientCompanyRepository::class),
 ];

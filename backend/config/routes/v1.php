@@ -43,6 +43,13 @@ use App\Http\Action\v1\User\GetUserRolesAction;
 use App\Http\Action\v1\User\GetUsersAction;
 use App\Http\Action\v1\User\UploadAvatarAction;
 use App\Http\Action\v1\User\UserUpdateAction;
+use App\Http\Action\v1\Client\CreateClientAction;
+use App\Http\Action\v1\Client\GetClientByIdAction;
+use App\Http\Action\v1\Client\GetClientsAction;
+use App\Http\Action\v1\Client\UpdateClientAction;
+use App\Http\Action\v1\Client\ClientCompany\CreateClientCompaniesAction;
+use App\Http\Action\v1\Client\ClientCompany\DeleteClientCompaniesAction;
+use App\Http\Action\v1\Client\ClientCompany\UpdateClientCompaniesAction;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
@@ -96,6 +103,18 @@ return static function (App $app): void {
             $group->post('/{id}/images', CreateProcessingImageAction::class)->add(Authenticate::class);
             $group->patch('/images/{imageId}', UpdateProcessingImageAction::class)->add(Authenticate::class);
             $group->delete('/images/{imageId}', DeleteProcessingImageAction::class)->add(Authenticate::class);
+        }));
+
+        $group->group('/clients', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('', GetClientsAction::class)->add(Authenticate::class);
+            $group->post('/create', CreateClientAction::class)->add(Authenticate::class);
+            $group->patch('/update/{id}', UpdateClientAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetClientByIdAction::class)->add(Authenticate::class);
+
+            // ClientCompany
+            $group->post('/{id}/companies', CreateClientCompaniesAction::class)->add(Authenticate::class);
+            $group->put('/{id}/companies', UpdateClientCompaniesAction::class)->add(Authenticate::class);
+            $group->delete('/{id}/companies', DeleteClientCompaniesAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/auth', new Group(static function (RouteCollectorProxy $group): void {
