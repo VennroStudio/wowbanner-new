@@ -12,6 +12,7 @@ use App\Modules\Client\Query\ClientPhone\Exists\ClientPhoneExistsFetcher;
 use App\Modules\Client\Query\ClientPhone\Exists\ClientPhoneExistsQuery;
 use App\Modules\Client\ReadModel\ClientCompany\ClientCompanyItem;
 use App\Modules\Client\ReadModel\ClientPhone\ClientPhoneItem;
+use Doctrine\DBAL\Exception;
 
 final readonly class ClientValidatorService
 {
@@ -23,6 +24,7 @@ final readonly class ClientValidatorService
     /**
      * @param list<ClientPhoneItem> $phones
      * @param list<ClientCompanyItem> $companies
+     * @throws Exception
      */
     public function validate(
         ?string $email,
@@ -53,6 +55,7 @@ final readonly class ClientValidatorService
 
     /**
      * @param list<ClientPhoneItem> $phones
+     * @throws Exception
      */
     private function validatePhones(array $phones, ?int $clientId): void
     {
