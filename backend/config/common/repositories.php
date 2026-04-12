@@ -18,6 +18,8 @@ use App\Modules\Processing\Entity\ProcessingImage\Persistence\Doctrine\DoctrineP
 use App\Modules\Processing\Entity\ProcessingImage\ProcessingImageRepository;
 use App\Modules\Client\Entity\Client\Persistence\Doctrine\DoctrineClientRepository;
 use App\Modules\Client\Entity\Client\ClientRepository;
+use App\Modules\Client\Entity\ClientPhone\Persistence\Doctrine\DoctrineClientPhoneRepository;
+use App\Modules\Client\Entity\ClientPhone\ClientPhoneRepository;
 use App\Modules\Client\Entity\ClientCompany\Persistence\Doctrine\DoctrineClientCompanyRepository;
 use App\Modules\Client\Entity\ClientCompany\ClientCompanyRepository;
 
@@ -34,4 +36,5 @@ return [
     ProcessingImageRepository::class => get(DoctrineProcessingImageRepository::class),
     ClientRepository::class   => get(DoctrineClientRepository::class),
     ClientCompanyRepository::class => get(DoctrineClientCompanyRepository::class),
+    ClientPhoneRepository::class => get(DoctrineClientPhoneRepository::class),
 ];

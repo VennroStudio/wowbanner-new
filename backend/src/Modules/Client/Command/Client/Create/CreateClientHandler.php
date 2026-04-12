@@ -58,6 +58,8 @@ final readonly class CreateClientHandler
 
         $this->repository->add($client);
 
+        $this->flusher->flush();
+
         $this->processPhones($client, $command->phones);
         $this->processCompanies($client, $command->companies);
 

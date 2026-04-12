@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Action\v1\Client;
 
 use App\Components\Http\Response\JsonDataResponse;
-use App\Components\Http\Route\Route;
+use App\Components\Router\Route;
 use App\Http\Unifier\Client\ClientUnifier;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdFetcher;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdQuery;
+use Doctrine\DBAL\Exception;
+use JsonException;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,6 +38,10 @@ final readonly class GetClientByIdAction implements RequestHandlerInterface
         private ClientUnifier $unifier,
     ) {}
 
+    /**
+     * @throws JsonException
+     * @throws Exception
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $id = Route::getArgumentToInt($request, 'id');

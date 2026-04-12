@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Client\Command\Client\Delete;
 
+use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
 use App\Modules\Client\Command\ClientCompany\Delete\DeleteClientCompanyCommand;
 use App\Modules\Client\Command\ClientCompany\Delete\DeleteClientCompanyHandler;
@@ -28,6 +29,9 @@ final readonly class DeleteClientHandler
         private DeleteClientCompanyHandler $deleteCompanyHandler,
     ) {}
 
+    /**
+     * @throws AccessDeniedException
+     */
     public function handle(DeleteClientCommand $command): void
     {
         $this->permissionService->check(

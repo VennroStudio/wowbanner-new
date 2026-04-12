@@ -79,8 +79,6 @@ final readonly class ClientById implements ClientModelInterface
             'info'          => $this->info,
             'docs'          => ['id' => $this->docs->value, 'label' => $this->docs->getLabel()],
             'type'          => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
-            'created_at'    => $this->createdAt,
-            'updated_at'    => $this->updatedAt,
         ];
     }
 }

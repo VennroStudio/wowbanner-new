@@ -19,7 +19,6 @@ services:
     env_file: .env
     volumes:
       - ./:/app
-      - ./auth.json:/root/.composer/auth.json
     networks:
       - proxy
 
@@ -31,7 +30,6 @@ services:
     env_file: .env
     volumes:
       - ./:/app
-      - ./auth.json:/root/.composer/auth.json
     networks:
       - proxy
 

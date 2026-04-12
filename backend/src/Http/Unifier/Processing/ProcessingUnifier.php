@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Processing;
 
+use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
 use App\Components\Storage\S3Transformer;
 use App\Modules\Processing\Query\ProcessingImage\FindByProcessingIds\ProcessingImageFindByProcessingIdsFetcher;
 use App\Modules\Processing\Query\ProcessingImage\FindByProcessingIds\ProcessingImageFindByProcessingIdsQuery;
 use App\Modules\Processing\ReadModel\Processing\Interface\ProcessingModelInterface;
 use App\Modules\Processing\ReadModel\ProcessingImage\ProcessingImageByProcessing;
+use Doctrine\DBAL\Exception;
 use Override;
 
 final readonly class ProcessingUnifier implements UnifierInterface
@@ -32,6 +34,7 @@ final readonly class ProcessingUnifier implements UnifierInterface
     /**
      * @param list<object> $items
      * @return list<array<string, mixed>>
+     * @throws Exception
      */
     #[Override]
     public function unify(?int $userId, array $items): array
@@ -41,6 +44,7 @@ final readonly class ProcessingUnifier implements UnifierInterface
         }
 
         $ids = array_map(static fn(ProcessingModelInterface $i): int => $i->getId(), $items);
+
         $groupedImages = $this->groupImagesByProcessingId(
             $this->imageFetcher->fetch(new ProcessingImageFindByProcessingIdsQuery($ids))
         );
@@ -71,9 +75,8 @@ final readonly class ProcessingUnifier implements UnifierInterface
         $grouped = [];
 
         foreach ($images as $image) {
-            $data = $image->toArray();
-            $data['path'] = $this->s3Transformer->buildUrl($data['path']);
-            unset($data['processing_id']);
+            $data = UnifierHelper::toArrayWithout($image, 'processing_id');
+            $data = UnifierHelper::transformField($data, 'path', $this->s3Transformer->buildUrl(...));
             $grouped[$image->getProcessingId()][] = $data;
         }
 

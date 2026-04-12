@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Material;
 
+use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
 use App\Components\Storage\S3Transformer;
 use App\Modules\Material\Query\MaterialImage\FindByMaterialIds\MaterialImageFindByMaterialIdsFetcher;
 use App\Modules\Material\Query\MaterialImage\FindByMaterialIds\MaterialImageFindByMaterialIdsQuery;
 use App\Modules\Material\ReadModel\Material\Interface\MaterialModelInterface;
 use App\Modules\Material\ReadModel\MaterialImage\MaterialImageByMaterial;
+use Doctrine\DBAL\Exception;
 use Override;
 
 final readonly class MaterialUnifier implements UnifierInterface
@@ -32,6 +34,7 @@ final readonly class MaterialUnifier implements UnifierInterface
     /**
      * @param list<object> $items
      * @return list<array<string, mixed>>
+     * @throws Exception
      */
     #[Override]
     public function unify(?int $userId, array $items): array
@@ -41,6 +44,7 @@ final readonly class MaterialUnifier implements UnifierInterface
         }
 
         $ids = array_map(static fn(MaterialModelInterface $i): int => $i->getId(), $items);
+
         $groupedImages = $this->groupImagesByMaterialId(
             $this->materialImageFetcher->fetch(new MaterialImageFindByMaterialIdsQuery($ids))
         );
@@ -71,9 +75,8 @@ final readonly class MaterialUnifier implements UnifierInterface
         $grouped = [];
 
         foreach ($images as $image) {
-            $data = $image->toArray();
-            $data['path'] = $this->s3Transformer->buildUrl($data['path']);
-            unset($data['material_id']);
+            $data = UnifierHelper::toArrayWithout($image, 'material_id');
+            $data = UnifierHelper::transformField($data, 'path', $this->s3Transformer->buildUrl(...));
             $grouped[$image->getMaterialId()][] = $data;
         }
 

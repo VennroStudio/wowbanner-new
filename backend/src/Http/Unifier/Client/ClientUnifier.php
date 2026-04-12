@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Client;
 
+use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
 use App\Modules\Client\Query\ClientCompany\FindByClientIds\ClientCompanyFindByClientIdsFetcher;
 use App\Modules\Client\Query\ClientCompany\FindByClientIds\ClientCompanyFindByClientIdsQuery;
@@ -12,6 +13,7 @@ use App\Modules\Client\Query\ClientPhone\FindByClientIds\ClientPhoneFindByClient
 use App\Modules\Client\ReadModel\Client\Interface\ClientModelInterface;
 use App\Modules\Client\ReadModel\ClientCompany\ClientCompanyByClient;
 use App\Modules\Client\ReadModel\ClientPhone\ClientPhoneByClient;
+use Doctrine\DBAL\Exception;
 use Override;
 
 final readonly class ClientUnifier implements UnifierInterface
@@ -33,6 +35,7 @@ final readonly class ClientUnifier implements UnifierInterface
     /**
      * @param list<ClientModelInterface> $items
      * @return list<array<string, mixed>>
+     * @throws Exception
      */
     #[Override]
     public function unify(?int $userId, array $items): array
@@ -63,8 +66,7 @@ final readonly class ClientUnifier implements UnifierInterface
         $data = $item->toArray();
         $data['phones'] = $phones[$item->getId()] ?? [];
         $data['companies'] = $companies[$item->getId()] ?? [];
-
-        return $data;
+        return UnifierHelper::withTimestamps($data, $item);
     }
 
     /**
@@ -75,7 +77,7 @@ final readonly class ClientUnifier implements UnifierInterface
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->clientId][] = $item->toArray();
+            $grouped[$item->clientId][] = UnifierHelper::toArrayWithout($item, 'client_id');
         }
         return $grouped;
     }
@@ -88,7 +90,7 @@ final readonly class ClientUnifier implements UnifierInterface
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->clientId][] = $item->toArray();
+            $grouped[$item->clientId][] = UnifierHelper::toArrayWithout($item, 'client_id');
         }
         return $grouped;
     }

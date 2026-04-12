@@ -11,6 +11,7 @@ use App\Http\Action\v1\Auth\LogoutAction;
 use App\Http\Action\v1\Auth\PasswordResetAction;
 use App\Http\Action\v1\Auth\PasswordResetConfirmAction;
 use App\Http\Action\v1\Auth\RefreshTokenAction;
+use App\Http\Action\v1\Client\CreateClientAction;
 use App\Http\Action\v1\Material\CreateMaterialAction;
 use App\Http\Action\v1\Material\DeleteMaterialAction;
 use App\Http\Action\v1\Material\GetMaterialByIdAction;

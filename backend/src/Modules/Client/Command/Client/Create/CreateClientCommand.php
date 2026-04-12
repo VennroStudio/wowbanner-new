@@ -24,16 +24,16 @@ final readonly class CreateClientCommand
         #[Assert\NotBlank(message: 'validation.first_name_required')]
         public string $firstName,
 
-        public ?string $middleName = null,
-
-        #[Assert\Email(message: 'validation.email_invalid')]
-        public ?string $email = null,
-
         #[Assert\NotBlank]
         public int $docs,
 
         #[Assert\NotBlank]
         public int $type,
+
+        public ?string $middleName = null,
+
+        #[Assert\Email(message: 'validation.email_invalid')]
+        public ?string $email = null,
 
         public ?string $info = null,
 

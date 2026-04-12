@@ -10,10 +10,13 @@ use App\Components\Validator\Validator;
 use App\Http\Unifier\Client\ClientUnifier;
 use App\Modules\Client\Query\Client\FindAll\ClientFindAllFetcher;
 use App\Modules\Client\Query\Client\FindAll\ClientFindAllQuery;
+use Doctrine\DBAL\Exception;
+use JsonException;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[OA\Get(
     path: '/clients',
@@ -40,6 +43,11 @@ final readonly class GetClientsAction implements RequestHandlerInterface
         private Validator $validator,
     ) {}
 
+    /**
+     * @throws ExceptionInterface
+     * @throws Exception
+     * @throws JsonException
+     */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $query = $this->denormalizer->denormalize(
