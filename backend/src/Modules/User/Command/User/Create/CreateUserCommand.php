@@ -36,6 +36,8 @@ final readonly class CreateUserCommand
         #[Assert\Email(message: 'validation.email_invalid')]
         #[Assert\Length(max: self::EMAIL_MAX_LENGTH, maxMessage: 'validation.email_too_long')]
         public string $email,
+        #[Assert\NotBlank]
+        public int $role,
         public string $locale = 'en',
     ) {}
 }

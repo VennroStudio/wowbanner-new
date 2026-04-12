@@ -60,8 +60,9 @@ class User
         string $firstName,
         string $email,
         string $password,
+        UserRole $role,
     ) {
-        $this->role = UserRole::USER;
+        $this->role = $role;
         $this->lastName = $lastName;
         $this->firstName = $firstName;
         $this->email = $email;
@@ -81,12 +82,14 @@ class User
         string $firstName,
         string $email,
         string $password,
+        UserRole $role,
     ): self {
         return new self(
             lastName: $lastName,
             firstName: $firstName,
             email: $email,
             password: $password,
+            role: $role,
         );
     }
 
@@ -96,12 +99,27 @@ class User
     public function edit(
         string $lastName,
         string $firstName,
+    ): void {
+        $this->assertNotDeleted();
+        $this->lastName = $lastName;
+        $this->firstName = $firstName;
+        $this->touch();
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public function editByAdmin(
+        string $lastName,
+        string $firstName,
         string $email,
+        UserRole $role,
     ): void {
         $this->assertNotDeleted();
         $this->lastName = $lastName;
         $this->firstName = $firstName;
         $this->email = $email;
+        $this->role = $role;
         $this->touch();
     }
 

@@ -11,6 +11,7 @@ use App\Modules\User\Command\Mailer\EmailVerification\EmailVerificationCommand;
 use App\Modules\User\Command\Mailer\EmailVerification\EmailVerificationHandler;
 use App\Modules\User\Command\UserToken\Create\CreateUserTokenCommand;
 use App\Modules\User\Command\UserToken\Create\CreateUserTokenHandler;
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 use App\Modules\User\Entity\User\User;
 use App\Modules\User\Entity\User\UserRepository;
 use App\Modules\User\Entity\UserToken\Fields\Enums\UserTokenType;
@@ -86,6 +87,7 @@ final readonly class CreateUserHandler
             firstName: $this->normalizeName($command->firstName),
             email: $email,
             password: $this->passwordHasher->hash($password),
+            role: UserRole::from($command->role),
         );
 
         $this->userRepository->add($user);

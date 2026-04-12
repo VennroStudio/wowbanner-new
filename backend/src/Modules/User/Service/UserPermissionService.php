@@ -13,22 +13,53 @@ final readonly class UserPermissionService
     /**
      * @throws AccessDeniedException
      */
-    public function check(int $currentUserId, UserRole $currentUserRole, int $userId, UserPermission $action): void
+    public function checkOwner(int $currentUserId, int $userId, UserPermission $action): void
     {
-        if (!$this->hasAccess($currentUserId, $currentUserRole, $userId, $action)) {
+        if ($currentUserId !== $userId) {
+            throw new AccessDeniedException();
+        }
+
+        if (!\in_array($action, $this->getAllowedActionsForOwner(), true)) {
             throw new AccessDeniedException();
         }
     }
 
-    public function hasAccess(int $currentUserId, UserRole $currentUserRole, int $userId, UserPermission $action): bool
+    /**
+     * @throws AccessDeniedException
+     */
+    public function checkRole(UserRole $currentUserRole, UserPermission $action): void
     {
-        if ($currentUserId === $userId) {
-            return true;
+        if (!\in_array($currentUserRole, $this->getAllowedRolesForAction($action), true)) {
+            throw new AccessDeniedException();
         }
-
-        return \in_array($currentUserRole, $this->getAllowedRolesForAction($action), true);
     }
 
+    /**
+     * @throws AccessDeniedException
+     */
+    public function checkOwnerOrRole(int $currentUserId, int $userId, UserRole $currentUserRole, UserPermission $action): void
+    {
+        if ($currentUserId === $userId) {
+            $this->checkOwner($currentUserId, $userId, $action);
+            return;
+        }
+
+        $this->checkRole($currentUserRole, $action);
+    }
+
+    /**
+     * @return list<UserPermission>
+     */
+    private function getAllowedActionsForOwner(): array
+    {
+        return [
+            UserPermission::UPDATE,
+        ];
+    }
+
+    /**
+     * @return list<UserRole>
+     */
     private function getAllowedRolesForAction(UserPermission $action): array
     {
         $adminRoles = [

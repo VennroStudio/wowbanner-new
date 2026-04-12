@@ -83,37 +83,83 @@ enum {Module}Permission: string
 
 ### PermissionService
 
-**Ресурс с владельцем:** `$currentUserId === $resourceOwnerId` → доступ разрешён (свой ресурс). Иначе — проверка роли через `getAllowedRolesForAction()`.
+Добавляй только те методы, которые реально нужны для сущности:
 
-**Справочник без владельца** (у сущности нет поля владельца): проверка только по роли — упрощённая сигнатура `check(UserRole $currentUserRole, {Module}Permission $action)` (или общий `UserRole` из модуля User); в `match` перечисляются роли для `CREATE`, `UPDATE`, `DELETE`.
+- `checkOwner` — владелец может выполнять действия над своим ресурсом, но не все. Требует `getAllowedActionsForOwner()`.
+- `checkRole` — действие доступно только по роли, владельца у ресурса нет либо владение не даёт права. Требует `getAllowedRolesForAction()`.
+- `checkOwnerOrRole` — действие доступно владельцу ИЛИ привилегированной роли. Делегирует в `checkOwner` и `checkRole`, оба метода должны присутствовать.
+
+`getAllowedActionsForOwner()` — добавляется только если есть `checkOwner`.
+`getAllowedRolesForAction()` — добавляется только если есть `checkRole`.
 
 ```php
 final readonly class {Module}PermissionService
 {
-    /** @throws AccessDeniedException */
-    public function check(int $currentUserId, {Module}Role $currentUserRole, int $ownerId, {Module}Permission $action): void
+    /** 
+     * Владелец может выполнять только разрешённые действия над своим ресурсом.
+     * @throws AccessDeniedException 
+     */
+    public function checkOwner(int $currentUserId, int $userId, {Module}Permission $action): void
     {
-        if (!$this->hasAccess($currentUserId, $currentUserRole, $ownerId, $action)) {
+        if ($currentUserId !== $userId) {
+            throw new AccessDeniedException();
+        }
+
+        if (!\in_array($action, $this->getAllowedActionsForOwner(), true)) {
             throw new AccessDeniedException();
         }
     }
 
-    public function hasAccess(int $currentUserId, {Module}Role $currentUserRole, int $ownerId, {Module}Permission $action): bool
+    /** 
+     * Проверка только по роли — владелец не даёт доступа.
+     * @throws AccessDeniedException 
+     */
+    public function checkRole({Module}Role $currentUserRole, {Module}Permission $action): void
     {
-        if ($currentUserId === $ownerId) {
-            return true;
+        if (!\in_array($currentUserRole, $this->getAllowedRolesForAction($action), true)) {
+            throw new AccessDeniedException();
         }
-
-        return in_array($currentUserRole, $this->getAllowedRolesForAction($action), true);
     }
 
-    /** @return list<{Module}Role> */
+    /** 
+     * Владелец (с учётом разрешённых действий) ИЛИ привилегированная роль.
+     * @throws AccessDeniedException 
+     */
+    public function checkOwnerOrRole(int $currentUserId, int $userId, {Module}Role $currentUserRole, {Module}Permission $action): void
+    {
+        if ($currentUserId === $userId) {
+            $this->checkOwner($currentUserId, $userId, $action);
+            return;
+        }
+
+        $this->checkRole($currentUserRole, $action);
+    }
+
+    /** 
+     * Действия, которые владелец может выполнять над своим ресурсом.
+     * @return list<{Module}Permission> 
+     */
+    private function getAllowedActionsForOwner(): array
+    {
+        return [
+            {Module}Permission::UPDATE,
+        ];
+    }
+
+    /** 
+     * Роли, которым разрешено действие.
+     * @return list<{Module}Role> 
+     */
     private function getAllowedRolesForAction({Module}Permission $action): array
     {
+        $adminRoles = [
+            {Module}Role::ADMIN,
+        ];
+
         return match ($action) {
             {Module}Permission::CREATE,
             {Module}Permission::UPDATE,
-            {Module}Permission::DELETE => [{Module}Role::ADMIN],
+            {Module}Permission::DELETE => $adminRoles,
         };
     }
 }
@@ -124,11 +170,25 @@ final readonly class {Module}PermissionService
 `currentUserRole` в Command — `int` (приходит из HTTP). В Handler приводится через `{Module}Role::from()`:
 
 ```php
-$this->permissionService->check(
+// Только владелец (с проверкой разрешённого действия)
+$this->permissionService->checkOwner(
     currentUserId: $command->currentUserId,
-    currentUserRole: {Module}Role::from($command->currentUserRole),
-    ownerId: $command->entityId,
+    userId: $command->userId,
     action: {Module}Permission::UPDATE,
+);
+
+// Только роль
+$this->permissionService->checkRole(
+    currentUserRole: {Module}Role::from($command->currentUserRole),
+    action: {Module}Permission::CREATE,
+);
+
+// Владелец ИЛИ роль
+$this->permissionService->checkOwnerOrRole(
+    currentUserId: $command->currentUserId,
+    userId: $command->userId,
+    currentUserRole: {Module}Role::from($command->currentUserRole),
+    action: {Module}Permission::DELETE,
 );
 ```
 

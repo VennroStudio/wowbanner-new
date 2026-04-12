@@ -26,6 +26,7 @@ use Symfony\Component\Translation\Translator;
         content: new OA\JsonContent(
             required: ['lastName', 'firstName', 'email'],
             properties: [
+                new OA\Property(property: 'role', type: 'integer', example: 1),
                 new OA\Property(property: 'lastName', type: 'string', example: 'Иванов'),
                 new OA\Property(property: 'firstName', type: 'string', example: 'Иван'),
                 new OA\Property(property: 'email', type: 'string', example: 'vennro@gmail.com'),

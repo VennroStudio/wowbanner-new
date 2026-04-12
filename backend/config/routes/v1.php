@@ -35,6 +35,7 @@ use App\Http\Action\v1\Processing\ProcessingImage\CreateProcessingImageAction;
 use App\Http\Action\v1\Processing\ProcessingImage\DeleteProcessingImageAction;
 use App\Http\Action\v1\Processing\ProcessingImage\UpdateProcessingImageAction;
 use App\Http\Action\v1\Processing\UpdateProcessingAction;
+use App\Http\Action\v1\User\Admin\AdminUpdateUserAction;
 use App\Http\Action\v1\User\CreateUserAction;
 
 use App\Http\Action\v1\User\DeleteAvatarAction;
@@ -56,6 +57,10 @@ use Slim\Routing\RouteCollectorProxy;
 return static function (App $app): void {
     $app->group('/v1', new Group(static function (RouteCollectorProxy $group): void {
         $group->get('', OpenApiAction::class);
+
+        $group->group('/admin', new Group(static function (RouteCollectorProxy $group): void {
+            $group->patch('/users/update/{id}', AdminUpdateUserAction::class)->add(Authenticate::class);
+        }));
 
         $group->group('/users', new Group(static function (RouteCollectorProxy $group): void {
             $group->get('', GetUsersAction::class)->add(Authenticate::class);

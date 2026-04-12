@@ -39,10 +39,10 @@ final readonly class UploadAvatarHandler
     {
         $user = $this->userRepository->getById($command->userId);
 
-        $this->userPermissionService->check(
+        $this->userPermissionService->checkOwnerOrRole(
             currentUserId: $command->currentUserId,
-            currentUserRole: UserRole::from($command->currentUserRole),
             userId: $command->userId,
+            currentUserRole: UserRole::from($command->currentUserRole),
             action: UserPermission::UPDATE,
         );
 
