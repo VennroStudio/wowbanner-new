@@ -6,6 +6,7 @@ namespace App\Modules\User\Permission;
 
 enum UserPermission: string
 {
+    case CREATE = 'user.create';
     case UPDATE = 'user.update';
     case DELETE = 'user.delete';
 }

@@ -38,6 +38,8 @@ final readonly class CreateUserCommand
         public string $email,
         #[Assert\NotBlank]
         public int $role,
+        #[Assert\NotBlank]
+        public int $currentUserRole,
         public string $locale = 'en',
     ) {}
 }

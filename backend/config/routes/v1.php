@@ -64,7 +64,7 @@ return static function (App $app): void {
 
         $group->group('/users', new Group(static function (RouteCollectorProxy $group): void {
             $group->get('', GetUsersAction::class)->add(Authenticate::class);
-            $group->post('/create', CreateUserAction::class);
+            $group->post('/create', CreateUserAction::class)->add(Authenticate::class);
             $group->get('/roles', GetUserRolesAction::class)->add(Authenticate::class);
             $group->get('/{id}', GetUserByIdAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UserUpdateAction::class)->add(Authenticate::class);

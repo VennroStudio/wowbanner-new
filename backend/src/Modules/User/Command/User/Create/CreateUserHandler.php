@@ -15,10 +15,12 @@ use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 use App\Modules\User\Entity\User\User;
 use App\Modules\User\Entity\User\UserRepository;
 use App\Modules\User\Entity\UserToken\Fields\Enums\UserTokenType;
+use App\Modules\User\Permission\UserPermission;
 use App\Modules\User\Query\User\FindByEmail\UserFindByEmailFetcher;
 use App\Modules\User\Query\User\FindByEmail\UserFindByEmailQuery;
 use App\Modules\User\Service\PasswordHasherService;
 use App\Modules\User\Service\TokenHasherService;
+use App\Modules\User\Service\UserPermissionService;
 use DateMalformedStringException;
 use Doctrine\DBAL\Exception;
 use Random\RandomException;
@@ -38,6 +40,7 @@ final readonly class CreateUserHandler
         private TokenHasherService $tokenHasher,
         private FlusherInterface $flusher,
         private EmailVerificationHandler $emailVerificationHandler,
+        private UserPermissionService $userPermissionService,
     ) {}
 
     /**
@@ -51,6 +54,11 @@ final readonly class CreateUserHandler
      */
     public function handle(CreateUserCommand $command): void
     {
+        $this->userPermissionService->checkRole(
+            currentUserRole: UserRole::from($command->currentUserRole),
+            action: UserPermission::CREATE,
+        );
+
         $email = mb_strtolower($command->email);
 
         $this->assertEmailNotRegistered($email);
