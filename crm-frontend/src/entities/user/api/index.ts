@@ -10,4 +10,6 @@ export const userApi = {
 export const authApi = {
   refresh: () => 
     apiClient.post<{ data: { access_token: string } }>(API_ENDPOINTS.AUTH.REFRESH, {}),
+  logout: () => 
+    apiClient.post(API_ENDPOINTS.AUTH.LOGOUT),
 };

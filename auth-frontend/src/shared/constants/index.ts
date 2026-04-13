@@ -1,4 +1,5 @@
 export const API_URL = import.meta.env.VITE_API_URL;
+export const CRM_URL = import.meta.env.VITE_CRM_URL;
 
 export const ROUTES = {
   REGISTER: '/register',

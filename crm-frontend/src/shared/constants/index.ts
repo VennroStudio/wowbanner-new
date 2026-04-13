@@ -4,6 +4,7 @@ export const AUTH_URL = import.meta.env.VITE_AUTH_URL;
 export const API_ENDPOINTS = {
   AUTH: {
     REFRESH: '/auth/refresh',
+    LOGOUT: '/auth/logout',
   },
   USERS: {
     BY_ID: (id: string | number) => `/users/${id}`,

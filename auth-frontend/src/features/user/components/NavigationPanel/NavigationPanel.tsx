@@ -1,11 +1,9 @@
 import React from 'react';
 import { LayoutDashboard } from 'lucide-react';
 import { PanelActionButton } from '../PanelActionButton';
+import { CRM_URL } from '@/shared/constants';
 
 export const NavigationPanel: React.FC = () => {
-  const handleNavigation = (url: string) => {
-    window.location.href = url;
-  };
 
   return (
     <div className="mb-8 text-left">
@@ -22,7 +20,7 @@ export const NavigationPanel: React.FC = () => {
         <PanelActionButton
           icon={LayoutDashboard}
           label="CRM"
-          onClick={() => handleNavigation('https://crm.wowbanner.local')}
+          onClick={() => { window.location.href = CRM_URL; }}
         />
       </div>
     </div>
