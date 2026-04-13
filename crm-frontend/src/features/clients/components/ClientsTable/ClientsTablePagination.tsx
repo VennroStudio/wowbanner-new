@@ -1,14 +1,13 @@
-import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Props {
-    page: number;
-    totalPages: number;
-    total: number;
-    onPageChange: (page: number) => void;
+  page: number;
+  totalPages: number;
+  total: number;
+  onPageChange: (page: number) => void;
 }
 
-export const ClientsTablePagination: React.FC<Props> = ({ page, totalPages, total, onPageChange }) => (
+export const ClientsTablePagination = ({ page, totalPages, total, onPageChange }: Props) => (
     <div className="flex justify-center items-center gap-8 px-5 py-3.5 border-t border-slate-100 bg-white">
         <button
             disabled={page <= 1}

@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Client } from '@/entities/client';
 import { ClientTableRow } from './ClientTableRow';
 import { ClientTableSkeleton } from './ClientTableSkeleton';
@@ -18,17 +17,17 @@ interface Props {
   onDelete?: (client: Client) => void;
 }
 
-export const ClientsTable: React.FC<Props> = ({
-                                                clients,
-                                                total,
-                                                isLoading,
-                                                isError,
-                                                page,
-                                                perPage,
-                                                onPageChange,
-                                                onEdit,
-                                                onDelete,
-                                              }) => {
+export const ClientsTable = ({
+  clients,
+  total,
+  isLoading,
+  isError,
+  page,
+  perPage,
+  onPageChange,
+  onEdit,
+  onDelete,
+}: Props) => {
   const totalPages = total ? Math.ceil(total / perPage) : 1;
   const hasData = !isLoading && !isError && clients && clients.length > 0;
 

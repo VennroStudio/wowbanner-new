@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const ClientTableSkeleton = () => (
     <>
       {[...Array(8)].map((_, i) => (
