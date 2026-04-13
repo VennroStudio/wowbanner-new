@@ -3,7 +3,7 @@ import { AlertTriangle } from 'lucide-react';
 import type { Client } from '@/entities/client';
 import { useDeleteClientCommand } from '@/entities/client';
 import { getApiErrorMessage } from '@/shared/utils/axiosError';
-import { ModalDialog } from '../ModalDialog';
+import { ModalDialog } from '@/shared/ui/ModalDialog';
 
 interface DeleteClientModalProps {
   open: boolean;

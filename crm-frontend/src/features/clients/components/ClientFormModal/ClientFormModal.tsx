@@ -7,7 +7,7 @@ import {
   useClientQuery,
 } from '@/entities/client';
 import { getApiErrorMessage } from '@/shared/utils/axiosError';
-import { ModalDialog } from '../ModalDialog';
+import { ModalDialog } from '@/shared/ui/ModalDialog';
 import {
   clientFormSchema,
   getClientFormDefaultValues,

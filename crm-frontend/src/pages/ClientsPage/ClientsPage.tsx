@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useClientsQuery } from '@/entities/client';
 import type { Client } from '@/entities/client';
+import { AlertBanner } from '@/shared/ui';
 import {
   ClientsHeader,
   ClientsTable,
-  ClientsNoticeBanner,
   ClientFormModal,
   DeleteClientModal,
 } from '@/features/clients';
@@ -49,7 +49,11 @@ export const ClientsPage = () => {
 
   return (
     <div className="h-full flex flex-col p-6 w-full">
-      {notice && <ClientsNoticeBanner message={notice} />}
+      {notice && (
+        <AlertBanner variant="success" className="mb-4">
+          {notice}
+        </AlertBanner>
+      )}
 
       <ClientsHeader
         search={search}

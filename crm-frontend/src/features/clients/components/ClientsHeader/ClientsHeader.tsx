@@ -1,5 +1,5 @@
 import { Plus, Download } from 'lucide-react';
-import { ClientsSearchInput } from '../ClientsSearch';
+import { SearchField } from '@/shared/ui';
 
 interface ClientsHeaderProps {
   onAddClient?: () => void;
@@ -19,7 +19,7 @@ export const ClientsHeader = ({
 
     <div className="flex flex-wrap items-center gap-3">
       <div className="w-full min-w-[200px] sm:w-72">
-        <ClientsSearchInput value={search} onChange={onSearchChange} />
+        <SearchField value={search} onChange={onSearchChange} />
       </div>
 
       <button

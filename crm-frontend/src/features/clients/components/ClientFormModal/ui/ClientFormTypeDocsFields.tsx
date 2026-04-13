@@ -1,7 +1,7 @@
 import type { UseFormRegister, UseFormGetValues } from 'react-hook-form';
 import { CLIENT_TYPE_OPTIONS, DOCS_OPTIONS } from '@/shared/constants/clientDictionaries';
 import type { ClientFormValues } from '../lib/clientFormSchema';
-import { fieldSelectClass } from '../lib/formFieldClasses';
+import { fieldSelectClass } from '@/shared/ui';
 
 interface Props {
   register: UseFormRegister<ClientFormValues>;

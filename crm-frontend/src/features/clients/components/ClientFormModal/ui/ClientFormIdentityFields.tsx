@@ -1,6 +1,6 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 import type { ClientFormValues } from '../lib/clientFormSchema';
-import { fieldInputClass } from '../lib/formFieldClasses';
+import { fieldInputClass } from '@/shared/ui';
 
 interface Props {
   register: UseFormRegister<ClientFormValues>;

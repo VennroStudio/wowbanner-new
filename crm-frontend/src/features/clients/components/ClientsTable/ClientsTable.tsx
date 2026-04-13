@@ -3,7 +3,7 @@ import { ClientTableRow } from './ClientTableRow';
 import { ClientTableSkeleton } from './ClientTableSkeleton';
 import { ClientsTableEmpty } from './ClientsTableEmpty';
 import { ClientsTableError } from './ClientsTableError';
-import { ClientsTablePagination } from './ClientsTablePagination';
+import { PaginationBar } from '@/shared/ui';
 
 interface Props {
   clients: Client[] | undefined;
@@ -66,7 +66,7 @@ export const ClientsTable = ({
         </div>
 
         {hasData && (
-            <ClientsTablePagination
+            <PaginationBar
                 page={page}
                 totalPages={totalPages}
                 total={total ?? 0}

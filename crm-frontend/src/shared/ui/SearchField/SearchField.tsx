@@ -1,21 +1,21 @@
 import { Search } from 'lucide-react';
 
-interface ClientsSearchInputProps {
+export interface SearchFieldProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  /** Tailwind width и др., по умолчанию полная ширина родителя */
+  /** Доп. классы для input (например ширина) */
   inputClassName?: string;
 }
 
-const defaultPlaceholder = 'Поиск по имени, email, телефону...';
+const defaultPlaceholder = 'Поиск…';
 
-export const ClientsSearchInput = ({
+export const SearchField = ({
   value,
   onChange,
   placeholder = defaultPlaceholder,
   inputClassName = 'w-full',
-}: ClientsSearchInputProps) => (
+}: SearchFieldProps) => (
   <div className="relative">
     <Search
       size={14}
