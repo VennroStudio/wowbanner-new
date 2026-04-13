@@ -16,7 +16,7 @@ export type CreateClientBody = {
   firstName: string;
   middleName?: string;
   email?: string;
-  docs?: number;
+  docs: number;
   type: number;
   info?: string;
   phones?: CreateClientPhone[];

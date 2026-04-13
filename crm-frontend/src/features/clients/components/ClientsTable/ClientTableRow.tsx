@@ -82,7 +82,7 @@ export const ClientTableRow: React.FC<Props> = ({ client, onEdit, onDelete }) =>
 
             {/* Действия */}
             <td className="px-5 py-4 align-top">
-                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1.5">
                     <button
                         onClick={() => onEdit?.(client)}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600

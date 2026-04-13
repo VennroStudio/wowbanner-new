@@ -1,0 +1,1 @@
+export { DeleteClientModal } from './DeleteClientModal';
