@@ -1,12 +1,18 @@
 import { API_ENDPOINTS } from '@/shared/constants';
 import { apiClient } from '@/shared/api/client';
-import type { User } from '../model/types';
+import type { User, Role, RegisterDto } from '../model/types';
 import type { ApiResponse } from '@/shared/types';
 
 export type UpdateUserBody = {
   firstName: string;
   lastName: string;
+};
+
+export type AdminUpdateUserBody = {
+  firstName: string;
+  lastName: string;
   email: string;
+  role: number;
 };
 
 export type UsersListParams = {
@@ -31,7 +37,13 @@ export const userApi = {
   updateUser: (userId: number, data: UpdateUserBody) =>
     apiClient.patch(API_ENDPOINTS.USERS.UPDATE(userId), data),
 
-  register: (data: { firstName: string; lastName: string; email: string }) =>
+  adminUpdateUser: (userId: number, data: AdminUpdateUserBody) =>
+    apiClient.patch(API_ENDPOINTS.USERS.ADMIN_UPDATE(userId), data),
+
+  getRoles: () =>
+    apiClient.get<ApiResponse<Role[]>>(API_ENDPOINTS.USERS.ROLES),
+
+  register: (data: RegisterDto) =>
     apiClient.post(API_ENDPOINTS.USERS.CREATE, data),
 
   deleteUser: (userId: number) => apiClient.delete(API_ENDPOINTS.USERS.DELETE(userId)),

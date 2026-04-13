@@ -24,7 +24,9 @@ export const API_ENDPOINTS = {
     BASE: '/users',
     BY_ID: (id: string | number) => `/users/${id}`,
     UPDATE: (id: string | number) => `/users/update/${id}`,
+    ADMIN_UPDATE: (id: string | number) => `/admin/users/update/${id}`,
     DELETE: (id: string | number) => `/users/delete/${id}`,
     AVATAR: (id: string | number) => `/users/${id}/avatar`,
+    ROLES: '/users/roles',
   },
 } as const;

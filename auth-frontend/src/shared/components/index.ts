@@ -6,3 +6,4 @@ export { PageCard } from './PageCard';
 export { PageCardHeader } from './PageCardHeader';
 export type { PageCardHeaderProps } from './PageCardHeader';
 export { SmallModal } from './SmallModal';
+export { Select } from './Select';

@@ -1,5 +1,5 @@
-export type { User, RegisterDto } from './model/types';
-export type { UpdateUserBody, UsersListParams } from './api/api';
+export type { User, Role, RegisterDto } from './model/types';
+export type { UpdateUserBody, AdminUpdateUserBody, UsersListParams } from './api/api';
 export { userApi } from './api/api';
 export { authApi } from './api/authApi';
 export { useUserQuery } from './hooks/useUserQuery';
@@ -8,3 +8,5 @@ export { useUpdateUserCommand } from './hooks/useUpdateUserCommand';
 export { useDeleteUserCommand } from './hooks/useDeleteUserCommand';
 export { useUploadAvatarCommand } from './hooks/useUploadAvatarCommand';
 export { useDeleteAvatarCommand } from './hooks/useDeleteAvatarCommand';
+export { useRolesQuery } from './hooks/useRolesQuery';
+export { useAdminUpdateUserCommand } from './hooks/useAdminUpdateUserCommand';

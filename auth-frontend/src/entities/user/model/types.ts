@@ -9,8 +9,14 @@ export interface User {
   created_at: string;
 }
 
+export interface Role {
+  value: number;
+  label: string;
+}
+
 export interface RegisterDto {
   firstName: string;
   lastName: string;
   email: string;
+  role: number;
 }

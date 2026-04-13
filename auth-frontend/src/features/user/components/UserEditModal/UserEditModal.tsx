@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { User } from '@/entities/user';
-import { useUpdateUserCommand } from '@/entities/user';
-import { Button, Input, SmallModal } from '@/shared/components';
+import { useAdminUpdateUserCommand, useRolesQuery } from '@/entities/user';
+import { Button, Input, SmallModal, Select } from '@/shared/components';
 
 interface UserEditModalProps {
   user: User | null;
@@ -9,25 +9,29 @@ interface UserEditModalProps {
 }
 
 export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose }) => {
-  const updateUser = useUpdateUserCommand();
+  const updateUser = useAdminUpdateUserCommand();
+  const { data: roles = [], isLoading: isRolesLoading } = useRolesQuery();
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [role, setRole] = useState<number | ''>('');
 
   useEffect(() => {
     if (user) {
       setFirstName(user.first_name);
       setLastName(user.last_name);
       setEmail(user.email);
+      setRole(user.role?.id ?? '');
     }
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || role === '') return;
     await updateUser.mutateAsync({
       id: user.id,
-      data: { firstName, lastName, email },
+      data: { firstName, lastName, email, role: Number(role) },
     });
     onClose();
   };
@@ -64,6 +68,18 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, onClose }) =
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
+        />
+        <Select
+          label="Роль"
+          options={roles}
+          placeholder="Выберите роль..."
+          value={role}
+          onChange={(e) => {
+            const val = e.target.value;
+            setRole(val === '' ? '' : (isNaN(Number(val)) ? (val as any) : Number(val)));
+          }}
+          required
+          disabled={isRolesLoading}
         />
         <div className="flex gap-3 mt-2">
           <Button
