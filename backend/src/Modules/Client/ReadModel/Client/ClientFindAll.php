@@ -23,7 +23,6 @@ final readonly class ClientFindAll implements ClientModelInterface
         public Docs $docs,
         public ClientType $type,
         public string $createdAt,
-        public ?string $updatedAt,
     ) {}
 
     /**
@@ -36,7 +35,6 @@ final readonly class ClientFindAll implements ClientModelInterface
      *     docs: int,
      *     type: int,
      *     created_at: string,
-     *     updated_at: string|null
  * } $row
      */
     public static function fromRow(array $row): self
@@ -50,7 +48,6 @@ final readonly class ClientFindAll implements ClientModelInterface
             docs: Docs::from((int)$row['docs']),
             type: ClientType::from((int)$row['type']),
             createdAt: $row['created_at'],
-            updatedAt: $row['updated_at'],
         );
     }
 

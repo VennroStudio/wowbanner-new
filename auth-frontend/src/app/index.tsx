@@ -1,15 +1,15 @@
+import { BrowserRouter } from 'react-router-dom';
 import { AppRouter } from './router';
-import { RouterProvider } from '@/shared/lib/router/RouterProvider';
 import { QueryProvider } from '@/app/providers';
 import { AuthInit } from '@/app/providers';
 
 const App = () => (
   <QueryProvider>
-    <RouterProvider>
+    <BrowserRouter>
       <AuthInit>
         <AppRouter />
       </AuthInit>
-    </RouterProvider>
+    </BrowserRouter>
   </QueryProvider>
 );
 

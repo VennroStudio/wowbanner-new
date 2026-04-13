@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useConfirmEmailCommand } from '@/features/auth/hooks/useConfirmEmailCommand';
-import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
 import { Button, PageCard, PageCardHeader } from '@/shared/components';
 
@@ -10,7 +10,7 @@ interface VerifyEmailProps {
 }
 
 export const VerifyEmail: React.FC<VerifyEmailProps> = ({ token }) => {
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const confirmEmailMutation = useConfirmEmailCommand();
   const { mutate, isPending, isSuccess, isError } = confirmEmailMutation;
 

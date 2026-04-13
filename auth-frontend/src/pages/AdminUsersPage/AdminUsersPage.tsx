@@ -2,11 +2,11 @@ import React from 'react';
 import { Users } from 'lucide-react';
 import { AdminUsersTable } from '@/features/user/components/AdminUsersTable';
 import { BackButton, PageCard, PageCardHeader } from '@/shared/components';
+import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/shared/constants';
-import { useRouter } from '@/shared/hooks';
 
 export const AdminUsersPage: React.FC = () => {
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
 
   return (
     <PageCard>

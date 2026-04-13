@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Mail, UserIcon, CheckCircle2, UserRoundPlus } from 'lucide-react';
 import { useRolesQuery } from '@/entities/user';
+import { useNavigate } from 'react-router-dom';
 import { useRegisterCommand } from '@/features/auth/hooks/useRegisterCommand';
-import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
 import { Input, Button, Alert, PageCard, BackButton, PageCardHeader, Select } from '@/shared/components';
 import type { AxiosError } from 'axios';
@@ -21,7 +21,7 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export const RegisterForm: React.FC = () => {
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const registerMutation = useRegisterCommand();
   const { data: roles = [], isLoading: isRolesLoading } = useRolesQuery();
 

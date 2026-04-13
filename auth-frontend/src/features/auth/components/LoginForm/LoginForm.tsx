@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useLoginCommand } from '@/features/auth/hooks/useLoginCommand';
-import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
 import { Input, Button, Alert, PageCard, PageCardHeader } from '@/shared/components';
 import type { AxiosError } from 'axios';
@@ -20,7 +20,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm: React.FC = () => {
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const login = useLoginCommand();
 
   const {

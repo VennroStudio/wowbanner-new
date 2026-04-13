@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Lock, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useConfirmResetCommand } from '@/features/auth/hooks/useConfirmResetCommand';
-import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
 import { Input, Button, Alert, PageCard, PageCardHeader } from '@/shared/components';
 import type { AxiosError } from 'axios';
@@ -21,7 +21,7 @@ interface ResetPasswordFormProps {
 }
 
 export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token }) => {
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const resetMutation = useConfirmResetCommand();
 
   const {

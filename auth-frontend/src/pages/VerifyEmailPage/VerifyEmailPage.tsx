@@ -1,9 +1,8 @@
+import { useSearchParams } from 'react-router-dom';
 import { VerifyEmail } from '@/features/auth';
 
-interface VerifyEmailPageProps {
-  token: string | null;
-}
-
-export const VerifyEmailPage = ({ token }: VerifyEmailPageProps) => (
-  <VerifyEmail token={token} />
-);
+export const VerifyEmailPage = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+  return <VerifyEmail token={token} />;
+};

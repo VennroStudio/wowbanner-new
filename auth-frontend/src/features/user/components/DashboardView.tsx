@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LogOut, Camera } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { useRouter } from '@/shared/hooks';
 import { UserAvatar } from './UserAvatar';
 import { AdminPanel } from './AdminPanel/AdminPanel';
 import { NavigationPanel } from './NavigationPanel/NavigationPanel';
@@ -11,7 +11,7 @@ import { PageCard } from '@/shared/components';
 import { ROUTES } from '@/shared/constants';
 
 export const DashboardView: React.FC = () => {
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
   const [isAvatarManagerOpen, setIsAvatarManagerOpen] = useState(false);
 

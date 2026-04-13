@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useRequestResetCommand } from '@/features/auth/hooks/useRequestResetCommand';
-import { useRouter } from '@/shared/hooks';
 import { ROUTES } from '@/shared/constants';
 import { Input, Button, Alert, PageCard, BackButton, PageCardHeader } from '@/shared/components';
 import type { AxiosError } from 'axios';
@@ -17,7 +17,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 export const ForgotPasswordForm: React.FC = () => {
-  const { navigate } = useRouter();
+  const navigate = useNavigate();
   const forgotMutation = useRequestResetCommand();
 
   const {
