@@ -22,6 +22,67 @@ final readonly class ClientValidatorService
     ) {}
 
     /**
+     * Нормализует номера в 89XXXXXXXXX, убирает пустые строки.
+     *
+     * @param list<ClientPhoneItem> $phones
+     *
+     * @return list<ClientPhoneItem>
+     */
+    public function normalizePhones(array $phones): array
+    {
+        $out = [];
+        foreach ($phones as $item) {
+            $raw = trim($item->phone);
+            if ($raw === '') {
+                continue;
+            }
+            $out[] = new ClientPhoneItem(
+                id: $item->id,
+                type: $item->type,
+                phone: $this->normalizeRuMobile($raw),
+            );
+        }
+
+        return $out;
+    }
+
+    private function normalizeRuMobile(string $raw): string
+    {
+        $digits = preg_replace('/\D+/', '', $raw) ?? '';
+        if ($digits === '') {
+            throw new DomainExceptionModule(
+                module: 'client',
+                message: 'error.phone_invalid_format',
+                code: 7,
+            );
+        }
+
+        if (str_starts_with($digits, '8')) {
+            $normalized = substr($digits, 0, 11);
+        } elseif (str_starts_with($digits, '7') && strlen($digits) >= 2 && $digits[1] === '9') {
+            $normalized = '8' . substr($digits, 1, 10);
+        } elseif (str_starts_with($digits, '9')) {
+            $normalized = '8' . substr($digits, 0, 10);
+        } else {
+            throw new DomainExceptionModule(
+                module: 'client',
+                message: 'error.phone_invalid_format',
+                code: 7,
+            );
+        }
+
+        if (!preg_match('/^89\d{9}$/', $normalized)) {
+            throw new DomainExceptionModule(
+                module: 'client',
+                message: 'error.phone_invalid_format',
+                code: 7,
+            );
+        }
+
+        return $normalized;
+    }
+
+    /**
      * @param list<ClientPhoneItem> $phones
      * @param list<ClientCompanyItem> $companies
      * @throws Exception

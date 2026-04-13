@@ -8,5 +8,6 @@ return [
     'error.client_phone_not_found'          => 'Client phone not found.',
     'error.email_already_taken'             => 'This email is already taken.',
     'error.phone_already_taken'             => 'This phone number is already taken.',
+    'error.phone_invalid_format'            => 'Invalid mobile phone number format.',
     'error.legal_client_must_have_company' => 'Legal clients must have at least one company linked.',
 ];

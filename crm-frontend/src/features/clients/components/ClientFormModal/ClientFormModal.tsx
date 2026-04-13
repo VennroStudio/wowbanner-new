@@ -158,6 +158,8 @@ export const ClientFormModal = ({
             <ClientPhonesEditor
               phoneFields={phoneFields}
               register={register}
+              control={control}
+              errors={errors}
               appendPhone={appendPhone}
               removePhone={removePhone}
             />

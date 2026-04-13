@@ -35,10 +35,12 @@ final readonly class UpdateClientHandler
 
         $client = $this->repository->getById($command->id);
 
+        $phones = $this->validator->normalizePhones($command->phones);
+
         $this->validator->validate(
             email: $command->email,
             type: $command->type,
-            phones: $command->phones,
+            phones: $phones,
             companies: $command->companies,
             clientId: $client->id,
         );
@@ -53,7 +55,7 @@ final readonly class UpdateClientHandler
             info: $command->info,
         );
 
-        $this->phoneSyncer->sync($client->id, $command->phones);
+        $this->phoneSyncer->sync($client->id, $phones);
         $this->companySyncer->sync($client->id, $command->companies);
 
         $this->flusher->flush();

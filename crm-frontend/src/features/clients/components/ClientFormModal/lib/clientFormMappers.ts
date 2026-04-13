@@ -1,5 +1,6 @@
 import type { Client } from '@/entities/client';
 import type { CreateClientBody, UpdateClientBody } from '@/entities/client';
+import { digitsOnly, parseDigitsToStorage } from '@/shared/lib/ruMobilePhone';
 import type { ClientFormValues } from './clientFormSchema';
 
 export function mapClientToFormValues(client: Client): ClientFormValues {
@@ -16,7 +17,7 @@ export function mapClientToFormValues(client: Client): ClientFormValues {
         ? client.phones.map((p) => ({
             id: p.id,
             type: p.type.id,
-            phone: p.phone,
+            phone: p.phone ? parseDigitsToStorage(digitsOnly(p.phone)) : '',
           }))
         : [{ type: 1, phone: '' }],
     companies: client.companies.map((c) => ({
@@ -28,8 +29,8 @@ export function mapClientToFormValues(client: Client): ClientFormValues {
 
 export function buildCreateClientBody(values: ClientFormValues): CreateClientBody {
   const phones = values.phones
-    .filter((p) => p.phone.trim())
-    .map(({ type, phone }) => ({ type, phone: phone.trim() }));
+    .filter((p) => digitsOnly(p.phone))
+    .map(({ type, phone }) => ({ type, phone: digitsOnly(phone) }));
   const companies =
     values.type === 2
       ? values.companies.filter((c) => c.name.trim()).map(({ name }) => ({ name: name.trim() }))
@@ -50,9 +51,9 @@ export function buildCreateClientBody(values: ClientFormValues): CreateClientBod
 
 export function buildUpdateClientBody(values: ClientFormValues): UpdateClientBody {
   const phones = values.phones
-    .filter((p) => p.phone.trim())
+    .filter((p) => digitsOnly(p.phone))
     .map((p) => {
-      const row = { type: p.type, phone: p.phone.trim() };
+      const row = { type: p.type, phone: digitsOnly(p.phone) };
       return p.id != null ? { id: p.id, ...row } : row;
     });
   const companies =

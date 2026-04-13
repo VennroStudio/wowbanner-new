@@ -39,10 +39,12 @@ final readonly class CreateClientHandler
             action: ClientPermission::CREATE,
         );
 
+        $phones = $this->validator->normalizePhones($command->phones);
+
         $this->validator->validate(
             email: $command->email,
             type: $command->type,
-            phones: $command->phones,
+            phones: $phones,
             companies: $command->companies,
         );
 
@@ -60,7 +62,7 @@ final readonly class CreateClientHandler
 
         $this->flusher->flush();
 
-        $this->processPhones($client, $command->phones);
+        $this->processPhones($client, $phones);
         $this->processCompanies($client, $command->companies);
 
         $this->flusher->flush();

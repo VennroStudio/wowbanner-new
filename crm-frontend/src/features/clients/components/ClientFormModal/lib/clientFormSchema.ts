@@ -1,10 +1,23 @@
 import * as z from 'zod';
+import { digitsOnly, isValidRuMobileStorage } from '@/shared/lib/ruMobilePhone';
 
-const phoneRowSchema = z.object({
-  id: z.number().optional(),
-  type: z.number(),
-  phone: z.string(),
-});
+const phoneRowSchema = z
+  .object({
+    id: z.number().optional(),
+    type: z.number(),
+    phone: z.string(),
+  })
+  .superRefine((row, ctx) => {
+    const d = digitsOnly(row.phone);
+    if (!d) return;
+    if (!isValidRuMobileStorage(d)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Введите полный номер (10 цифр после +7)',
+        path: ['phone'],
+      });
+    }
+  });
 
 const companyRowSchema = z.object({
   id: z.number().optional(),

@@ -1,11 +1,16 @@
 import { Plus, Trash2 } from 'lucide-react';
-import type { FieldArrayWithId, UseFormRegister } from 'react-hook-form';
+import { Controller, type Control, type FieldErrors, type UseFormRegister } from 'react-hook-form';
+import type { FieldArrayWithId } from 'react-hook-form';
 import { PHONE_TYPE_OPTIONS } from '@/shared/constants/clientDictionaries';
+import { PhoneInputRu } from '@/shared/ui/PhoneInputRu';
+import { fieldInputClass } from '@/shared/ui';
 import type { ClientFormValues } from '../lib/clientFormSchema';
 
 interface Props {
   phoneFields: FieldArrayWithId<ClientFormValues, 'phones', 'fieldId'>[];
   register: UseFormRegister<ClientFormValues>;
+  control: Control<ClientFormValues>;
+  errors: FieldErrors<ClientFormValues>;
   appendPhone: (v: { type: number; phone: string }) => void;
   removePhone: (index: number) => void;
 }
@@ -13,6 +18,8 @@ interface Props {
 export const ClientPhonesEditor = ({
   phoneFields,
   register,
+  control,
+  errors,
   appendPhone,
   removePhone,
 }: Props) => (
@@ -40,10 +47,27 @@ export const ClientPhonesEditor = ({
               </option>
             ))}
           </select>
-          <input
-            {...register(`phones.${index}.phone`)}
-            placeholder="+7…"
-            className="flex-1 min-w-[140px] px-3 py-1.5 text-sm border border-slate-200 rounded-lg"
+          <Controller
+            name={`phones.${index}.phone`}
+            control={control}
+            render={({ field }) => (
+              <div className="flex-1 min-w-[140px]">
+                <PhoneInputRu
+                  ref={field.ref}
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  aria-invalid={errors.phones?.[index]?.phone ? true : undefined}
+                  className={`${fieldInputClass} py-1.5`}
+                />
+                {errors.phones?.[index]?.phone?.message && (
+                  <p className="text-xs text-red-600 mt-0.5">
+                    {String(errors.phones[index]?.phone?.message)}
+                  </p>
+                )}
+              </div>
+            )}
           />
           <button
             type="button"

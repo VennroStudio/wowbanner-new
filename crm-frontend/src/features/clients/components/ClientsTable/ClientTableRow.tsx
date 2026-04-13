@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import type { Client } from '@/entities/client';
+import { formatRuMobileDisplayFromStorage } from '@/shared/lib/ruMobilePhone';
 
 interface Props {
   client: Client;
@@ -67,7 +68,7 @@ export const ClientTableRow = ({ client, onEdit, onDelete }: Props) => {
           {client.phones && client.phones.length > 0 ? (
             client.phones.map((p) => (
               <span key={p.id} className="text-sm text-slate-600">
-                {p.phone}
+                {formatRuMobileDisplayFromStorage(p.phone)}
               </span>
             ))
           ) : (
