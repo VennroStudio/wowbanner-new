@@ -45,10 +45,10 @@ final readonly class ClientFindAllFetcher
             )->setParameter('search', '%' . $query->search . '%');
         }
 
-        $qb->groupBy('c.id');
-
         $countQb = clone $qb;
         $total = (int)$countQb->select('COUNT(DISTINCT c.id)')->executeQuery()->fetchOne();
+
+        $qb->groupBy('c.id');
 
         $rows = $qb->select(
             'c.id',
