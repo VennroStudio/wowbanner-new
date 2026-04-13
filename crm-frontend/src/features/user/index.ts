@@ -1,1 +1,2 @@
-export { UserDropdown } from './ui/UserDropdown';
+export { UserDropdown } from './components/UserDropdown';
+export { UserAvatar } from './components/UserAvatar';
