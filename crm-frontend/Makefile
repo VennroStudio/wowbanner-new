@@ -1,12 +1,12 @@
 -include .env.deploy
 export
 
-SERVICE = auth-app-wowbanner
+SERVICE = crm-app-wowbanner
 VERSION := $(IMAGE_TAG).$(BUILD_NUMBER)
 
 # ─── Setup ────────────────────────────────────────────────────────────────────
 create:
-	docker run --rm -v "$(CURDIR):/app" -w /app node:22-alpine npm create vite@latest . -- --template react-ts
+	docker run --rm -v "$(CURDIR):/app" -w /app node:22-alpine sh -c "npx --yes create-vite@latest temp-app --template react-ts && cp -r temp-app/* . && cp -r temp-app/.[!.]* . 2>/dev/null || true && rm -rf temp-app && rm -f package-lock.json"
 	docker run --rm -v "$(CURDIR):/app" -w /app node:22-alpine npm install -D tailwindcss @tailwindcss/vite
 	docker run --rm -v "$(CURDIR):/app" -w /app node:22-alpine npm install
 	docker run --rm -v "$(CURDIR):/app" -w /app node:22-alpine npm install react-hook-form zod @hookform/resolvers axios @tanstack/react-query zustand lucide-react

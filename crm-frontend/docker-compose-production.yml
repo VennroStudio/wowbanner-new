@@ -1,0 +1,14 @@
+name: wowbanner-new
+
+services:
+  crm-app-wowbanner:
+    image: ${REGISTRY}/crm-frontend-wowbanner:${IMAGE_TAG}
+    container_name: crm-frontend-wowbanner
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
