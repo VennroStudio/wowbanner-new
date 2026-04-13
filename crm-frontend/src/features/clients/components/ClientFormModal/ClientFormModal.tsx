@@ -32,7 +32,8 @@ interface ClientFormModalProps {
   mode: 'create' | 'edit';
   clientId?: number;
   onClose: () => void;
-  onSuccess?: () => void;
+  /** Вызывается после успешного create/update; режим не зависит от состояния страницы-родителя */
+  onSuccess?: (mode: 'create' | 'edit') => void;
 }
 
 export const ClientFormModal = ({
@@ -109,7 +110,7 @@ export const ClientFormModal = ({
       } else if (clientId != null) {
         await updateMutation.mutateAsync({ id: clientId, body: buildUpdateClientBody(values) });
       }
-      onSuccess?.();
+      onSuccess?.(mode);
       onClose();
     } catch (e) {
       setSubmitError(getApiErrorMessage(e));

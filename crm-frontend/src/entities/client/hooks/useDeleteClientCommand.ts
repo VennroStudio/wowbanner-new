@@ -6,8 +6,9 @@ export const useDeleteClientCommand = () => {
 
   return useMutation({
     mutationFn: (id: number | string) => clientApi.deleteClient(id),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client', id] });
     },
   });
 };

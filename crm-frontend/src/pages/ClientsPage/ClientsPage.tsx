@@ -85,8 +85,8 @@ export const ClientsPage = () => {
         mode={editClientId != null ? 'edit' : 'create'}
         clientId={editClientId ?? undefined}
         onClose={closeForm}
-        onSuccess={() =>
-          setNotice(editClientId != null ? 'Клиент сохранён' : 'Клиент создан')
+        onSuccess={(mode) =>
+          setNotice(mode === 'edit' ? 'Клиент сохранён' : 'Клиент создан')
         }
       />
 
