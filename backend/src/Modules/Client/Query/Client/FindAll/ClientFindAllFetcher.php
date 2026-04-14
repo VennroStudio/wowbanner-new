@@ -34,13 +34,15 @@ final readonly class ClientFindAllFetcher
         $this->phoneFetcher->joinForFilter($qb, 'c');
 
         if ($query->search !== null && $query->search !== '') {
+            $phoneAlias = ClientPhoneFindByClientIdsFetcher::ALIAS;
+            $companyAlias = ClientCompanyFindByClientIdsFetcher::ALIAS;
             $qb->andWhere(
                 $qb->expr()->or(
-                    'c.last_name ILIKE :search',
-                    'c.first_name ILIKE :search',
-                    'c.email ILIKE :search',
-                    ClientPhoneFindByClientIdsFetcher::ALIAS . '.phone ILIKE :search',
-                    ClientCompanyFindByClientIdsFetcher::ALIAS . '.company_name ILIKE :search'
+                    'LOWER(c.last_name) LIKE LOWER(:search)',
+                    'LOWER(c.first_name) LIKE LOWER(:search)',
+                    'LOWER(c.email) LIKE LOWER(:search)',
+                    "LOWER({$phoneAlias}.phone) LIKE LOWER(:search)",
+                    "LOWER({$companyAlias}.company_name) LIKE LOWER(:search)"
                 )
             )->setParameter('search', '%' . $query->search . '%');
         }

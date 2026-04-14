@@ -27,7 +27,7 @@ final readonly class ProcessingFindAllFetcher
             ->from(self::TABLE);
 
         if ($query->search !== null && $query->search !== '') {
-            $qb->andWhere('name ILIKE :search')
+            $qb->andWhere('LOWER(name) LIKE LOWER(:search)')
                 ->setParameter('search', '%' . $query->search . '%');
         }
 
