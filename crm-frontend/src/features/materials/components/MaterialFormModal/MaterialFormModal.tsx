@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useCreateMaterialCommand,
   useUpdateMaterialCommand,
   useMaterialQuery,
+  materialApi,
 } from '@/entities/material';
 import { getApiErrorMessage } from '@/shared/utils/axiosError';
 import { ModalDialog, RichTextEditor } from '@/shared/ui';
@@ -19,6 +21,7 @@ import {
   buildCreateMaterialBody,
   buildUpdateMaterialBody,
 } from './lib/materialFormMappers';
+import { getDirtyImageAltUpdates } from './lib/getDirtyImageAltUpdates';
 import { MaterialFormFooter } from './ui/MaterialFormFooter';
 import { MaterialImagesSection } from './ui/MaterialImagesSection';
 
@@ -37,6 +40,7 @@ export const MaterialFormModal = ({
   onClose,
   onSuccess,
 }: MaterialFormModalProps) => {
+  const queryClient = useQueryClient();
   const createMutation = useCreateMaterialCommand();
   const updateMutation = useUpdateMaterialCommand();
   const { data: materialResponse, isLoading: isLoadingMaterial } = useMaterialQuery(materialId ?? 0, {
@@ -53,6 +57,14 @@ export const MaterialFormModal = ({
     resolver: zodResolver(materialFormSchema),
     defaultValues: getMaterialFormDefaultValues(),
   });
+
+  const [altDrafts, setAltDrafts] = useState<Record<number, string>>({});
+  const [isSavingAlts, setIsSavingAlts] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setAltDrafts({});
+  }, [open, materialId]);
 
   useEffect(() => {
     if (!open) return;
@@ -80,12 +92,44 @@ export const MaterialFormModal = ({
     try {
       if (mode === 'create') {
         await createMutation.mutateAsync(buildCreateMaterialBody(values));
-      } else if (materialId != null) {
-        await updateMutation.mutateAsync({
-          id: materialId,
-          body: buildUpdateMaterialBody(values),
-        });
+        setAltDrafts({});
+        onSuccess?.(mode);
+        onClose();
+        return;
       }
+
+      if (materialId == null) return;
+
+      await updateMutation.mutateAsync({
+        id: materialId,
+        body: buildUpdateMaterialBody(values),
+      });
+
+      const images = materialResponse?.data?.images ?? [];
+      const dirty = getDirtyImageAltUpdates(images, altDrafts);
+
+      if (dirty.length > 0) {
+        setIsSavingAlts(true);
+        try {
+          await Promise.all(
+            dirty.map(({ imageId, alt }) => materialApi.updateImageAlt(imageId, alt)),
+          );
+        } catch (e) {
+          setSubmitError(
+            `Материал сохранён, но подписи к изображениям не обновились: ${getApiErrorMessage(e)}`,
+          );
+          await queryClient.invalidateQueries({ queryKey: ['material', materialId] });
+          await queryClient.invalidateQueries({ queryKey: ['materials'] });
+          setAltDrafts({});
+          return;
+        } finally {
+          setIsSavingAlts(false);
+        }
+        await queryClient.invalidateQueries({ queryKey: ['material', materialId] });
+        await queryClient.invalidateQueries({ queryKey: ['materials'] });
+      }
+
+      setAltDrafts({});
       onSuccess?.(mode);
       onClose();
     } catch (e) {
@@ -93,7 +137,8 @@ export const MaterialFormModal = ({
     }
   };
 
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isPending =
+    createMutation.isPending || updateMutation.isPending || isSavingAlts;
   const showLoader = mode === 'edit' && isLoadingMaterial;
   const title = mode === 'create' ? 'Новый материал' : 'Редактирование материала';
   const material = materialResponse?.data;
@@ -127,6 +172,7 @@ export const MaterialFormModal = ({
                 className={fieldInputClass}
                 autoComplete="off"
                 autoFocus
+                disabled={isPending}
               />
               {errors.name?.message && (
                 <p className="text-xs text-red-600 mt-1">{String(errors.name.message)}</p>
@@ -153,7 +199,12 @@ export const MaterialFormModal = ({
             </div>
 
             {mode === 'edit' && materialId != null && material && (
-              <MaterialImagesSection materialId={materialId} images={material.images ?? []} />
+              <MaterialImagesSection
+                materialId={materialId}
+                images={material.images ?? []}
+                altDrafts={altDrafts}
+                setAltDrafts={setAltDrafts}
+              />
             )}
           </div>
 

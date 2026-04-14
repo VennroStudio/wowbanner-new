@@ -1,26 +1,27 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { ImagePlus, Trash2 } from 'lucide-react';
 import type { MaterialImage } from '@/entities/material';
-import {
-  useUploadMaterialImagesCommand,
-  useUpdateMaterialImageAltCommand,
-  useDeleteMaterialImageCommand,
-} from '@/entities/material';
-import { fieldInputClass } from '@/shared/ui';
+import { useUploadMaterialImagesCommand, useDeleteMaterialImageCommand } from '@/entities/material';
 import { getApiErrorMessage } from '@/shared/utils/axiosError';
+import { ImageAltTextInput } from './ImageAltTextInput';
 
 interface Props {
   materialId: number;
   images: MaterialImage[];
+  altDrafts: Record<number, string>;
+  setAltDrafts: Dispatch<SetStateAction<Record<number, string>>>;
 }
 
-export const MaterialImagesSection = ({ materialId, images }: Props) => {
+export const MaterialImagesSection = ({
+  materialId,
+  images,
+  altDrafts,
+  setAltDrafts,
+}: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadMutation = useUploadMaterialImagesCommand();
-  const updateAltMutation = useUpdateMaterialImageAltCommand();
   const deleteMutation = useDeleteMaterialImageCommand();
   const [error, setError] = useState<string | null>(null);
-  const [altDrafts, setAltDrafts] = useState<Record<number, string>>({});
 
   const getAlt = (img: MaterialImage) =>
     altDrafts[img.id] !== undefined ? altDrafts[img.id] : (img.alt ?? '');
@@ -36,22 +37,6 @@ export const MaterialImagesSection = ({ materialId, images }: Props) => {
         imageAlts: list.map(() => ''),
       });
       if (fileInputRef.current) fileInputRef.current.value = '';
-    } catch (e) {
-      setError(getApiErrorMessage(e));
-    }
-  };
-
-  const saveAlt = async (imageId: number) => {
-    const img = images.find((i) => i.id === imageId);
-    const alt =
-      altDrafts[imageId] !== undefined ? altDrafts[imageId] : (img?.alt ?? '');
-    setError(null);
-    try {
-      await updateAltMutation.mutateAsync({
-        imageId,
-        alt,
-        materialId,
-      });
     } catch (e) {
       setError(getApiErrorMessage(e));
     }
@@ -116,23 +101,10 @@ export const MaterialImagesSection = ({ materialId, images }: Props) => {
               </a>
               <div className="flex-1 min-w-0 space-y-2">
                 <label className="block text-[11px] font-medium text-slate-500">Подпись (alt)</label>
-                <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="text"
-                    value={getAlt(img)}
-                    onChange={(e) => setAltDrafts((d) => ({ ...d, [img.id]: e.target.value }))}
-                    className={`${fieldInputClass} flex-1 min-w-[120px] text-sm py-1.5`}
-                    placeholder="Описание для доступности"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => void saveAlt(img.id)}
-                    disabled={updateAltMutation.isPending}
-                    className="px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-100"
-                  >
-                    Сохранить подпись
-                  </button>
-                </div>
+                <ImageAltTextInput
+                  value={getAlt(img)}
+                  onValueChange={(v) => setAltDrafts((d) => ({ ...d, [img.id]: v }))}
+                />
               </div>
               <button
                 type="button"
