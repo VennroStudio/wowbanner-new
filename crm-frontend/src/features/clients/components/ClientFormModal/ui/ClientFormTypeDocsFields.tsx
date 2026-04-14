@@ -1,5 +1,8 @@
 import type { UseFormRegister, UseFormGetValues } from 'react-hook-form';
-import { CLIENT_TYPE_OPTIONS, DOCS_OPTIONS } from '@/shared/constants/clientDictionaries';
+import {
+  useClientDocsTypesQuery,
+  useClientTypesQuery,
+} from '@/entities/client';
 import type { ClientFormValues } from '../lib/clientFormSchema';
 import { fieldSelectClass } from '@/shared/ui';
 
@@ -16,6 +19,8 @@ export const ClientFormTypeDocsFields = ({
   appendCompany,
   replaceCompanies,
 }: Props) => {
+  const { data: clientTypes = [], isLoading: isTypesLoading } = useClientTypesQuery();
+  const { data: docsTypes = [], isLoading: isDocsLoading } = useClientDocsTypesQuery();
   const { onChange: typeOnChange, ...typeRest } = register('type', { valueAsNumber: true });
 
   return (
@@ -35,8 +40,9 @@ export const ClientFormTypeDocsFields = ({
             }
           }}
           className={fieldSelectClass}
+          disabled={isTypesLoading}
         >
-          {CLIENT_TYPE_OPTIONS.map((o) => (
+          {clientTypes.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
@@ -45,8 +51,12 @@ export const ClientFormTypeDocsFields = ({
       </div>
       <div>
         <label className="block text-xs font-medium text-slate-500 mb-1">Документы *</label>
-        <select {...register('docs', { valueAsNumber: true })} className={fieldSelectClass}>
-          {DOCS_OPTIONS.map((o) => (
+        <select
+          {...register('docs', { valueAsNumber: true })}
+          className={fieldSelectClass}
+          disabled={isDocsLoading}
+        >
+          {docsTypes.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>

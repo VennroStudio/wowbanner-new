@@ -20,5 +20,8 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string | number) => `/clients/${id}`,
     UPDATE: (id: string | number) => `/clients/update/${id}`,
     DELETE: (id: string | number) => `/clients/delete/${id}`,
+    TYPES: '/clients/types',
+    DOCS_TYPES: '/clients/docs-types',
+    PHONE_TYPES: '/clients/phone-types',
   },
 } as const;

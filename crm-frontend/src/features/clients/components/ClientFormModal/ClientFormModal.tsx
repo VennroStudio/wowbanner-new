@@ -5,6 +5,9 @@ import {
   useCreateClientCommand,
   useUpdateClientCommand,
   useClientQuery,
+  useClientTypesQuery,
+  useClientDocsTypesQuery,
+  useClientPhoneTypesQuery,
 } from '@/entities/client';
 import { getApiErrorMessage } from '@/shared/utils/axiosError';
 import { ModalDialog } from '@/shared/ui/ModalDialog';
@@ -49,6 +52,19 @@ export const ClientFormModal = ({
     enabled: open && mode === 'edit' && clientId != null && clientId > 0,
   });
 
+  const { isLoading: isLoadingClientTypes } = useClientTypesQuery({
+    enabled: open,
+  });
+  const { isLoading: isLoadingClientDocsTypes } = useClientDocsTypesQuery({
+    enabled: open,
+  });
+  const { isLoading: isLoadingClientPhoneTypes } = useClientPhoneTypesQuery({
+    enabled: open,
+  });
+
+  const isDictsLoading =
+    isLoadingClientTypes || isLoadingClientDocsTypes || isLoadingClientPhoneTypes;
+
   const {
     register,
     control,
@@ -91,10 +107,9 @@ export const ClientFormModal = ({
   useEffect(() => {
     if (!open || mode !== 'edit') return;
     const inner = clientResponse?.data;
-    if (inner) {
-      reset(mapClientToFormValues(inner));
-    }
-  }, [open, mode, clientResponse, reset]);
+    if (!inner || isDictsLoading) return;
+    reset(mapClientToFormValues(inner));
+  }, [open, mode, clientResponse, reset, isDictsLoading]);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -118,7 +133,7 @@ export const ClientFormModal = ({
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
-  const showLoader = mode === 'edit' && isLoadingClient;
+  const showLoader = mode === 'edit' && (isLoadingClient || isDictsLoading);
 
   const title = mode === 'create' ? 'Новый клиент' : 'Редактирование клиента';
 

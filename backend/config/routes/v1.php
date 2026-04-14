@@ -12,6 +12,9 @@ use App\Http\Action\v1\Auth\PasswordResetAction;
 use App\Http\Action\v1\Auth\PasswordResetConfirmAction;
 use App\Http\Action\v1\Auth\RefreshTokenAction;
 use App\Http\Action\v1\Client\CreateClientAction;
+use App\Http\Action\v1\Client\GetClientDocsTypesAction;
+use App\Http\Action\v1\Client\GetClientPhoneTypesAction;
+use App\Http\Action\v1\Client\GetClientTypesAction;
 use App\Http\Action\v1\Material\CreateMaterialAction;
 use App\Http\Action\v1\Material\DeleteMaterialAction;
 use App\Http\Action\v1\Material\GetMaterialByIdAction;
@@ -110,6 +113,9 @@ return static function (App $app): void {
 
         $group->group('/clients', new Group(static function (RouteCollectorProxy $group): void {
             $group->get('', GetClientsAction::class)->add(Authenticate::class);
+            $group->get('/types', GetClientTypesAction::class)->add(Authenticate::class);
+            $group->get('/docs-types', GetClientDocsTypesAction::class)->add(Authenticate::class);
+            $group->get('/phone-types', GetClientPhoneTypesAction::class)->add(Authenticate::class);
             $group->post('/create', CreateClientAction::class)->add(Authenticate::class);
             $group->get('/{id}', GetClientByIdAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UpdateClientAction::class)->add(Authenticate::class);

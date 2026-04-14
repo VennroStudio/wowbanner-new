@@ -22,8 +22,6 @@ final readonly class ClientValidatorService
     ) {}
 
     /**
-     * Нормализует номера в 89XXXXXXXXX, убирает пустые строки.
-     *
      * @param list<ClientPhoneItem> $phones
      *
      * @return list<ClientPhoneItem>

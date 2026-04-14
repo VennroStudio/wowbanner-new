@@ -1,6 +1,6 @@
 import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/constants';
-import type { Client, GetClientsParams, PaginatedResponse } from '../model/types';
+import type { Client, ClientEnumOption, GetClientsParams, PaginatedResponse } from '../model/types';
 
 export type CreateClientPhone = {
   type: number;
@@ -58,5 +58,20 @@ export const clientApi = {
   deleteClient: async (id: number | string) => {
     const { data } = await apiClient.delete<{ data: number }>(API_ENDPOINTS.CLIENTS.DELETE(id));
     return data;
+  },
+
+  getClientTypes: async () => {
+    const { data } = await apiClient.get<{ data: ClientEnumOption[] }>(API_ENDPOINTS.CLIENTS.TYPES);
+    return data.data;
+  },
+
+  getClientDocsTypes: async () => {
+    const { data } = await apiClient.get<{ data: ClientEnumOption[] }>(API_ENDPOINTS.CLIENTS.DOCS_TYPES);
+    return data.data;
+  },
+
+  getClientPhoneTypes: async () => {
+    const { data } = await apiClient.get<{ data: ClientEnumOption[] }>(API_ENDPOINTS.CLIENTS.PHONE_TYPES);
+    return data.data;
   },
 };

@@ -1,3 +1,9 @@
+/** Элемент справочника из enum (GET /clients/types и т.д.): { value, label } */
+export interface ClientEnumOption {
+  value: number;
+  label: string;
+}
+
 export interface DictItem {
   id: number;
   label: string;
