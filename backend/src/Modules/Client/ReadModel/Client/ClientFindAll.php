@@ -16,6 +16,7 @@ final readonly class ClientFindAll implements ClientModelInterface
 
     public function __construct(
         public int $id,
+        public ?string $oldFullName,
         public string $lastName,
         public string $firstName,
         public ?string $middleName,
@@ -28,6 +29,7 @@ final readonly class ClientFindAll implements ClientModelInterface
     /**
      * @param array{
      *     id: int,
+     *     old_full_name: string,
      *     last_name: string,
      *     first_name: string,
      *     middle_name: string|null,
@@ -41,6 +43,7 @@ final readonly class ClientFindAll implements ClientModelInterface
     {
         return new self(
             id: (int)$row['id'],
+            oldFullName: $row['old_full_name'],
             lastName: $row['last_name'],
             firstName: $row['first_name'],
             middleName: $row['middle_name'],
@@ -62,6 +65,7 @@ final readonly class ClientFindAll implements ClientModelInterface
     {
         return [
             'id'          => $this->id,
+            'oldFullName' => $this->oldFullName,
             'last_name'   => $this->lastName,
             'first_name'  => $this->firstName,
             'middle_name' => $this->middleName,

@@ -38,8 +38,10 @@ final readonly class ClientFindAllFetcher
             $companyAlias = ClientCompanyFindByClientIdsFetcher::ALIAS;
             $qb->andWhere(
                 $qb->expr()->or(
+                    'LOWER(c.old_full_name) LIKE LOWER(:search)',
                     'LOWER(c.last_name) LIKE LOWER(:search)',
                     'LOWER(c.first_name) LIKE LOWER(:search)',
+                    'LOWER(c.middle_name) LIKE LOWER(:search)',
                     'LOWER(c.email) LIKE LOWER(:search)',
                     "LOWER({$phoneAlias}.phone) LIKE LOWER(:search)",
                     "LOWER({$companyAlias}.company_name) LIKE LOWER(:search)"
@@ -54,6 +56,7 @@ final readonly class ClientFindAllFetcher
 
         $rows = $qb->select(
             'c.id',
+            'c.old_full_name',
             'c.last_name',
             'c.first_name',
             'c.middle_name',
