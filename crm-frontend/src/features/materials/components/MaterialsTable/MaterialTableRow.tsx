@@ -31,7 +31,7 @@ export const MaterialTableRow = ({ material, onEdit, onDelete }: Props) => {
 
       <td className="px-5 py-4 align-top min-w-0">
         {descriptionPreview ? (
-          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed break-words">
+          <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed break-words whitespace-pre-line">
             {descriptionPreview}
           </p>
         ) : (

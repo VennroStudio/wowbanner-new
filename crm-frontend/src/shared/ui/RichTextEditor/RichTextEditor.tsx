@@ -22,7 +22,7 @@ import {
   Undo2,
   Redo2,
 } from 'lucide-react';
-import './RichTextEditor.css';
+import './richTextEditor.css';
 
 export interface RichTextEditorProps {
   value: string;
