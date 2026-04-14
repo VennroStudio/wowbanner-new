@@ -30,7 +30,7 @@ export const ClientsPage = () => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
       setPage(1);
-    }, 300);
+    }, 800);
     return () => clearTimeout(timer);
   }, [search]);
 

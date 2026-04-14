@@ -10,6 +10,18 @@ export const useClientsQuery = (params?: GetClientsParams) => {
   return useQuery({
     queryKey: ['clients', { page, perPage, search }] as const,
     queryFn: () => clientApi.getClients({ page, perPage, search }),
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData, previousQuery) => {
+      if (!previousQuery) return undefined;
+
+      const prevParams = previousQuery.queryKey[1] as {
+        page: number;
+        perPage: number;
+        search: string;
+      };
+
+      if (prevParams.search !== search || prevParams.perPage !== perPage) return undefined;
+
+      return previousData;
+    },
   });
 };
