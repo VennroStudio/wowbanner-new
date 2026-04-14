@@ -6,6 +6,7 @@ export const ROUTES = {
   CLIENTS: '/clients',
   MATERIALS: '/materials',
   PROCESSINGS: '/processings',
+  PRINTINGS: '/printings',
 } as const;
 
 export const API_ENDPOINTS = {
@@ -46,5 +47,12 @@ export const API_ENDPOINTS = {
     IMAGES: (processingId: string | number) => `/processings/${processingId}/images`,
     IMAGE_UPDATE: (imageId: string | number) => `/processings/images/${imageId}`,
     IMAGE_DELETE: (imageId: string | number) => `/processings/images/${imageId}`,
+  },
+  PRINTINGS: {
+    LIST: '/printings',
+    CREATE: '/printings/create',
+    BY_ID: (id: string | number) => `/printings/${id}`,
+    UPDATE: (id: string | number) => `/printings/update/${id}`,
+    DELETE: (id: string | number) => `/printings/delete/${id}`,
   },
 } as const;

@@ -1,0 +1,1 @@
+export { PrintingsPage } from './PrintingsPage';

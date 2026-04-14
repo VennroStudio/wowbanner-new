@@ -4,6 +4,7 @@ import { HomePage } from '@/pages/HomePage';
 import { ClientsPage } from '@/pages/ClientsPage';
 import { MaterialsPage } from '@/pages/MaterialsPage';
 import { ProcessingsPage } from '@/pages/ProcessingsPage';
+import { PrintingsPage } from '@/pages/PrintingsPage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 
 export const AppRouter = () => (
@@ -12,6 +13,7 @@ export const AppRouter = () => (
     <Route path={ROUTES.CLIENTS} element={<ClientsPage />} />
     <Route path={ROUTES.MATERIALS} element={<MaterialsPage />} />
     <Route path={ROUTES.PROCESSINGS} element={<ProcessingsPage />} />
+    <Route path={ROUTES.PRINTINGS} element={<PrintingsPage />} />
     <Route path="*" element={<NotFoundPage />} />
   </Routes>
 );

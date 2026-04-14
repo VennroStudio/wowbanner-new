@@ -10,9 +10,9 @@ export const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const displayName = user?.first_name
-    ? `${user.first_name} ${user.last_name || ''}`.trim()
-    : (user?.email || 'Пользователь');
+  const displayName = user
+    ? `${user.first_name} ${user.last_name}`.trim()
+    : 'Пользователь';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,11 +43,7 @@ export const UserDropdown = () => {
         onClick={() => setIsOpen(!isOpen)}
       />
       {isOpen && (
-        <UserDropdownMenu
-          displayName={displayName}
-          email={user?.email}
-          onLogout={handleLogout}
-        />
+        <UserDropdownMenu role={user?.role.label ?? ''} onLogout={handleLogout} />
       )}
     </div>
   );

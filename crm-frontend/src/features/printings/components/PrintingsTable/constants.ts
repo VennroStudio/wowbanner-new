@@ -1,0 +1,1 @@
+export const PRINTINGS_TABLE_COLUMN_COUNT = 3;
