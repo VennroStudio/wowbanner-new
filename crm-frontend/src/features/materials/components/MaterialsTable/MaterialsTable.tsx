@@ -37,16 +37,16 @@ export const MaterialsTable = ({
         <table className="w-full text-left border-collapse table-fixed">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-5 py-3 w-[80px] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <th className="px-5 py-3 w-[72px] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 ID
               </th>
-              <th className="px-5 py-3 w-[32%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <th className="px-5 py-3 w-[22%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 Название
               </th>
-              <th className="px-5 py-3 w-[22%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                Превью
+              <th className="px-5 py-3 w-[32%] min-w-0 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                Описание
               </th>
-              <th className="px-5 py-3 w-[100px] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <th className="px-5 py-3 w-[20%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 Фото
               </th>
               <th className="px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">

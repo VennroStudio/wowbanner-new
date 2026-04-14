@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import type { Material } from '@/entities/material';
+import { htmlToPlainText } from '@/shared/lib/htmlToPlainText';
 
 interface Props {
   material: Material;
@@ -10,6 +11,7 @@ interface Props {
 export const MaterialTableRow = ({ material, onEdit, onDelete }: Props) => {
   const images = material.images ?? [];
   const preview = images.slice(0, 3);
+  const descriptionPreview = htmlToPlainText(material.description ?? '');
 
   return (
     <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors group">
@@ -21,12 +23,17 @@ export const MaterialTableRow = ({ material, onEdit, onDelete }: Props) => {
         <button
           type="button"
           onClick={() => onEdit?.(material)}
-          className="text-left w-full font-medium text-slate-900 text-sm leading-snug mb-1 group-hover:text-blue-600 transition-colors cursor-pointer"
+          className="text-left w-full font-medium text-slate-900 text-sm leading-snug group-hover:text-blue-600 transition-colors cursor-pointer"
         >
           {material.name}
         </button>
-        {material.description ? (
-          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{material.description}</p>
+      </td>
+
+      <td className="px-5 py-4 align-top min-w-0">
+        {descriptionPreview ? (
+          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed break-words">
+            {descriptionPreview}
+          </p>
         ) : (
           <p className="text-xs text-slate-300 italic">Нет описания</p>
         )}
@@ -55,10 +62,6 @@ export const MaterialTableRow = ({ material, onEdit, onDelete }: Props) => {
         ) : (
           <span className="text-slate-300 text-sm">—</span>
         )}
-      </td>
-
-      <td className="px-5 py-4 align-top text-sm text-slate-600">
-        {images.length === 0 ? '—' : `${images.length} шт.`}
       </td>
 
       <td className="px-5 py-4 align-top">

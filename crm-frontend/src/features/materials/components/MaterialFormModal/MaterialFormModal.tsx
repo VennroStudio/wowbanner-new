@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   useCreateMaterialCommand,
@@ -7,8 +7,8 @@ import {
   useMaterialQuery,
 } from '@/entities/material';
 import { getApiErrorMessage } from '@/shared/utils/axiosError';
-import { ModalDialog } from '@/shared/ui';
-import { fieldInputClass, fieldTextareaClass } from '@/shared/ui';
+import { ModalDialog, RichTextEditor } from '@/shared/ui';
+import { fieldInputClass } from '@/shared/ui';
 import {
   materialFormSchema,
   getMaterialFormDefaultValues,
@@ -45,6 +45,7 @@ export const MaterialFormModal = ({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -134,10 +135,17 @@ export const MaterialFormModal = ({
 
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1">Описание</label>
-              <textarea
-                {...register('description')}
-                rows={4}
-                className={fieldTextareaClass}
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder="Текст описания материала"
+                    disabled={isPending}
+                  />
+                )}
               />
               {errors.description?.message && (
                 <p className="text-xs text-red-600 mt-1">{String(errors.description.message)}</p>

@@ -122,6 +122,7 @@ help:
 	@echo ""
 	@echo "-NPM:"
 	@echo "  make install           - Установить зависимости"
+	@echo "  make node-install      - Установить зависимости локально"
 	@echo "  make npm-add PACK=     - Добавить пакет"
 	@echo "  make npm-remove PACK=  - Удалить пакет"
 	@echo "  make lint              - Проверка ESLint"

@@ -11,3 +11,6 @@ export type { AlertBannerVariant } from './AlertBanner';
 
 export { PaginationBar } from './PaginationBar';
 export type { PaginationBarProps } from './PaginationBar';
+
+export { RichTextEditor } from './RichTextEditor';
+export type { RichTextEditorProps } from './RichTextEditor';
