@@ -73,6 +73,7 @@ final class {Entity}FindAllQuery
 - Список: `ModelCountItemsResult<ReadModel>` — COUNT через клонирование QueryBuilder
 - Enum в условии — передавать как `$query->type->value`
 - Кеш — через `Cacher`; инвалидация в соответствующем Handler'е
+- **Поиск по подстроке (MySQL/MariaDB):** не использовать **`ILIKE`** (это PostgreSQL). Для регистронезависимого совпадения: **`LOWER(колонка) LIKE LOWER(:search)`** и параметр `'%' . $query->search . '%'`.
 
 ### Одна запись (nullable)
 
@@ -188,7 +189,7 @@ final readonly class {Entity}FindAllFetcher
             ->andWhere('deleted_at IS NULL');
 
         if ($query->search !== null && $query->search !== '') {
-            $qb->andWhere('name ILIKE :search')
+            $qb->andWhere('LOWER(name) LIKE LOWER(:search)')
                 ->setParameter('search', '%' . $query->search . '%');
         }
 
@@ -212,9 +213,16 @@ final readonly class {Entity}FindAllFetcher
             ->executeQuery()
             ->fetchAllAssociative();
 
+        /** @var list<{Entity}FindAll> $items */
+        $items = {Entity}FindAll::fromRows($rows);
+
+        return new ModelCountItemsResult(
+            items: $items,
+            count: $total,
         );
     }
 }
+```
 
 ---
 
@@ -255,11 +263,12 @@ $qb = $this->connection->createQueryBuilder()
 // Подключаем джоин
 $this->relatedFetcher->joinForFilter($qb, 'c');
 
-if ($query->search) {
+if ($query->search !== null && $query->search !== '') {
+    $relatedAlias = {RelatedEntity}Fetcher::ALIAS;
     $qb->andWhere(
         $qb->expr()->or(
-            'c.name ILIKE :search',
-            {RelatedEntity}Fetcher::ALIAS . '.{field} ILIKE :search'
+            'LOWER(c.name) LIKE LOWER(:search)',
+            "LOWER({$relatedAlias}.{field}) LIKE LOWER(:search)"
         )
     )->setParameter('search', '%' . $query->search . '%');
 }
@@ -269,5 +278,4 @@ $qb->groupBy('c.id');
 
 // Считаем общее количество уникальных записей
 $total = (int)$countQb->select('COUNT(DISTINCT c.id)')->executeQuery()->fetchOne();
-```
 ```
