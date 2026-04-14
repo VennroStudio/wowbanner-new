@@ -7,7 +7,7 @@ namespace App\Http\Action\v1\Processing\ProcessingImage;
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Response\JsonDataSuccessResponse;
-use App\Components\Http\Route\Route;
+use App\Components\Router\Route;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Processing\Command\ProcessingImage\Delete\DeleteProcessingImageCommand;

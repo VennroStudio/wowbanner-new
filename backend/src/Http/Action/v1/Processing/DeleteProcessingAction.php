@@ -7,7 +7,7 @@ namespace App\Http\Action\v1\Processing;
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Response\JsonDataSuccessResponse;
-use App\Components\Http\Route\Route;
+use App\Components\Router\Route;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Processing\Command\Processing\Delete\DeleteProcessingCommand;
@@ -28,10 +28,10 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
     parameters: [
         new OA\Parameter(
             name: 'id',
+            description: 'ID обработки',
             in: 'path',
             required: true,
-            schema: new OA\Schema(type: 'integer'),
-            description: 'ID обработки'
+            schema: new OA\Schema(type: 'integer')
         )
     ],
     responses: [

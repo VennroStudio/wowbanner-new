@@ -8,7 +8,7 @@ use App\Components\Exception\AccessDeniedException;
 use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Request\RequestFile;
 use App\Components\Http\Response\JsonDataSuccessResponse;
-use App\Components\Http\Route\Route;
+use App\Components\Router\Route;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Processing\Command\ProcessingImage\Create\CreateProcessingImageCommand;
@@ -75,7 +75,9 @@ final readonly class CreateProcessingImageAction implements RequestHandlerInterf
         private CreateProcessingImageHandler $handler,
     ) {}
 
-    /** @throws ExceptionInterface|RandomException|AccessDeniedException */
+    /**
+     * @throws ExceptionInterface|RandomException|AccessDeniedException
+     */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {

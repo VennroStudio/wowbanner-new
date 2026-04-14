@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Processing\Query\Processing\FindAll;
 
-use App\Components\Query\ModelCountItemsResult;
+use App\Components\ReadModel\ModelCountItemsResult;
 use App\Modules\Processing\ReadModel\Processing\ProcessingFindAll;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -34,7 +34,7 @@ final readonly class ProcessingFindAllFetcher
         $total = (int) (clone $qb)->select('COUNT(id)')->executeQuery()->fetchOne();
 
         $rows = $qb
-            ->select('id', 'name', 'type', 'price')
+            ->select('id', 'name', 'description', 'type', 'cost_price', 'price')
             ->orderBy('id', 'ASC')
             ->setFirstResult($query->getOffset())
             ->setMaxResults($query->perPage)

@@ -5,6 +5,7 @@ export const ROUTES = {
   HOME: '/',
   CLIENTS: '/clients',
   MATERIALS: '/materials',
+  PROCESSINGS: '/processings',
 } as const;
 
 export const API_ENDPOINTS = {
@@ -34,5 +35,16 @@ export const API_ENDPOINTS = {
     IMAGES: (materialId: string | number) => `/materials/${materialId}/images`,
     IMAGE_UPDATE: (imageId: string | number) => `/materials/images/${imageId}`,
     IMAGE_DELETE: (imageId: string | number) => `/materials/images/${imageId}`,
+  },
+  PROCESSINGS: {
+    LIST: '/processings',
+    CREATE: '/processings/create',
+    BY_ID: (id: string | number) => `/processings/${id}`,
+    UPDATE: (id: string | number) => `/processings/update/${id}`,
+    DELETE: (id: string | number) => `/processings/delete/${id}`,
+    TYPES: '/processings/types',
+    IMAGES: (processingId: string | number) => `/processings/${processingId}/images`,
+    IMAGE_UPDATE: (imageId: string | number) => `/processings/images/${imageId}`,
+    IMAGE_DELETE: (imageId: string | number) => `/processings/images/${imageId}`,
   },
 } as const;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Action\v1\Processing;
 
 use App\Components\Http\Response\JsonDataResponse;
-use App\Components\Http\Route\Route;
+use App\Components\Router\Route;
 use App\Http\Unifier\Processing\ProcessingUnifier;
 use App\Modules\Processing\Query\Processing\GetById\ProcessingGetByIdFetcher;
 use App\Modules\Processing\Query\Processing\GetById\ProcessingGetByIdQuery;
@@ -24,10 +24,10 @@ use Throwable;
     parameters: [
         new OA\Parameter(
             name: 'id',
+            description: 'ID обработки',
             in: 'path',
             required: true,
-            schema: new OA\Schema(type: 'integer'),
-            description: 'ID обработки'
+            schema: new OA\Schema(type: 'integer')
         )
     ],
     responses: [

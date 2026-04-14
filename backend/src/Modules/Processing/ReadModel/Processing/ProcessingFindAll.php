@@ -16,7 +16,9 @@ final readonly class ProcessingFindAll implements ProcessingModelInterface
     public function __construct(
         public int $id,
         public string $name,
+        public string $description,
         public ProcessingType $type,
+        public string $costPrice,
         public string $price,
     ) {}
 
@@ -24,7 +26,9 @@ final readonly class ProcessingFindAll implements ProcessingModelInterface
      * @param array{
      *     id: int,
      *     name: string,
+     *     description: string,
      *     type: int,
+     *     cost_price: string,
      *     price: string
      * } $row
      */
@@ -33,7 +37,9 @@ final readonly class ProcessingFindAll implements ProcessingModelInterface
         return new self(
             id: (int)$row['id'],
             name: $row['name'],
+            description: $row['description'],
             type: ProcessingType::from($row['type']),
+            costPrice: $row['cost_price'],
             price: $row['price'],
         );
     }
@@ -48,13 +54,15 @@ final readonly class ProcessingFindAll implements ProcessingModelInterface
     public function toArray(): array
     {
         return [
-            'id'    => $this->id,
-            'name'  => $this->name,
-            'type'  => [
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'description' => $this->description,
+            'type'        => [
                 'id'    => $this->type->value,
                 'label' => $this->type->getLabel(),
             ],
-            'price' => $this->price,
+            'cost_price'  => $this->costPrice,
+            'price'       => $this->price,
         ];
     }
 }

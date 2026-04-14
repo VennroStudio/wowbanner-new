@@ -1,0 +1,1 @@
+export const PROCESSINGS_TABLE_COLUMN_COUNT = 7;
