@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const ClientTableRow = ({ client, onEdit, onDelete }: Props) => {
-  const fullName = `${client.last_name} ${client.first_name} ${client.middle_name || ''}`.trim();
+    const fullName = `${client.last_name || ''} ${client.first_name || ''} ${client.middle_name || ''}`.trim() || client.old_full_name;
 
   return (
     <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors group">
@@ -21,18 +21,13 @@ export const ClientTableRow = ({ client, onEdit, onDelete }: Props) => {
         <button
           type="button"
           onClick={() => onEdit?.(client)}
-          className="text-left w-full font-medium text-slate-900 text-sm leading-snug mb-1.5 group-hover:text-blue-600 transition-colors cursor-pointer"
+          className="text-left w-full font-medium text-slate-900 text-sm leading-snug group-hover:text-blue-600 transition-colors cursor-pointer"
         >
           {fullName}
         </button>
-        <div className="text-xs text-slate-400 leading-relaxed">
-          {client.type.label}
-          {client.docs && (
-            <>
-              <span className="mx-1.5 text-slate-200">·</span>
-              {client.docs.label}
-            </>
-          )}
+        <div className="text-xs text-slate-400 leading-relaxed flex flex-col gap-0.5">
+          <span>{client.type.label}</span>
+          <span>{client.docs.label}</span>
         </div>
       </td>
 

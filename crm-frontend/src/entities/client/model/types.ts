@@ -22,6 +22,7 @@ export interface ClientCompany {
 
 export interface Client {
   id: number;
+  old_full_name: string | null;
   last_name: string;
   first_name: string;
   middle_name: string | null;

@@ -64,14 +64,14 @@ final readonly class ClientFindAll implements ClientModelInterface
     public function toArray(): array
     {
         return [
-            'id'          => $this->id,
-            'oldFullName' => $this->oldFullName,
-            'last_name'   => $this->lastName,
-            'first_name'  => $this->firstName,
-            'middle_name' => $this->middleName,
-            'email'       => $this->email,
-            'docs'        => ['id' => $this->docs->value, 'label' => $this->docs->getLabel()],
-            'type'        => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
+            'id'            => $this->id,
+            'old_full_name' => $this->oldFullName,
+            'last_name'     => $this->lastName,
+            'first_name'    => $this->firstName,
+            'middle_name'   => $this->middleName,
+            'email'         => $this->email,
+            'docs'          => ['id' => $this->docs->value, 'label' => $this->docs->getLabel()],
+            'type'          => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
         ];
     }
 }
