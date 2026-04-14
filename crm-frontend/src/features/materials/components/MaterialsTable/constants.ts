@@ -1,0 +1,1 @@
+export const MATERIALS_TABLE_COLUMN_COUNT = 5;

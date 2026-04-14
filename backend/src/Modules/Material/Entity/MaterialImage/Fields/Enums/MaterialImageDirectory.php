@@ -6,5 +6,5 @@ namespace App\Modules\Material\Entity\MaterialImage\Fields\Enums;
 
 enum MaterialImageDirectory: string
 {
-    case MATERIAL = '/materials/';
+    case MATERIAL = 'materials/';
 }

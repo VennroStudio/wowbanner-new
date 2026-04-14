@@ -1,0 +1,1 @@
+export { MaterialsHeader } from './MaterialsHeader';

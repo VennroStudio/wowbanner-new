@@ -1,7 +1,6 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
-import { Home, Users, Briefcase, BarChart2, Settings, MessageSquare } from 'lucide-react';
+import { Home, Users, Briefcase, BarChart2, Settings, MessageSquare, Layers } from 'lucide-react';
 import { ROUTES } from '@/shared/constants';
 
 interface SidebarProps {
@@ -15,6 +14,7 @@ type MenuItem = MenuLink | MenuDisabled;
 const menuItems: MenuItem[] = [
   { to: ROUTES.HOME, icon: Home, label: 'Главная' },
   { to: ROUTES.CLIENTS, icon: Users, label: 'Клиенты' },
+  { to: ROUTES.MATERIALS, icon: Layers, label: 'Материалы' },
   { disabled: true, icon: Briefcase, label: 'Заказы' },
   { disabled: true, icon: BarChart2, label: 'Аналитика' },
   { disabled: true, icon: MessageSquare, label: 'Чаты' },

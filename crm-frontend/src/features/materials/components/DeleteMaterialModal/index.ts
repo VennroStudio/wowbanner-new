@@ -1,0 +1,1 @@
+export { DeleteMaterialModal } from './DeleteMaterialModal';

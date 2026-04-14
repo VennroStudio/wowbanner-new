@@ -6,5 +6,5 @@ namespace App\Modules\Processing\Entity\ProcessingImage\Fields\Enums;
 
 enum ProcessingImageDirectory: string
 {
-    case PROCESSING = '/processing/';
+    case PROCESSING = 'processing/';
 }
