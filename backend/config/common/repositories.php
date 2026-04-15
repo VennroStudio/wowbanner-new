@@ -22,7 +22,12 @@ use App\Modules\Client\Entity\ClientPhone\Persistence\Doctrine\DoctrineClientPho
 use App\Modules\Client\Entity\ClientPhone\ClientPhoneRepository;
 use App\Modules\Client\Entity\ClientCompany\Persistence\Doctrine\DoctrineClientCompanyRepository;
 use App\Modules\Client\Entity\ClientCompany\ClientCompanyRepository;
-
+use App\Modules\Production\Entity\Production\Persistence\Doctrine\DoctrineProductionRepository;
+use App\Modules\Production\Entity\Production\ProductionRepository;
+use App\Modules\Production\Entity\ProductionMaterial\Persistence\Doctrine\DoctrineProductionMaterialRepository;
+use App\Modules\Production\Entity\ProductionMaterial\ProductionMaterialRepository;
+use App\Modules\Production\Entity\ProductionPrint\Persistence\Doctrine\DoctrineProductionPrintRepository;
+use App\Modules\Production\Entity\ProductionPrint\ProductionPrintRepository;
 
 use function DI\get;
 
@@ -37,4 +42,7 @@ return [
     ClientRepository::class   => get(DoctrineClientRepository::class),
     ClientCompanyRepository::class => get(DoctrineClientCompanyRepository::class),
     ClientPhoneRepository::class => get(DoctrineClientPhoneRepository::class),
+    ProductionRepository::class           => get(DoctrineProductionRepository::class),
+    ProductionMaterialRepository::class   => get(DoctrineProductionMaterialRepository::class),
+    ProductionPrintRepository::class      => get(DoctrineProductionPrintRepository::class),
 ];

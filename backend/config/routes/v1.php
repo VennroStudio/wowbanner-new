@@ -38,6 +38,11 @@ use App\Http\Action\v1\Processing\ProcessingImage\CreateProcessingImageAction;
 use App\Http\Action\v1\Processing\ProcessingImage\DeleteProcessingImageAction;
 use App\Http\Action\v1\Processing\ProcessingImage\UpdateProcessingImageAction;
 use App\Http\Action\v1\Processing\UpdateProcessingAction;
+use App\Http\Action\v1\Production\CreateProductionAction;
+use App\Http\Action\v1\Production\DeleteProductionAction;
+use App\Http\Action\v1\Production\GetProductionByIdAction;
+use App\Http\Action\v1\Production\GetProductionsAction;
+use App\Http\Action\v1\Production\UpdateProductionAction;
 use App\Http\Action\v1\User\Admin\AdminUpdateUserAction;
 use App\Http\Action\v1\User\CreateUserAction;
 
@@ -109,6 +114,14 @@ return static function (App $app): void {
             $group->post('/{id}/images', CreateProcessingImageAction::class)->add(Authenticate::class);
             $group->patch('/images/{imageId}', UpdateProcessingImageAction::class)->add(Authenticate::class);
             $group->delete('/images/{imageId}', DeleteProcessingImageAction::class)->add(Authenticate::class);
+        }));
+
+        $group->group('/productions', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('', GetProductionsAction::class)->add(Authenticate::class);
+            $group->post('/create', CreateProductionAction::class)->add(Authenticate::class);
+            $group->patch('/update/{id}', UpdateProductionAction::class)->add(Authenticate::class);
+            $group->delete('/delete/{id}', DeleteProductionAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetProductionByIdAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/clients', new Group(static function (RouteCollectorProxy $group): void {
