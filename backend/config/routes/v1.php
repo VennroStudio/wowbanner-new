@@ -38,11 +38,11 @@ use App\Http\Action\v1\Processing\ProcessingImage\CreateProcessingImageAction;
 use App\Http\Action\v1\Processing\ProcessingImage\DeleteProcessingImageAction;
 use App\Http\Action\v1\Processing\ProcessingImage\UpdateProcessingImageAction;
 use App\Http\Action\v1\Processing\UpdateProcessingAction;
-use App\Http\Action\v1\Production\CreateProductionAction;
-use App\Http\Action\v1\Production\DeleteProductionAction;
-use App\Http\Action\v1\Production\GetProductionByIdAction;
-use App\Http\Action\v1\Production\GetProductionsAction;
-use App\Http\Action\v1\Production\UpdateProductionAction;
+use App\Http\Action\v1\Product\CreateProductAction;
+use App\Http\Action\v1\Product\DeleteProductAction;
+use App\Http\Action\v1\Product\GetProductByIdAction;
+use App\Http\Action\v1\Product\GetProductsAction;
+use App\Http\Action\v1\Product\UpdateProductAction;
 use App\Http\Action\v1\User\Admin\AdminUpdateUserAction;
 use App\Http\Action\v1\User\CreateUserAction;
 
@@ -116,12 +116,12 @@ return static function (App $app): void {
             $group->delete('/images/{imageId}', DeleteProcessingImageAction::class)->add(Authenticate::class);
         }));
 
-        $group->group('/productions', new Group(static function (RouteCollectorProxy $group): void {
-            $group->get('', GetProductionsAction::class)->add(Authenticate::class);
-            $group->post('/create', CreateProductionAction::class)->add(Authenticate::class);
-            $group->patch('/update/{id}', UpdateProductionAction::class)->add(Authenticate::class);
-            $group->delete('/delete/{id}', DeleteProductionAction::class)->add(Authenticate::class);
-            $group->get('/{id}', GetProductionByIdAction::class)->add(Authenticate::class);
+        $group->group('/products', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('', GetProductsAction::class)->add(Authenticate::class);
+            $group->post('/create', CreateProductAction::class)->add(Authenticate::class);
+            $group->patch('/update/{id}', UpdateProductAction::class)->add(Authenticate::class);
+            $group->delete('/delete/{id}', DeleteProductAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetProductByIdAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/clients', new Group(static function (RouteCollectorProxy $group): void {
