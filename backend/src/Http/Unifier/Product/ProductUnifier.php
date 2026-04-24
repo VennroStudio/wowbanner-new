@@ -12,6 +12,7 @@ use App\Modules\Product\Query\ProductPrint\FindByProductIds\ProductPrintFindByPr
 use App\Modules\Product\Query\ProductPrint\FindByProductIds\ProductPrintFindByProductIdsQuery;
 use App\Modules\Product\ReadModel\Product\Interface\ProductModelInterface;
 use App\Modules\Product\ReadModel\ProductMaterial\ProductMaterialByProductId;
+use App\Modules\Product\ReadModel\ProductPrint\ProductPrintByProductId;
 use Doctrine\DBAL\Exception;
 use Override;
 
