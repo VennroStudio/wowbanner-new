@@ -25,8 +25,8 @@ final readonly class DoctrineProductMaterialRepository implements ProductMateria
     #[Override]
     public function getById(int $id): ProductMaterial
     {
-        $ProductMaterial = $this->findById($id);
-        if ($ProductMaterial === null) {
+        $productMaterial = $this->findById($id);
+        if ($productMaterial === null) {
             throw new DomainExceptionModule(
                 module: 'Product',
                 message: 'error.Product_material_not_found',
@@ -34,7 +34,7 @@ final readonly class DoctrineProductMaterialRepository implements ProductMateria
             );
         }
 
-        return $ProductMaterial;
+        return $productMaterial;
     }
 
     #[Override]
@@ -47,20 +47,20 @@ final readonly class DoctrineProductMaterialRepository implements ProductMateria
      * @return list<ProductMaterial>
      */
     #[Override]
-    public function findByProductId(int $ProductId): array
+    public function findByProductId(int $productId): array
     {
-        return $this->repo->findBy(['ProductId' => $ProductId]);
+        return $this->repo->findBy(['productId' => $productId]);
     }
 
     #[Override]
-    public function add(ProductMaterial $ProductMaterial): void
+    public function add(ProductMaterial $productMaterial): void
     {
-        $this->em->persist($ProductMaterial);
+        $this->em->persist($productMaterial);
     }
 
     #[Override]
-    public function remove(ProductMaterial $ProductMaterial): void
+    public function remove(ProductMaterial $productMaterial): void
     {
-        $this->em->remove($ProductMaterial);
+        $this->em->remove($productMaterial);
     }
 }

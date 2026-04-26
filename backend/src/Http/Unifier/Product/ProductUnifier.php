@@ -83,7 +83,7 @@ final readonly class ProductUnifier implements UnifierInterface
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->ProductId][] = UnifierHelper::toArrayWithout($item, 'Product_id');
+            $grouped[$item->productId][] = UnifierHelper::toArrayWithout($item, 'product_id');
         }
 
         return $grouped;
@@ -97,7 +97,7 @@ final readonly class ProductUnifier implements UnifierInterface
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->ProductId][] = UnifierHelper::toArrayWithout($item, 'Product_id');
+            $grouped[$item->productId][] = UnifierHelper::toArrayWithout($item, 'product_id');
         }
 
         return $grouped;

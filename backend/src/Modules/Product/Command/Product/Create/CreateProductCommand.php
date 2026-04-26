@@ -19,12 +19,12 @@ final readonly class CreateProductCommand
         public int $currentUserId,
         #[Assert\NotBlank]
         public int $currentUserRole,
-        #[Assert\NotBlank(message: 'validation.Product_name_required')]
+        #[Assert\NotBlank(message: 'validation.product_name_required')]
         #[Assert\Length(
             min: self::NAME_MIN_LENGTH,
             max: self::NAME_MAX_LENGTH,
-            minMessage: 'validation.Product_name_too_short',
-            maxMessage: 'validation.Product_name_too_long',
+            minMessage: 'validation.product_name_too_short',
+            maxMessage: 'validation.product_name_too_long',
         )]
         public string $name,
         /** @var list<ProductMaterialItem> */

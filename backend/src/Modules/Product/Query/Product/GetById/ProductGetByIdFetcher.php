@@ -12,7 +12,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class ProductGetByIdFetcher
 {
-    private const string TABLE = 'Products';
+    private const string TABLE = 'products';
     private const int CACHE_TTL = 900;
 
     public function __construct(

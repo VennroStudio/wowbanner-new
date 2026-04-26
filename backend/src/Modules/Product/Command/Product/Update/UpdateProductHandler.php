@@ -31,14 +31,14 @@ final readonly class UpdateProductHandler
             action: ProductPermission::UPDATE,
         );
 
-        $Product = $this->repository->getById($command->id);
+        $product = $this->repository->getById($command->id);
 
-        $Product->edit(name: $command->name);
+        $product->edit(name: $command->name);
 
         $this->materialSyncer->sync($command->id, $command->materials);
         $this->printSyncer->sync($command->id, $command->prints);
 
-        $this->cacher->delete('Product_by_id_' . $command->id);
+        $this->cacher->delete('product_by_id_' . $command->id);
 
         $this->flusher->flush();
     }

@@ -10,7 +10,7 @@ interface ProductRepository
 
     public function findById(int $id): ?Product;
 
-    public function add(Product $Product): void;
+    public function add(Product $product): void;
 
-    public function remove(Product $Product): void;
+    public function remove(Product $product): void;
 }

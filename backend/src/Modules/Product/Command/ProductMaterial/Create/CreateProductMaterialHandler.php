@@ -16,7 +16,7 @@ final readonly class CreateProductMaterialHandler
     public function handle(CreateProductMaterialCommand $command): void
     {
         $link = ProductMaterial::create(
-            ProductId: $command->ProductId,
+            productId: $command->productId,
             materialOptionId: $command->materialOptionId,
         );
 

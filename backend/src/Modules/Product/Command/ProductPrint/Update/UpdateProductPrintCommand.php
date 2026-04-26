@@ -8,7 +8,7 @@ final readonly class UpdateProductPrintCommand
 {
     public function __construct(
         public int $id,
-        public int $ProductId,
+        public int $productId,
         public int $printId,
     ) {}
 }

@@ -14,14 +14,14 @@ final readonly class ProductMaterialByProductId implements ProductMaterialModelI
 
     public function __construct(
         public int $id,
-        public int $ProductId,
+        public int $productId,
         public int $materialOptionId,
     ) {}
 
     /**
      * @param array{
      *     id: int,
-     *     Product_id: int,
+     *     product_id: int,
      *     material_option_id: int
      * } $row
      */
@@ -29,7 +29,7 @@ final readonly class ProductMaterialByProductId implements ProductMaterialModelI
     {
         return new self(
             id: $row['id'],
-            ProductId: $row['Product_id'],
+            productId: $row['product_id'],
             materialOptionId: $row['material_option_id'],
         );
     }
@@ -43,7 +43,7 @@ final readonly class ProductMaterialByProductId implements ProductMaterialModelI
     #[Override]
     public function getProductId(): int
     {
-        return $this->ProductId;
+        return $this->productId;
     }
 
     #[Override]
@@ -51,7 +51,7 @@ final readonly class ProductMaterialByProductId implements ProductMaterialModelI
     {
         return [
             'id'                 => $this->id,
-            'Product_id'      => $this->ProductId,
+            'product_id'      => $this->productId,
             'material_option_id' => $this->materialOptionId,
         ];
     }

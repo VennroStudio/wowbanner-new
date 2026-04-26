@@ -16,7 +16,7 @@ final readonly class CreateProductPrintHandler
     public function handle(CreateProductPrintCommand $command): void
     {
         $link = ProductPrint::create(
-            ProductId: $command->ProductId,
+            productId: $command->productId,
             printId: $command->printId,
         );
 

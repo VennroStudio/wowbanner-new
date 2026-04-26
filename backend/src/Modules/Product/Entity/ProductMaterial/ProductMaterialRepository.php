@@ -13,9 +13,9 @@ interface ProductMaterialRepository
     /**
      * @return list<ProductMaterial>
      */
-    public function findByProductId(int $ProductId): array;
+    public function findByProductId(int $productId): array;
 
-    public function add(ProductMaterial $ProductMaterial): void;
+    public function add(ProductMaterial $productMaterial): void;
 
-    public function remove(ProductMaterial $ProductMaterial): void;
+    public function remove(ProductMaterial $productMaterial): void;
 }

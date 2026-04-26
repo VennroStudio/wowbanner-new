@@ -25,8 +25,8 @@ final readonly class DoctrineProductPrintRepository implements ProductPrintRepos
     #[Override]
     public function getById(int $id): ProductPrint
     {
-        $ProductPrint = $this->findById($id);
-        if ($ProductPrint === null) {
+        $productPrint = $this->findById($id);
+        if ($productPrint === null) {
             throw new DomainExceptionModule(
                 module: 'Product',
                 message: 'error.Product_print_not_found',
@@ -34,7 +34,7 @@ final readonly class DoctrineProductPrintRepository implements ProductPrintRepos
             );
         }
 
-        return $ProductPrint;
+        return $productPrint;
     }
 
     #[Override]
@@ -47,20 +47,20 @@ final readonly class DoctrineProductPrintRepository implements ProductPrintRepos
      * @return list<ProductPrint>
      */
     #[Override]
-    public function findByProductId(int $ProductId): array
+    public function findByProductId(int $productId): array
     {
-        return $this->repo->findBy(['ProductId' => $ProductId]);
+        return $this->repo->findBy(['productId' => $productId]);
     }
 
     #[Override]
-    public function add(ProductPrint $ProductPrint): void
+    public function add(ProductPrint $productPrint): void
     {
-        $this->em->persist($ProductPrint);
+        $this->em->persist($productPrint);
     }
 
     #[Override]
-    public function remove(ProductPrint $ProductPrint): void
+    public function remove(ProductPrint $productPrint): void
     {
-        $this->em->remove($ProductPrint);
+        $this->em->remove($productPrint);
     }
 }

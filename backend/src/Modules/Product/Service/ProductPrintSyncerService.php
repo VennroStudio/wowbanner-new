@@ -25,9 +25,9 @@ final readonly class ProductPrintSyncerService
     /**
      * @param list<ProductPrintItem> $items
      */
-    public function sync(int $ProductId, array $items): void
+    public function sync(int $productId, array $items): void
     {
-        $currentRows = $this->repository->findByProductId($ProductId);
+        $currentRows = $this->repository->findByProductId($productId);
         $currentIds = array_map(static fn($p) => $p->id, $currentRows);
         $commandIds = array_filter(array_map(static fn($p) => $p->id, $items));
 
@@ -44,12 +44,12 @@ final readonly class ProductPrintSyncerService
             if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateProductPrintCommand(
                     id: $item->id,
-                    ProductId: $ProductId,
+                    productId: $productId,
                     printId: $item->printId,
                 ));
             } else {
                 $this->createHandler->handle(new CreateProductPrintCommand(
-                    ProductId: $ProductId,
+                    productId: $productId,
                     printId: $item->printId,
                 ));
             }

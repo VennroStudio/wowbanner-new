@@ -17,7 +17,7 @@ final readonly class UpdateProductPrintHandler
         $link = $this->repository->getById($command->id);
 
         $link->edit(
-            ProductId: $command->ProductId,
+            productId: $command->productId,
             printId: $command->printId,
         );
     }

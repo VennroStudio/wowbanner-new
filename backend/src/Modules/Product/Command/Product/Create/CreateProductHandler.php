@@ -34,14 +34,14 @@ final readonly class CreateProductHandler
             action: ProductPermission::CREATE,
         );
 
-        $Product = Product::create(name: $command->name);
+        $product = Product::create(name: $command->name);
 
-        $this->repository->add($Product);
+        $this->repository->add($product);
 
         $this->flusher->flush();
 
-        $this->processMaterials($Product, $command->materials);
-        $this->processPrints($Product, $command->prints);
+        $this->processMaterials($product, $command->materials);
+        $this->processPrints($product, $command->prints);
 
         $this->flusher->flush();
     }
@@ -49,11 +49,11 @@ final readonly class CreateProductHandler
     /**
      * @param list<ProductMaterialItem> $items
      */
-    private function processMaterials(Product $Product, array $items): void
+    private function processMaterials(Product $product, array $items): void
     {
         foreach ($items as $item) {
             $this->createMaterialHandler->handle(new CreateProductMaterialCommand(
-                ProductId: (int)$Product->id,
+                productId: (int)$product->id,
                 materialOptionId: $item->materialOptionId,
             ));
         }
@@ -62,11 +62,11 @@ final readonly class CreateProductHandler
     /**
      * @param list<ProductPrintItem> $items
      */
-    private function processPrints(Product $Product, array $items): void
+    private function processPrints(Product $product, array $items): void
     {
         foreach ($items as $item) {
             $this->createPrintHandler->handle(new CreateProductPrintCommand(
-                ProductId: (int)$Product->id,
+                productId: (int)$product->id,
                 printId: $item->printId,
             ));
         }

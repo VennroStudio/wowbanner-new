@@ -22,8 +22,8 @@ final readonly class DeleteProductHandler
 {
     public function __construct(
         private ProductRepository            $repository,
-        private ProductMaterialRepository    $ProductMaterialRepository,
-        private ProductPrintRepository       $ProductPrintRepository,
+        private ProductMaterialRepository    $productMaterialRepository,
+        private ProductPrintRepository       $productPrintRepository,
         private FlusherInterface             $flusher,
         private ProductPermissionService     $permissionService,
         private DeleteProductMaterialHandler $deleteProductMaterialHandler,
@@ -41,21 +41,21 @@ final readonly class DeleteProductHandler
             action: ProductPermission::DELETE,
         );
 
-        $Product = $this->repository->getById($command->id);
+        $product = $this->repository->getById($command->id);
 
         $this->deleteMaterials($command->id);
         $this->deletePrints($command->id);
 
-        $this->repository->remove($Product);
+        $this->repository->remove($product);
 
-        $this->cacher->delete('Product_by_id_' . $command->id);
+        $this->cacher->delete('product_by_id_' . $command->id);
 
         $this->flusher->flush();
     }
 
-    private function deleteMaterials(int $ProductId): void
+    private function deleteMaterials(int $productId): void
     {
-        $materials = $this->ProductMaterialRepository->findByProductId($ProductId);
+        $materials = $this->productMaterialRepository->findByProductId($productId);
         foreach ($materials as $material) {
             if ($material->id === null) {
                 continue;
@@ -66,9 +66,9 @@ final readonly class DeleteProductHandler
         }
     }
 
-    private function deletePrints(int $ProductId): void
+    private function deletePrints(int $productId): void
     {
-        $prints = $this->ProductPrintRepository->findByProductId($ProductId);
+        $prints = $this->productPrintRepository->findByProductId($productId);
         foreach ($prints as $print) {
             if ($print->id === null) {
                 continue;

@@ -14,14 +14,14 @@ final readonly class ProductPrintByProductId implements ProductPrintModelInterfa
 
     public function __construct(
         public int $id,
-        public int $ProductId,
+        public int $productId,
         public int $printId,
     ) {}
 
     /**
      * @param array{
      *     id: int,
-     *     Product_id: int,
+     *     product_id: int,
      *     print_id: int
      * } $row
      */
@@ -29,7 +29,7 @@ final readonly class ProductPrintByProductId implements ProductPrintModelInterfa
     {
         return new self(
             id: $row['id'],
-            ProductId: $row['Product_id'],
+            productId: $row['product_id'],
             printId: $row['print_id'],
         );
     }
@@ -43,7 +43,7 @@ final readonly class ProductPrintByProductId implements ProductPrintModelInterfa
     #[Override]
     public function getProductId(): int
     {
-        return $this->ProductId;
+        return $this->productId;
     }
 
     #[Override]
@@ -51,7 +51,7 @@ final readonly class ProductPrintByProductId implements ProductPrintModelInterfa
     {
         return [
             'id'            => $this->id,
-            'Product_id' => $this->ProductId,
+            'product_id' => $this->productId,
             'print_id'      => $this->printId,
         ];
     }

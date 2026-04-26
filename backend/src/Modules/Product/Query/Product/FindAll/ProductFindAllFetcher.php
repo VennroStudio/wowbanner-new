@@ -11,7 +11,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class ProductFindAllFetcher
 {
-    private const string TABLE = 'Products';
+    private const string TABLE = 'products';
 
     public function __construct(
         private Connection $connection,

@@ -25,9 +25,9 @@ final readonly class ProductMaterialSyncerService
     /**
      * @param list<ProductMaterialItem> $items
      */
-    public function sync(int $ProductId, array $items): void
+    public function sync(int $productId, array $items): void
     {
-        $currentRows = $this->repository->findByProductId($ProductId);
+        $currentRows = $this->repository->findByProductId($productId);
         $currentIds = array_map(static fn($m) => $m->id, $currentRows);
         $commandIds = array_filter(array_map(static fn($m) => $m->id, $items));
 
@@ -44,12 +44,12 @@ final readonly class ProductMaterialSyncerService
             if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateProductMaterialCommand(
                     id: $item->id,
-                    ProductId: $ProductId,
+                    productId: $productId,
                     materialOptionId: $item->materialOptionId,
                 ));
             } else {
                 $this->createHandler->handle(new CreateProductMaterialCommand(
-                    ProductId: $ProductId,
+                    productId: $productId,
                     materialOptionId: $item->materialOptionId,
                 ));
             }

@@ -8,8 +8,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'Product_materials')]
-#[ORM\Index(name: 'idx_Product_id', columns: ['Product_id'])]
+#[ORM\Table(name: 'product_materials')]
+#[ORM\Index(name: 'idx_product_id', columns: ['product_id'])]
 #[ORM\Index(name: 'idx_material_option_id', columns: ['material_option_id'])]
 class ProductMaterial
 {
@@ -19,25 +19,25 @@ class ProductMaterial
     private(set) ?int $id = null;
 
     #[ORM\Column(type: Types::INTEGER)]
-    private(set) int $ProductId;
+    private(set) int $productId;
 
     #[ORM\Column(type: Types::INTEGER)]
     private(set) int $materialOptionId;
 
-    private function __construct(int $ProductId, int $materialOptionId)
+    private function __construct(int $productId, int $materialOptionId)
     {
-        $this->ProductId = $ProductId;
+        $this->productId = $productId;
         $this->materialOptionId = $materialOptionId;
     }
 
-    public static function create(int $ProductId, int $materialOptionId): self
+    public static function create(int $productId, int $materialOptionId): self
     {
-        return new self($ProductId, $materialOptionId);
+        return new self($productId, $materialOptionId);
     }
 
-    public function edit(int $ProductId, int $materialOptionId): void
+    public function edit(int $productId, int $materialOptionId): void
     {
-        $this->ProductId = $ProductId;
+        $this->productId = $productId;
         $this->materialOptionId = $materialOptionId;
     }
 }

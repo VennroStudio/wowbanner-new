@@ -8,7 +8,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'Products')]
+#[ORM\Table(name: 'products')]
 #[ORM\Index(name: 'idx_name', columns: ['name'])]
 class Product
 {

@@ -6,7 +6,7 @@ namespace App\Modules\Product\Permission;
 
 enum ProductPermission: string
 {
-    case CREATE = 'Product.create';
-    case UPDATE = 'Product.update';
-    case DELETE = 'Product.delete';
+    case CREATE = 'product.create';
+    case UPDATE = 'product.update';
+    case DELETE = 'product.delete';
 }

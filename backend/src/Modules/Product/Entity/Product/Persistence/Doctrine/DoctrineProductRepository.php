@@ -25,8 +25,8 @@ final readonly class DoctrineProductRepository implements ProductRepository
     #[Override]
     public function getById(int $id): Product
     {
-        $Product = $this->findById($id);
-        if ($Product === null) {
+        $product = $this->findById($id);
+        if ($product === null) {
             throw new DomainExceptionModule(
                 module: 'Product',
                 message: 'error.Product_not_found',
@@ -34,7 +34,7 @@ final readonly class DoctrineProductRepository implements ProductRepository
             );
         }
 
-        return $Product;
+        return $product;
     }
 
     #[Override]
@@ -44,14 +44,14 @@ final readonly class DoctrineProductRepository implements ProductRepository
     }
 
     #[Override]
-    public function add(Product $Product): void
+    public function add(Product $product): void
     {
-        $this->em->persist($Product);
+        $this->em->persist($product);
     }
 
     #[Override]
-    public function remove(Product $Product): void
+    public function remove(Product $product): void
     {
-        $this->em->remove($Product);
+        $this->em->remove($product);
     }
 }

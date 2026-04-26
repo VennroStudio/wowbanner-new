@@ -7,9 +7,9 @@ namespace App\Modules\Product\Query\ProductPrint\FindByProductIds;
 final readonly class ProductPrintFindByProductIdsQuery
 {
     /**
-     * @param list<int> $ProductIds
+     * @param list<int> $productIds
      */
     public function __construct(
-        public array $ProductIds,
+        public array $productIds,
     ) {}
 }

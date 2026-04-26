@@ -11,7 +11,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class ProductPrintFindByProductIdsFetcher
 {
-    private const string TABLE = 'Product_prints';
+    private const string TABLE = 'product_prints';
 
     public function __construct(
         private Connection $connection,
@@ -23,15 +23,15 @@ final readonly class ProductPrintFindByProductIdsFetcher
      */
     public function fetch(ProductPrintFindByProductIdsQuery $query): array
     {
-        if ($query->ProductIds === []) {
+        if ($query->productIds === []) {
             return [];
         }
 
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'Product_id', 'print_id')
+            ->select('id', 'product_id', 'print_id')
             ->from(self::TABLE)
-            ->where('Product_id IN (:ids)')
-            ->setParameter('ids', $query->ProductIds, ArrayParameterType::INTEGER)
+            ->where('product_id IN (:ids)')
+            ->setParameter('ids', $query->productIds, ArrayParameterType::INTEGER)
             ->orderBy('id', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();

@@ -8,7 +8,7 @@ final readonly class UpdateProductMaterialCommand
 {
     public function __construct(
         public int $id,
-        public int $ProductId,
+        public int $productId,
         public int $materialOptionId,
     ) {}
 }

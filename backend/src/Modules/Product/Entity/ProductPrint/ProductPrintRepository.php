@@ -13,9 +13,9 @@ interface ProductPrintRepository
     /**
      * @return list<ProductPrint>
      */
-    public function findByProductId(int $ProductId): array;
+    public function findByProductId(int $productId): array;
 
-    public function add(ProductPrint $ProductPrint): void;
+    public function add(ProductPrint $productPrint): void;
 
-    public function remove(ProductPrint $ProductPrint): void;
+    public function remove(ProductPrint $productPrint): void;
 }
