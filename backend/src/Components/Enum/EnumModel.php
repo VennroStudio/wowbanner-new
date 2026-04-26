@@ -9,7 +9,7 @@ use BackedEnum;
 final readonly class EnumModel
 {
     public function __construct(
-        public int|string $value,
+        public int|string $id,
         public string $label,
     ) {}
 
@@ -21,7 +21,7 @@ final readonly class EnumModel
     public static function fromEnum(BackedEnum&EnumInterface $enum): self
     {
         return new self(
-            value: $enum->value,
+            id: $enum->value,
             label: $enum->getLabel(),
         );
     }

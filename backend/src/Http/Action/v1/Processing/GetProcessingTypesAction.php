@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Action\v1\Processing;
 
+use App\Components\Enum\EnumModel;
 use App\Components\Http\Response\JsonDataResponse;
 use App\Modules\Processing\Entity\Processing\Fields\Enums\ProcessingType;
+use JsonException;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
@@ -23,14 +25,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 )]
 final readonly class GetProcessingTypesAction implements RequestHandlerInterface
 {
+    /**
+     * @throws JsonException
+     */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $types = array_map(static fn(ProcessingType $type): array => [
-            'id'    => $type->value,
-            'label' => $type->getLabel(),
-        ], ProcessingType::cases());
-
-        return new JsonDataResponse($types);
+        return new JsonDataResponse(EnumModel::fromEnumClass(ProcessingType::class));
     }
 }
