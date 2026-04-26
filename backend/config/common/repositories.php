@@ -6,6 +6,16 @@ use App\Modules\Material\Entity\Material\MaterialRepository;
 use App\Modules\Material\Entity\Material\Persistence\Doctrine\DoctrineMaterialRepository;
 use App\Modules\Material\Entity\MaterialImage\MaterialImageRepository;
 use App\Modules\Material\Entity\MaterialImage\Persistence\Doctrine\DoctrineMaterialImageRepository;
+use App\Modules\Material\Entity\MaterialOption\MaterialOptionRepository;
+use App\Modules\Material\Entity\MaterialOption\Persistence\Doctrine\DoctrineMaterialOptionRepository;
+use App\Modules\Material\Entity\MaterialPricingByArea\MaterialPricingByAreaRepository;
+use App\Modules\Material\Entity\MaterialPricingByArea\Persistence\Doctrine\DoctrineMaterialPricingByAreaRepository;
+use App\Modules\Material\Entity\MaterialPricingByPiece\MaterialPricingByPieceRepository;
+use App\Modules\Material\Entity\MaterialPricingByPiece\Persistence\Doctrine\DoctrineMaterialPricingByPieceRepository;
+use App\Modules\Material\Entity\MaterialPricingCut\MaterialPricingCutRepository;
+use App\Modules\Material\Entity\MaterialPricingCut\Persistence\Doctrine\DoctrineMaterialPricingCutRepository;
+use App\Modules\Material\Entity\MaterialProcessing\MaterialProcessingRepository;
+use App\Modules\Material\Entity\MaterialProcessing\Persistence\Doctrine\DoctrineMaterialProcessingRepository;
 use App\Modules\Printing\Entity\Printing\Persistence\Doctrine\DoctrinePrintingRepository;
 use App\Modules\Printing\Entity\Printing\PrintingRepository;
 use App\Modules\User\Entity\User\Persistence\Doctrine\DoctrineUserRepository;
@@ -32,8 +42,13 @@ use App\Modules\Product\Entity\ProductPrint\ProductPrintRepository;
 use function DI\get;
 
 return [
-    MaterialRepository::class      => get(DoctrineMaterialRepository::class),
-    MaterialImageRepository::class => get(DoctrineMaterialImageRepository::class),
+    MaterialRepository::class                => get(DoctrineMaterialRepository::class),
+    MaterialImageRepository::class          => get(DoctrineMaterialImageRepository::class),
+    MaterialOptionRepository::class         => get(DoctrineMaterialOptionRepository::class),
+    MaterialPricingByAreaRepository::class  => get(DoctrineMaterialPricingByAreaRepository::class),
+    MaterialPricingByPieceRepository::class => get(DoctrineMaterialPricingByPieceRepository::class),
+    MaterialProcessingRepository::class     => get(DoctrineMaterialProcessingRepository::class),
+    MaterialPricingCutRepository::class     => get(DoctrineMaterialPricingCutRepository::class),
     PrintingRepository::class      => get(DoctrinePrintingRepository::class),
     UserRepository::class      => get(DoctrineUserRepository::class),
     UserTokenRepository::class => get(DoctrineUserTokenRepository::class),
