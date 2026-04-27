@@ -53,4 +53,10 @@ final class DoctrineMaterialProcessingRepository implements MaterialProcessingRe
     {
         return $this->repo->findOneBy(['id' => $id]);
     }
+
+    #[Override]
+    public function findByMaterialId(int $materialId): array
+    {
+        return $this->repo->findBy(['materialId' => $materialId], ['id' => 'ASC']);
+    }
 }

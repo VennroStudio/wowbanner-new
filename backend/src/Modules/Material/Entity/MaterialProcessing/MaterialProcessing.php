@@ -46,8 +46,10 @@ class MaterialProcessing
         return new self($materialId, $optionId, $processingId);
     }
 
-    public function edit(int $processingId): void
+    public function edit(int $materialId, int $optionId, int $processingId): void
     {
+        $this->materialId = $materialId;
+        $this->optionId = $optionId;
         $this->processingId = $processingId;
     }
 }

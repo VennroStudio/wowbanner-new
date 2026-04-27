@@ -13,4 +13,9 @@ interface MaterialProcessingRepository
     public function getById(int $id): MaterialProcessing;
 
     public function findById(int $id): ?MaterialProcessing;
+
+    /**
+     * @return list<MaterialProcessing>
+     */
+    public function findByMaterialId(int $materialId): array;
 }

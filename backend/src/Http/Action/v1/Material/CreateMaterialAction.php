@@ -31,6 +31,72 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
             properties: [
                 new OA\Property(property: 'name', type: 'string', example: 'Баннер'),
                 new OA\Property(property: 'description', type: 'string', example: 'Описание материала'),
+                new OA\Property(
+                    property: 'options',
+                    type: 'array',
+                    items: new OA\Items(
+                        required: ['name', 'pricingType'],
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer', nullable: true),
+                            new OA\Property(property: 'name', type: 'string', example: 'Вариант 1'),
+                            new OA\Property(property: 'pricingType', type: 'integer', example: 1),
+                            new OA\Property(property: 'isCut', type: 'boolean', default: false),
+                            new OA\Property(
+                                property: 'pricingByArea',
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(property: 'id', type: 'integer', nullable: true),
+                                        new OA\Property(property: 'dpiType', type: 'integer', example: 1),
+                                        new OA\Property(property: 'areaRangeType', type: 'integer', example: 1),
+                                        new OA\Property(property: 'price', type: 'string', example: '10.00'),
+                                        new OA\Property(property: 'cost', type: 'string', example: '5.00'),
+                                        new OA\Property(property: 'printHours', type: 'string', example: '1.00'),
+                                    ],
+                                    type: 'object',
+                                )
+                            ),
+                            new OA\Property(
+                                property: 'pricingByPiece',
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(property: 'id', type: 'integer', nullable: true),
+                                        new OA\Property(property: 'variantType', type: 'integer', example: 1),
+                                        new OA\Property(property: 'price', type: 'string', example: '10.00'),
+                                        new OA\Property(property: 'cost', type: 'string', example: '5.00'),
+                                        new OA\Property(property: 'printHours', type: 'string', example: '1.00'),
+                                    ],
+                                    type: 'object',
+                                )
+                            ),
+                            new OA\Property(
+                                property: 'pricingByCut',
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(property: 'id', type: 'integer', nullable: true),
+                                        new OA\Property(property: 'type', type: 'integer', example: 1),
+                                        new OA\Property(property: 'price', type: 'string', example: '2.00'),
+                                    ],
+                                    type: 'object',
+                                )
+                            ),
+                            new OA\Property(
+                                property: 'processings',
+                                type: 'array',
+                                items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(property: 'id', type: 'integer', nullable: true),
+                                        new OA\Property(property: 'processingId', type: 'integer', example: 1),
+                                    ],
+                                    type: 'object',
+                                )
+                            ),
+                        ],
+                        type: 'object',
+                    )
+                ),
             ]
         )
     ),

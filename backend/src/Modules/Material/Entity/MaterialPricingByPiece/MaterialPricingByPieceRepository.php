@@ -13,4 +13,9 @@ interface MaterialPricingByPieceRepository
     public function getById(int $id): MaterialPricingByPiece;
 
     public function findById(int $id): ?MaterialPricingByPiece;
+
+    /**
+     * @return list<MaterialPricingByPiece>
+     */
+    public function findByMaterialId(int $materialId): array;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\Material\Update;
 
+use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionItem;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class UpdateMaterialCommand
@@ -31,5 +32,9 @@ final readonly class UpdateMaterialCommand
         public string $name,
         #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'validation.material_description_too_long')]
         public string $description = '',
+
+        /** @var list<MaterialOptionItem> */
+        #[Assert\Valid]
+        public array $options = [],
     ) {}
 }

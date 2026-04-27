@@ -13,4 +13,9 @@ interface MaterialOptionRepository
     public function getById(int $id): MaterialOption;
 
     public function findById(int $id): ?MaterialOption;
+
+    /**
+     * @return MaterialOption[]
+     */
+    public function findByMaterialId(int $materialId): array;
 }
