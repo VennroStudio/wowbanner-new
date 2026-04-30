@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from '@/shared/api/types';
+
 export interface ProcessingTypeRef {
   id: number;
   label: string;
@@ -25,10 +27,4 @@ export interface GetProcessingsParams {
   perPage?: number;
   search?: string;
 }
-
-export interface PaginatedProcessingsResponse {
-  data: {
-    count: number;
-    items: Processing[];
-  };
-}
+export type PaginatedProcessingsResponse = PaginatedResponse<Processing>;

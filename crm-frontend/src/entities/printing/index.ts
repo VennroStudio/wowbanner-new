@@ -1,10 +1,11 @@
 export type { Printing, GetPrintingsParams, PaginatedPrintingsResponse } from './model/types';
 
-export { printingApi } from './api/api';
-export type { CreatePrintingBody, UpdatePrintingBody } from './api/api';
+export { printingApi } from './api/printing.api';
+export type { CreatePrintingBody, UpdatePrintingBody } from './api/printing.api';
+export { printingKeys } from './model/query-keys';
 
-export { usePrintingsQuery } from './hooks/usePrintingsQuery';
-export { usePrintingQuery } from './hooks/usePrintingQuery';
-export { useCreatePrintingCommand } from './hooks/useCreatePrintingCommand';
-export { useUpdatePrintingCommand } from './hooks/useUpdatePrintingCommand';
-export { useDeletePrintingCommand } from './hooks/useDeletePrintingCommand';
+export { usePrintingsQuery } from './model/usePrintingsQuery';
+export { usePrintingQuery } from './model/usePrintingQuery';
+export { useCreatePrintingCommand } from './model/useCreatePrintingCommand';
+export { useUpdatePrintingCommand } from './model/useUpdatePrintingCommand';
+export { useDeletePrintingCommand } from './model/useDeletePrintingCommand';

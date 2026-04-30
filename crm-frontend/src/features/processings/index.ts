@@ -1,4 +1,4 @@
-export { ProcessingsHeader } from './components/ProcessingsHeader';
-export { ProcessingsTable } from './components/ProcessingsTable';
-export { ProcessingFormModal } from './components/ProcessingFormModal';
-export { DeleteProcessingModal } from './components/DeleteProcessingModal';
+export { ProcessingsHeader } from './ui/ProcessingsHeader';
+export { ProcessingsTable } from './ui/ProcessingsTable';
+export { ProcessingFormModal } from './ui/ProcessingFormModal';
+export { DeleteProcessingModal } from './ui/DeleteProcessingModal';

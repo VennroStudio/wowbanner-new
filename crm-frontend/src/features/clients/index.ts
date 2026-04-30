@@ -1,5 +1,5 @@
-export { ClientsHeader } from './components/ClientsHeader';
-export { ClientsSearch } from './components/ClientsSearch';
-export { ClientsTable } from './components/ClientsTable';
-export { ClientFormModal } from './components/ClientFormModal';
-export { DeleteClientModal } from './components/DeleteClientModal';
+export { ClientsHeader } from './ui/ClientsHeader';
+export { ClientsSearch } from './ui/ClientsSearch';
+export { ClientsTable } from './ui/ClientsTable';
+export { ClientFormModal } from './ui/ClientFormModal';
+export { DeleteClientModal } from './ui/DeleteClientModal';

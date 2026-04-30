@@ -1,4 +1,4 @@
-export { PrintingsHeader } from './components/PrintingsHeader';
-export { PrintingsTable } from './components/PrintingsTable';
-export { PrintingFormModal } from './components/PrintingFormModal';
-export { DeletePrintingModal } from './components/DeletePrintingModal';
+export { PrintingsHeader } from './ui/PrintingsHeader';
+export { PrintingsTable } from './ui/PrintingsTable';
+export { PrintingFormModal } from './ui/PrintingFormModal';
+export { DeletePrintingModal } from './ui/DeletePrintingModal';

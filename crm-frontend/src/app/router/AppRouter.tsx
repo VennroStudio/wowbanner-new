@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import { ROUTES } from '@/shared/constants';
-import { HomePage } from '@/pages/HomePage';
-import { ClientsPage } from '@/pages/ClientsPage';
-import { MaterialsPage } from '@/pages/MaterialsPage';
-import { ProcessingsPage } from '@/pages/ProcessingsPage';
-import { PrintingsPage } from '@/pages/PrintingsPage';
-import { NotFoundPage } from '@/pages/NotFoundPage';
+import { ROUTES } from '@/shared/routing/routes';
+import { HomePage } from '@/pages/home';
+import { ClientsPage } from '@/pages/clients';
+import { MaterialsPage } from '@/pages/materials';
+import { ProcessingsPage } from '@/pages/processings';
+import { PrintingsPage } from '@/pages/printings';
+import { NotFoundPage } from '@/pages/not-found';
 
 export const AppRouter = () => (
   <Routes>

@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from '@/shared/api/types';
+
 export interface Printing {
   id: number;
   name: string;
@@ -8,10 +10,4 @@ export interface GetPrintingsParams {
   perPage?: number;
   search?: string;
 }
-
-export interface PaginatedPrintingsResponse {
-  data: {
-    count: number;
-    items: Printing[];
-  };
-}
+export type PaginatedPrintingsResponse = PaginatedResponse<Printing>;

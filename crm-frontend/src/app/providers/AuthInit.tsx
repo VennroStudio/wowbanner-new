@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
-import { useAuthStore } from '@/features/auth';
-import { useRefreshCommand } from '@/features/auth';
+import { useRefreshSession, useSessionStore } from '@/entities/session';
 import { getCookie } from '@/shared/api/client';
-import { AUTH_URL } from '@/shared/constants';
+import { AUTH_URL } from '@/shared/config/env';
 
 export const AuthInit: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { setIsLoading, isLoading } = useAuthStore();
-  const refresh = useRefreshCommand();
+  const { setIsLoading, isLoading } = useSessionStore();
+  const { mutateAsync: refreshSession } = useRefreshSession();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -18,7 +17,7 @@ export const AuthInit: React.FC<{ children: React.ReactNode }> = ({ children }) 
       }
 
       try {
-        await refresh.mutateAsync();
+        await refreshSession();
       } catch (err) {
         console.error('Silent refresh failed', err);
         // В случае ошибки (токен стух/неверный) тоже редирект на страницу авторизации
@@ -29,7 +28,7 @@ export const AuthInit: React.FC<{ children: React.ReactNode }> = ({ children }) 
     };
 
     initAuth();
-  }, [setIsLoading]);
+  }, [refreshSession, setIsLoading]);
 
   // Пока грузится первоначальная сессия - показываем спиннер, а не белый экран или куски интерфейса
   if (isLoading) {

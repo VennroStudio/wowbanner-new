@@ -1,5 +1,10 @@
 export { ModalDialog } from './ModalDialog';
 export type { ModalDialogSize } from './ModalDialog';
+export { ConfirmActionModal } from './ConfirmActionModal';
+export { FormErrorBanner } from './FormErrorBanner';
+export { FormModalFooter } from './FormModalFooter';
+export { TableStateRow } from './TableStateRow';
+export { RowActionButtons } from './RowActionButtons';
 
 export { fieldInputClass, fieldSelectClass, fieldTextareaClass } from './form/fieldClasses';
 

@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from '@/shared/api/types';
+
 export interface MaterialImage {
   id: number;
   path: string;
@@ -16,10 +18,4 @@ export interface GetMaterialsParams {
   perPage?: number;
   search?: string;
 }
-
-export interface PaginatedResponse<T> {
-  data: {
-    count: number;
-    items: T[];
-  };
-}
+export type { PaginatedResponse };

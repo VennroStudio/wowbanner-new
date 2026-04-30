@@ -1,13 +1,14 @@
 export type { Material, MaterialImage, GetMaterialsParams, PaginatedResponse } from './model/types';
 
-export { materialApi } from './api/api';
-export type { CreateMaterialBody, UpdateMaterialBody } from './api/api';
+export { materialApi } from './api/material.api';
+export type { CreateMaterialBody, UpdateMaterialBody } from './api/material.api';
+export { materialKeys } from './model/query-keys';
 
-export { useMaterialsQuery } from './hooks/useMaterialsQuery';
-export { useMaterialQuery } from './hooks/useMaterialQuery';
-export { useCreateMaterialCommand } from './hooks/useCreateMaterialCommand';
-export { useUpdateMaterialCommand } from './hooks/useUpdateMaterialCommand';
-export { useDeleteMaterialCommand } from './hooks/useDeleteMaterialCommand';
-export { useUploadMaterialImagesCommand } from './hooks/useUploadMaterialImagesCommand';
-export { useUpdateMaterialImageAltCommand } from './hooks/useUpdateMaterialImageAltCommand';
-export { useDeleteMaterialImageCommand } from './hooks/useDeleteMaterialImageCommand';
+export { useMaterialsQuery } from './model/useMaterialsQuery';
+export { useMaterialQuery } from './model/useMaterialQuery';
+export { useCreateMaterialCommand } from './model/useCreateMaterialCommand';
+export { useUpdateMaterialCommand } from './model/useUpdateMaterialCommand';
+export { useDeleteMaterialCommand } from './model/useDeleteMaterialCommand';
+export { useUploadMaterialImagesCommand } from './model/useUploadMaterialImagesCommand';
+export { useUpdateMaterialImageAltCommand } from './model/useUpdateMaterialImageAltCommand';
+export { useDeleteMaterialImageCommand } from './model/useDeleteMaterialImageCommand';

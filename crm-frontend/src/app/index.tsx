@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { Header } from '@/widgets/header/ui/Header';
-import { Sidebar } from '@/widgets/sidebar/ui/Sidebar';
+import { AppHeader } from '@/widgets/app-header';
+import { AppSidebar } from '@/widgets/app-sidebar';
 import { AppRouter } from '@/app/router';
 import { AuthInit, QueryProvider } from './providers';
 
@@ -15,9 +15,9 @@ const App = () => {
       <BrowserRouter>
         <AuthInit>
           <div className="h-screen flex flex-col font-sans bg-slate-50 overflow-hidden">
-            <Header toggleSidebar={toggleSidebar} />
+            <AppHeader toggleSidebar={toggleSidebar} />
             <div className="flex flex-1 overflow-hidden">
-              <Sidebar isOpen={isSidebarOpen} />
+              <AppSidebar isOpen={isSidebarOpen} />
               <main className="flex-1 overflow-y-auto w-full min-w-0">
                 <AppRouter />
               </main>

@@ -53,6 +53,11 @@ preview:
 lint:
 	docker compose run --rm $(SERVICE) npm run lint
 
+typecheck:
+	docker compose run --rm $(SERVICE) npm run typecheck
+
+verify: lint typecheck
+
 format:
 	docker compose run --rm $(SERVICE) npx prettier --write "src/**/*.{ts,tsx,css,json}"
 
@@ -126,6 +131,8 @@ help:
 	@echo "  make npm-add PACK=     - Добавить пакет"
 	@echo "  make npm-remove PACK=  - Удалить пакет"
 	@echo "  make lint              - Проверка ESLint"
+	@echo "  make typecheck         - Проверка TypeScript"
+	@echo "  make verify            - ESLint + TypeScript"
 	@echo "  make format            - Форматирование Prettier"
 	@echo ""
 	@echo "-PRODUCTION:"
@@ -143,5 +150,5 @@ help:
 	@echo "======================================"
 
 .PHONY: help create init restart rebuild docker-up docker-down docker-clear docker-build \
-        docker-logs docker-shell install npm-add npm-remove dev build-local preview lint format \
+        docker-logs docker-shell install npm-add npm-remove dev build-local preview lint typecheck verify format \
         docker-login server-login server-logout build push deploy rollback list-v clean-v

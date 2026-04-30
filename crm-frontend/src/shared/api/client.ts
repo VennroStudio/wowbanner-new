@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL, AUTH_URL } from '@/shared/constants';
+import { API_URL, AUTH_URL } from '@/shared/config/env';
 import { getAccessToken } from './accessToken';
 
 export const apiClient = axios.create({

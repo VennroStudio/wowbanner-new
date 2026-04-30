@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from '@/shared/api/types';
+
 /** Элемент справочника из enum (GET /clients/types и т.д.): { value, label } */
 export interface ClientEnumOption {
   value: number;
@@ -41,10 +43,4 @@ export interface GetClientsParams {
   perPage?: number;
   search?: string;
 }
-
-export interface PaginatedResponse<T> {
-  data: {
-    count: number;
-    items: T[];
-  };
-}
+export type { PaginatedResponse };

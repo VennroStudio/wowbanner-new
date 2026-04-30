@@ -1,4 +1,4 @@
-export { MaterialsHeader } from './components/MaterialsHeader';
-export { MaterialsTable } from './components/MaterialsTable';
-export { MaterialFormModal } from './components/MaterialFormModal';
-export { DeleteMaterialModal } from './components/DeleteMaterialModal';
+export { MaterialsHeader } from './ui/MaterialsHeader';
+export { MaterialsTable } from './ui/MaterialsTable';
+export { MaterialFormModal } from './ui/MaterialFormModal';
+export { DeleteMaterialModal } from './ui/DeleteMaterialModal';
