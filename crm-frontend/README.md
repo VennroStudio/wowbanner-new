@@ -271,6 +271,8 @@ import { useClientsQuery } from '@/entities/client/model/useClientsQuery';
 - `ConfirmActionModal`
 - `FormErrorBanner`
 - `FormModalFooter`
+- `TableStateRow`
+- `RowActionButtons`
 - `AlertBanner`
 - `PaginationBar`
 - `RichTextEditor`
@@ -286,6 +288,12 @@ import { useClientsQuery } from '@/entities/client/model/useClientsQuery';
 - `htmlToPlainText`
 - `ruMobilePhone`
 
+Правило:
+
+- `shared/lib` — это reusable hooks и helpers, у которых есть прикладной UI/domain-смысл
+- сюда попадают преобразования и механики, которые напрямую обслуживают формы, таблицы, modal-flow, поиск, отображение и пользовательский ввод
+- если helper выражает повторяемый UI/domain pattern, его место обычно в `shared/lib`
+
 ### `shared/utils`
 
 Сейчас там лежат:
@@ -293,7 +301,17 @@ import { useClientsQuery } from '@/entities/client/model/useClientsQuery';
 - `getApiErrorMessage`
 - JWT helpers
 
-Важно: в будущем нужно решить, где заканчивается `lib` и начинается `utils`, чтобы не плодить путаницу.
+Правило:
+
+- `shared/utils` — это маленькие технические pure-функции без UI-композиции и без локального состояния
+- сюда попадают low-level helpers, которые не являются готовым UI/domain pattern
+- если helper больше похож на инфраструктурную или техническую утилиту, чем на reusable UI primitive, его место в `shared/utils`
+
+Текущее решение по проекту:
+
+- переносов между `shared/lib` и `shared/utils` сейчас не требуется
+- текущее распределение считается валидным и должно использоваться как опорное
+- новые shared-файлы нужно добавлять только по этим правилам, а не “по ощущению”
 
 ## Текущие домены
 
@@ -381,6 +399,19 @@ import { useClientsQuery } from '@/entities/client/model/useClientsQuery';
 - `materialKeys`
 - `processingKeys`
 - `printingKeys`
+
+### 7. Табличные shared-примитивы
+
+Для таблиц уже приняты такие общие компоненты:
+
+- `TableStateRow` — для empty/error состояний
+- `RowActionButtons` — для action-кнопок в строках
+
+Если кто-то меняет или создаёт новую таблицу, сначала нужно использовать эти shared-примитивы, а не копировать заново:
+
+- пустое состояние
+- error состояние
+- кнопки `Редактировать / Удалить`
 
 ## Как добавлять новый экран
 
