@@ -16,6 +16,18 @@ use App\Modules\Material\Entity\MaterialPricingCut\MaterialPricingCutRepository;
 use App\Modules\Material\Entity\MaterialPricingCut\Persistence\Doctrine\DoctrineMaterialPricingCutRepository;
 use App\Modules\Material\Entity\MaterialProcessing\MaterialProcessingRepository;
 use App\Modules\Material\Entity\MaterialProcessing\Persistence\Doctrine\DoctrineMaterialProcessingRepository;
+use App\Modules\Order\Entity\Order\OrderRepository;
+use App\Modules\Order\Entity\Order\Persistence\Doctrine\DoctrineOrderRepository;
+use App\Modules\Order\Entity\OrderDelivery\OrderDeliveryRepository;
+use App\Modules\Order\Entity\OrderDelivery\Persistence\Doctrine\DoctrineOrderDeliveryRepository;
+use App\Modules\Order\Entity\OrderItem\OrderItemRepository;
+use App\Modules\Order\Entity\OrderItem\Persistence\Doctrine\DoctrineOrderItemRepository;
+use App\Modules\Order\Entity\OrderItemMilling\OrderItemMillingRepository;
+use App\Modules\Order\Entity\OrderItemMilling\Persistence\Doctrine\DoctrineOrderItemMillingRepository;
+use App\Modules\Order\Entity\OrderItemProcessing\OrderItemProcessingRepository;
+use App\Modules\Order\Entity\OrderItemProcessing\Persistence\Doctrine\DoctrineOrderItemProcessingRepository;
+use App\Modules\Order\Entity\OrderSection\OrderSectionRepository;
+use App\Modules\Order\Entity\OrderSection\Persistence\Doctrine\DoctrineOrderSectionRepository;
 use App\Modules\Printing\Entity\Printing\Persistence\Doctrine\DoctrinePrintingRepository;
 use App\Modules\Printing\Entity\Printing\PrintingRepository;
 use App\Modules\User\Entity\User\Persistence\Doctrine\DoctrineUserRepository;
@@ -49,6 +61,12 @@ return [
     MaterialPricingByPieceRepository::class => get(DoctrineMaterialPricingByPieceRepository::class),
     MaterialProcessingRepository::class     => get(DoctrineMaterialProcessingRepository::class),
     MaterialPricingCutRepository::class     => get(DoctrineMaterialPricingCutRepository::class),
+    OrderRepository::class                  => get(DoctrineOrderRepository::class),
+    OrderItemRepository::class              => get(DoctrineOrderItemRepository::class),
+    OrderItemMillingRepository::class       => get(DoctrineOrderItemMillingRepository::class),
+    OrderItemProcessingRepository::class    => get(DoctrineOrderItemProcessingRepository::class),
+    OrderSectionRepository::class           => get(DoctrineOrderSectionRepository::class),
+    OrderDeliveryRepository::class          => get(DoctrineOrderDeliveryRepository::class),
     PrintingRepository::class      => get(DoctrinePrintingRepository::class),
     UserRepository::class      => get(DoctrineUserRepository::class),
     UserTokenRepository::class => get(DoctrineUserTokenRepository::class),
