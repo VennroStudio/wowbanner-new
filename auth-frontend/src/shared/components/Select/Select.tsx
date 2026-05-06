@@ -1,7 +1,8 @@
 import React from 'react';
 
 interface SelectOption {
-  value: string | number;
+  id?: string | number;
+  value?: string | number;
   label: string;
 }
 
@@ -33,7 +34,7 @@ export const Select: React.FC<SelectProps> = ({
       >
         <option value="" disabled hidden>{placeholder}</option>
         {options.map((opt, idx) => (
-          <option key={`opt-${opt.value}-${idx}`} value={opt.value}>
+          <option key={`opt-${String(opt.id ?? opt.value)}-${idx}`} value={opt.id ?? opt.value}>
             {opt.label}
           </option>
         ))}

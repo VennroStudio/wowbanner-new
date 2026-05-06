@@ -24,7 +24,7 @@ export const ClientPhonesEditor = ({
   removePhone,
 }: Props) => {
   const { data: phoneTypes = [], isLoading: isPhoneTypesLoading } = useClientPhoneTypesQuery();
-  const defaultPhoneType = phoneTypes[0]?.value ?? 1;
+  const defaultPhoneType = phoneTypes[0]?.id ?? 1;
 
   return (
     <div>
@@ -47,7 +47,7 @@ export const ClientPhonesEditor = ({
               disabled={isPhoneTypesLoading}
             >
               {phoneTypes.map((o) => (
-                <option key={o.value} value={o.value}>
+                <option key={o.id} value={o.id}>
                   {o.label}
                 </option>
               ))}

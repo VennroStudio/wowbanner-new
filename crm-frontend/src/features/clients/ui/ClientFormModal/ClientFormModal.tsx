@@ -173,7 +173,7 @@ export const ClientFormModal = ({
               removePhone={removePhone}
             />
 
-            {clientType === 2 && (
+            {Number(clientType) === 2 && (
               <ClientCompaniesEditor
                 companyFields={companyFields}
                 register={register}

@@ -43,7 +43,7 @@ export const ClientFormTypeDocsFields = ({
           disabled={isTypesLoading}
         >
           {clientTypes.map((o) => (
-            <option key={o.value} value={o.value}>
+            <option key={o.id} value={o.id}>
               {o.label}
             </option>
           ))}
@@ -57,7 +57,7 @@ export const ClientFormTypeDocsFields = ({
           disabled={isDocsLoading}
         >
           {docsTypes.map((o) => (
-            <option key={o.value} value={o.value}>
+            <option key={o.id} value={o.id}>
               {o.label}
             </option>
           ))}

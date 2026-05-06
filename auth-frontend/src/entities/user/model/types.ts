@@ -10,7 +10,7 @@ export interface User {
 }
 
 export interface Role {
-  value: number;
+  id: number;
   label: string;
 }
 

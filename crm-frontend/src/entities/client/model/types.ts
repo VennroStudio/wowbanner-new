@@ -1,8 +1,8 @@
 import type { PaginatedResponse } from '@/shared/api/types';
 
-/** Элемент справочника из enum (GET /clients/types и т.д.): { value, label } */
+/** Элемент справочника из enum (GET /clients/types и т.д.): { id, label } */
 export interface ClientEnumOption {
-  value: number;
+  id: number;
   label: string;
 }
 
