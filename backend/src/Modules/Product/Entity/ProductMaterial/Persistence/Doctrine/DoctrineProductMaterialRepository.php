@@ -28,8 +28,8 @@ final readonly class DoctrineProductMaterialRepository implements ProductMateria
         $productMaterial = $this->findById($id);
         if ($productMaterial === null) {
             throw new DomainExceptionModule(
-                module: 'Product',
-                message: 'error.Product_material_not_found',
+                module: 'product',
+                message: 'error.product_material_not_found',
                 code: 2
             );
         }

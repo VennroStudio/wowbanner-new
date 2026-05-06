@@ -20,8 +20,10 @@ use App\Http\Action\v1\Material\DeleteMaterialAction;
 use App\Http\Action\v1\Material\GetMaterialAreaRangeTypesAction;
 use App\Http\Action\v1\Material\GetMaterialByIdAction;
 use App\Http\Action\v1\Material\GetMaterialDpiTypesAction;
+use App\Http\Action\v1\Material\GetMaterialOptionSelectAction;
 use App\Http\Action\v1\Material\GetMaterialOptionPricingTypesAction;
 use App\Http\Action\v1\Material\GetMaterialPricingCutTypesAction;
+use App\Http\Action\v1\Material\GetMaterialSelectAction;
 use App\Http\Action\v1\Material\GetMaterialsAction;
 use App\Http\Action\v1\Material\GetMaterialVariantTypesAction;
 use App\Http\Action\v1\Material\MaterialImage\CreateMaterialImageAction;
@@ -89,11 +91,13 @@ return static function (App $app): void {
 
         $group->group('/materials', new Group(static function (RouteCollectorProxy $group): void {
             $group->get('', GetMaterialsAction::class)->add(Authenticate::class);
+            $group->get('/select', GetMaterialSelectAction::class)->add(Authenticate::class);
             $group->get('/option-pricing-types', GetMaterialOptionPricingTypesAction::class)->add(Authenticate::class);
             $group->get('/area-range-types', GetMaterialAreaRangeTypesAction::class)->add(Authenticate::class);
             $group->get('/dpi-types', GetMaterialDpiTypesAction::class)->add(Authenticate::class);
             $group->get('/variant-types', GetMaterialVariantTypesAction::class)->add(Authenticate::class);
             $group->get('/pricing-cut-types', GetMaterialPricingCutTypesAction::class)->add(Authenticate::class);
+            $group->get('/{id}/options/select', GetMaterialOptionSelectAction::class)->add(Authenticate::class);
             $group->post('/create', CreateMaterialAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UpdateMaterialAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeleteMaterialAction::class)->add(Authenticate::class);

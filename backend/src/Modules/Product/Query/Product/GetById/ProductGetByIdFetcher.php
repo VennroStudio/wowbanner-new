@@ -45,8 +45,8 @@ final readonly class ProductGetByIdFetcher
 
         if ($row === false) {
             throw new DomainExceptionModule(
-                module: 'Product',
-                message: 'error.Product_not_found',
+                module: 'product',
+                message: 'error.product_not_found',
                 code: 1
             );
         }

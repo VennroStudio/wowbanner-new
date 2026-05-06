@@ -28,8 +28,8 @@ final readonly class DoctrineProductRepository implements ProductRepository
         $product = $this->findById($id);
         if ($product === null) {
             throw new DomainExceptionModule(
-                module: 'Product',
-                message: 'error.Product_not_found',
+                module: 'product',
+                message: 'error.product_not_found',
                 code: 1
             );
         }

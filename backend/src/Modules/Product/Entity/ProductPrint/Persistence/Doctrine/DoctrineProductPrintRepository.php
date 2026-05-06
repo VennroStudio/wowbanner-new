@@ -28,8 +28,8 @@ final readonly class DoctrineProductPrintRepository implements ProductPrintRepos
         $productPrint = $this->findById($id);
         if ($productPrint === null) {
             throw new DomainExceptionModule(
-                module: 'Product',
-                message: 'error.Product_print_not_found',
+                module: 'product',
+                message: 'error.product_print_not_found',
                 code: 3
             );
         }

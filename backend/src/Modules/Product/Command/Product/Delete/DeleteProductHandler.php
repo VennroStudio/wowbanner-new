@@ -48,7 +48,7 @@ final readonly class DeleteProductHandler
 
         $this->repository->remove($product);
 
-        $this->cacher->delete('product_by_id_' . $command->id);
+        $this->cacher->delete('Product_by_id_' . $command->id);
 
         $this->flusher->flush();
     }
