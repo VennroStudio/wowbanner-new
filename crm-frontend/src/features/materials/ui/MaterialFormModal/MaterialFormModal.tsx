@@ -279,6 +279,7 @@ export const MaterialFormModal = ({
               </>
             ) : (
               <MaterialOptionEditor
+                key={`material-option-${activeTab}`}
                 optionIndex={activeTab}
                 control={control}
                 register={register}
