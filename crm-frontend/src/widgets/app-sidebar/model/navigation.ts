@@ -10,6 +10,7 @@ import {
   Wrench,
   Printer,
   Package,
+  Calculator,
 } from 'lucide-react';
 import { ROUTES } from '@/shared/routing/routes';
 
@@ -25,6 +26,7 @@ export const navigationItems: NavigationItem[] = [
   { to: ROUTES.PROCESSINGS, icon: Wrench, label: 'Доп. обработки' },
   { to: ROUTES.PRINTINGS, icon: Printer, label: 'Тип печати' },
   { to: ROUTES.PRODUCTS, icon: Package, label: 'Продукты' },
+  { to: ROUTES.CALCULATORS, icon: Calculator, label: 'Калькуляторы' },
   { disabled: true, icon: Briefcase, label: 'Заказы' },
   { disabled: true, icon: BarChart2, label: 'Аналитика' },
   { disabled: true, icon: MessageSquare, label: 'Чаты' },
