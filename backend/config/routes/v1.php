@@ -34,6 +34,7 @@ use App\Http\Action\v1\OpenApiAction;
 use App\Http\Action\v1\Printing\CreatePrintingAction;
 use App\Http\Action\v1\Printing\DeletePrintingAction;
 use App\Http\Action\v1\Printing\GetPrintingByIdAction;
+use App\Http\Action\v1\Printing\GetPrintingSelectAction;
 use App\Http\Action\v1\Printing\GetPrintingsAction;
 use App\Http\Action\v1\Printing\UpdatePrintingAction;
 use App\Http\Action\v1\Processing\CreateProcessingAction;
@@ -111,6 +112,7 @@ return static function (App $app): void {
 
         $group->group('/printings', new Group(static function (RouteCollectorProxy $group): void {
             $group->get('', GetPrintingsAction::class)->add(Authenticate::class);
+            $group->get('/select', GetPrintingSelectAction::class)->add(Authenticate::class);
             $group->post('/create', CreatePrintingAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UpdatePrintingAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeletePrintingAction::class)->add(Authenticate::class);
