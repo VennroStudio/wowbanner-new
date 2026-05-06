@@ -5,6 +5,11 @@ export interface ProcessingTypeRef {
   label: string;
 }
 
+export interface ProcessingSelectOption {
+  id: number;
+  name: string;
+}
+
 export interface ProcessingImage {
   id: number;
   path: string;

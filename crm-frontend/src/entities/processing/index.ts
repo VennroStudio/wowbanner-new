@@ -1,6 +1,7 @@
 export type {
   Processing,
   ProcessingImage,
+  ProcessingSelectOption,
   ProcessingTypeRef,
   GetProcessingsParams,
   PaginatedProcessingsResponse,
@@ -13,6 +14,7 @@ export { processingKeys } from './model/query-keys';
 export { useProcessingsQuery } from './model/useProcessingsQuery';
 export { useProcessingQuery } from './model/useProcessingQuery';
 export { useProcessingTypesQuery } from './model/useProcessingTypesQuery';
+export { useProcessingSelectQuery } from './model/useProcessingSelectQuery';
 export { useCreateProcessingCommand } from './model/useCreateProcessingCommand';
 export { useUpdateProcessingCommand } from './model/useUpdateProcessingCommand';
 export { useDeleteProcessingCommand } from './model/useDeleteProcessingCommand';

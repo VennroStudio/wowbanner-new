@@ -6,4 +6,5 @@ export const processingKeys = {
   details: () => ['processing'] as const,
   detail: (id: number | string) => ['processing', id] as const,
   types: () => ['processingTypes'] as const,
+  select: () => ['processingSelect'] as const,
 };

@@ -5,6 +5,7 @@ import type {
   GetProcessingsParams,
   PaginatedProcessingsResponse,
   Processing,
+  ProcessingSelectOption,
   ProcessingTypeRef,
 } from '../model/types';
 
@@ -37,6 +38,13 @@ export const processingApi = {
 
   getProcessingTypes: async (): Promise<ProcessingTypeRef[]> => {
     const { data } = await apiClient.get<ApiDataResponse<ProcessingTypeRef[]>>(API_ENDPOINTS.PROCESSINGS.TYPES);
+    return data.data;
+  },
+
+  getProcessingSelectOptions: async (): Promise<ProcessingSelectOption[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<ProcessingSelectOption[]>>(
+      API_ENDPOINTS.PROCESSINGS.SELECT,
+    );
     return data.data;
   },
 

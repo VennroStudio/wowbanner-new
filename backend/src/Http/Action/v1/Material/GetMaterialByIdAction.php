@@ -6,7 +6,7 @@ namespace App\Http\Action\v1\Material;
 
 use App\Components\Http\Response\JsonDataResponse;
 use App\Components\Router\Route;
-use App\Http\Unifier\Material\MaterialUnifier;
+use App\Http\Unifier\Material\MaterialDetailUnifier;
 use App\Modules\Material\Query\Material\GetById\MaterialGetByIdFetcher;
 use App\Modules\Material\Query\Material\GetById\MaterialGetByIdQuery;
 use Doctrine\DBAL\Exception;
@@ -42,7 +42,7 @@ final readonly class GetMaterialByIdAction implements RequestHandlerInterface
 {
     public function __construct(
         private MaterialGetByIdFetcher $fetcher,
-        private MaterialUnifier $unifier,
+        private MaterialDetailUnifier $unifier,
     ) {}
 
     /**

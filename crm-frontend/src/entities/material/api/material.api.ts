@@ -1,16 +1,24 @@
 import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/api/endpoints';
 import type { ApiDataResponse, ApiMutationResponse } from '@/shared/api/types';
-import type { GetMaterialsParams, Material, PaginatedResponse } from '../model/types';
+import type {
+  GetMaterialsParams,
+  Material,
+  MaterialCreateUpdateOption,
+  MaterialEnumRef,
+  PaginatedResponse,
+} from '../model/types';
 
 export type CreateMaterialBody = {
   name: string;
   description?: string;
+  options?: MaterialCreateUpdateOption[];
 };
 
 export type UpdateMaterialBody = {
   name: string;
   description?: string;
+  options?: MaterialCreateUpdateOption[];
 };
 
 export const materialApi = {
@@ -43,6 +51,41 @@ export const materialApi = {
   deleteMaterial: async (id: number | string) => {
     const { data } = await apiClient.delete<ApiMutationResponse>(API_ENDPOINTS.MATERIALS.DELETE(id));
     return data;
+  },
+
+  getOptionPricingTypes: async (): Promise<MaterialEnumRef[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<MaterialEnumRef[]>>(
+      API_ENDPOINTS.MATERIALS.OPTION_PRICING_TYPES,
+    );
+    return data.data;
+  },
+
+  getAreaRangeTypes: async (): Promise<MaterialEnumRef[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<MaterialEnumRef[]>>(
+      API_ENDPOINTS.MATERIALS.AREA_RANGE_TYPES,
+    );
+    return data.data;
+  },
+
+  getDpiTypes: async (): Promise<MaterialEnumRef[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<MaterialEnumRef[]>>(
+      API_ENDPOINTS.MATERIALS.DPI_TYPES,
+    );
+    return data.data;
+  },
+
+  getVariantTypes: async (): Promise<MaterialEnumRef[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<MaterialEnumRef[]>>(
+      API_ENDPOINTS.MATERIALS.VARIANT_TYPES,
+    );
+    return data.data;
+  },
+
+  getPricingCutTypes: async (): Promise<MaterialEnumRef[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<MaterialEnumRef[]>>(
+      API_ENDPOINTS.MATERIALS.PRICING_CUT_TYPES,
+    );
+    return data.data;
   },
 
   uploadImages: async (materialId: number | string, files: File[], imageAlts: string[]) => {
