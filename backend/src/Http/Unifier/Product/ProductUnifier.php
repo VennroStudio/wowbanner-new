@@ -6,6 +6,10 @@ namespace App\Http\Unifier\Product;
 
 use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
+use App\Modules\Material\Query\Material\GetById\MaterialGetByIdFetcher;
+use App\Modules\Material\Query\Material\GetById\MaterialGetByIdQuery;
+use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdFetcher;
+use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdQuery;
 use App\Modules\Product\Query\ProductMaterial\FindByProductIds\ProductMaterialFindByProductIdsFetcher;
 use App\Modules\Product\Query\ProductMaterial\FindByProductIds\ProductMaterialFindByProductIdsQuery;
 use App\Modules\Product\Query\ProductPrint\FindByProductIds\ProductPrintFindByProductIdsFetcher;
@@ -13,6 +17,8 @@ use App\Modules\Product\Query\ProductPrint\FindByProductIds\ProductPrintFindByPr
 use App\Modules\Product\ReadModel\Product\Interface\ProductModelInterface;
 use App\Modules\Product\ReadModel\ProductMaterial\ProductMaterialByProductId;
 use App\Modules\Product\ReadModel\ProductPrint\ProductPrintByProductId;
+use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdFetcher;
+use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdQuery;
 use Doctrine\DBAL\Exception;
 use Override;
 
@@ -21,6 +27,9 @@ final readonly class ProductUnifier implements UnifierInterface
     public function __construct(
         private ProductMaterialFindByProductIdsFetcher $materialFetcher,
         private ProductPrintFindByProductIdsFetcher    $printFetcher,
+        private MaterialGetByIdFetcher                $materialByIdFetcher,
+        private MaterialOptionGetByIdFetcher          $materialOptionFetcher,
+        private PrintingGetByIdFetcher                $printingByIdFetcher,
     ) {}
 
     #[Override]
@@ -83,7 +92,15 @@ final readonly class ProductUnifier implements UnifierInterface
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->productId][] = UnifierHelper::toArrayWithout($item, 'product_id');
+            $option = $this->materialOptionFetcher->fetch(new MaterialOptionGetByIdQuery($item->materialOptionId));
+            $material = $this->materialByIdFetcher->fetch(new MaterialGetByIdQuery($option->materialId));
+            $grouped[$item->productId][] = [
+                'id' => $item->id,
+                'material_option_id' => $item->materialOptionId,
+                'material_id' => $option->materialId,
+                'material_name' => $material->name,
+                'material_option_name' => $option->name,
+            ];
         }
 
         return $grouped;
@@ -97,7 +114,12 @@ final readonly class ProductUnifier implements UnifierInterface
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->productId][] = UnifierHelper::toArrayWithout($item, 'product_id');
+            $print = $this->printingByIdFetcher->fetch(new PrintingGetByIdQuery($item->printId));
+            $grouped[$item->productId][] = [
+                'id' => $item->id,
+                'print_id' => $item->printId,
+                'print_name' => $print->name,
+            ];
         }
 
         return $grouped;

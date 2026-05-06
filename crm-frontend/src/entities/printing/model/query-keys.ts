@@ -5,4 +5,5 @@ export const printingKeys = {
     ['printings', params] as const,
   details: () => ['printing'] as const,
   detail: (id: number | string) => ['printing', id] as const,
+  select: () => ['printingSelect'] as const,
 };

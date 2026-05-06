@@ -4,10 +4,12 @@ export type {
   MaterialEnumRef,
   MaterialImage,
   MaterialOption,
+  MaterialOptionSelectOption,
   MaterialOptionProcessing,
   MaterialPricingByAreaRow,
   MaterialPricingByCutRow,
   MaterialPricingByPieceRow,
+  MaterialSelectOption,
   GetMaterialsParams,
   PaginatedResponse,
 } from './model/types';
@@ -18,6 +20,8 @@ export { materialKeys } from './model/query-keys';
 
 export { useMaterialsQuery } from './model/useMaterialsQuery';
 export { useMaterialQuery } from './model/useMaterialQuery';
+export { useMaterialSelectQuery } from './model/useMaterialSelectQuery';
+export { useMaterialOptionSelectQuery } from './model/useMaterialOptionSelectQuery';
 export { useMaterialOptionPricingTypesQuery } from './model/useMaterialOptionPricingTypesQuery';
 export { useMaterialAreaRangeTypesQuery } from './model/useMaterialAreaRangeTypesQuery';
 export { useMaterialDpiTypesQuery } from './model/useMaterialDpiTypesQuery';

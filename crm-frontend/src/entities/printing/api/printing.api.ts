@@ -1,7 +1,12 @@
 import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/api/endpoints';
 import type { ApiDataResponse, ApiMutationResponse } from '@/shared/api/types';
-import type { GetPrintingsParams, PaginatedPrintingsResponse, Printing } from '../model/types';
+import type {
+  GetPrintingsParams,
+  PaginatedPrintingsResponse,
+  Printing,
+  PrintingSelectOption,
+} from '../model/types';
 
 export type CreatePrintingBody = {
   name: string;
@@ -28,6 +33,13 @@ export const printingApi = {
       API_ENDPOINTS.PRINTINGS.BY_ID(id),
     );
     return data;
+  },
+
+  getPrintingSelectOptions: async (): Promise<PrintingSelectOption[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<PrintingSelectOption[]>>(
+      API_ENDPOINTS.PRINTINGS.SELECT,
+    );
+    return data.data;
   },
 
   createPrinting: async (body: CreatePrintingBody) => {

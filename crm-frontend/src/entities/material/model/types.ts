@@ -5,6 +5,16 @@ export interface MaterialEnumRef {
   label: string;
 }
 
+export interface MaterialSelectOption {
+  id: number;
+  name: string;
+}
+
+export interface MaterialOptionSelectOption {
+  id: number;
+  name: string;
+}
+
 export interface MaterialImage {
   id: number;
   path: string;

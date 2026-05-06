@@ -5,6 +5,11 @@ export interface Printing {
   name: string;
 }
 
+export interface PrintingSelectOption {
+  id: number;
+  name: string;
+}
+
 export interface GetPrintingsParams {
   page?: number;
   perPage?: number;

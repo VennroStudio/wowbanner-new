@@ -18,8 +18,10 @@ export const API_ENDPOINTS = {
   },
   MATERIALS: {
     LIST: '/materials',
+    SELECT: '/materials/select',
     CREATE: '/materials/create',
     BY_ID: (id: string | number) => `/materials/${id}`,
+    OPTION_SELECT: (id: string | number) => `/materials/${id}/options/select`,
     UPDATE: (id: string | number) => `/materials/update/${id}`,
     DELETE: (id: string | number) => `/materials/delete/${id}`,
     OPTION_PRICING_TYPES: '/materials/option-pricing-types',
@@ -45,9 +47,17 @@ export const API_ENDPOINTS = {
   },
   PRINTINGS: {
     LIST: '/printings',
+    SELECT: '/printings/select',
     CREATE: '/printings/create',
     BY_ID: (id: string | number) => `/printings/${id}`,
     UPDATE: (id: string | number) => `/printings/update/${id}`,
     DELETE: (id: string | number) => `/printings/delete/${id}`,
+  },
+  PRODUCTS: {
+    LIST: '/products',
+    CREATE: '/products/create',
+    BY_ID: (id: string | number) => `/products/${id}`,
+    UPDATE: (id: string | number) => `/products/update/${id}`,
+    DELETE: (id: string | number) => `/products/delete/${id}`,
   },
 } as const;
