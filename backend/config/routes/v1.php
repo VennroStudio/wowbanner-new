@@ -37,6 +37,7 @@ use App\Http\Action\v1\Printing\UpdatePrintingAction;
 use App\Http\Action\v1\Processing\CreateProcessingAction;
 use App\Http\Action\v1\Processing\DeleteProcessingAction;
 use App\Http\Action\v1\Processing\GetProcessingByIdAction;
+use App\Http\Action\v1\Processing\GetProcessingSelectAction;
 use App\Http\Action\v1\Processing\GetProcessingsAction;
 use App\Http\Action\v1\Processing\GetProcessingTypesAction;
 use App\Http\Action\v1\Processing\ProcessingImage\CreateProcessingImageAction;
@@ -114,6 +115,7 @@ return static function (App $app): void {
 
         $group->group('/processings', new Group(static function (RouteCollectorProxy $group): void {
             $group->get('', GetProcessingsAction::class)->add(Authenticate::class);
+            $group->get('/select', GetProcessingSelectAction::class)->add(Authenticate::class);
             $group->post('/create', CreateProcessingAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UpdateProcessingAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeleteProcessingAction::class)->add(Authenticate::class);

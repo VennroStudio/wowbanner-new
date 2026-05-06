@@ -113,7 +113,28 @@
 
 ---
 
-## 4. Создание обработки (CreateProcessingAction)
+## 4. Получение обработок для селекта (GetProcessingSelectAction)
+
+**Цель:** Получить облегченный список обработок для селектов и автокомплитов.
+
+**Запрос:**
+- Метод: `GET`
+- URL: `/v1/processings/select`
+- Заголовок: `Authorization: Bearer <access_token>`
+
+**Успех (200):**
+```json
+{
+  "data": [
+    { "id": 1, "name": "Люверсы" },
+    { "id": 2, "name": "Проклейка" }
+  ]
+}
+```
+
+---
+
+## 5. Создание обработки (CreateProcessingAction)
 
 **Цель:** Создать новую обработку.
 
@@ -139,7 +160,7 @@
 
 ---
 
-## 5. Обновление обработки (UpdateProcessingAction)
+## 6. Обновление обработки (UpdateProcessingAction)
 
 **Цель:** Обновить данные существующей обработки.
 
@@ -165,7 +186,7 @@
 
 ---
 
-## 6. Удаление обработки (DeleteProcessingAction)
+## 7. Удаление обработки (DeleteProcessingAction)
 
 **Цель:** Удалить обработку.
 
@@ -181,7 +202,7 @@
 
 ---
 
-## 7. Добавление изображений (CreateProcessingImageAction)
+## 8. Добавление изображений (CreateProcessingImageAction)
 
 **Цель:** Загрузить фотографии для обработки.
 
@@ -203,7 +224,7 @@
 
 ---
 
-## 8. Обновление описания изображения (UpdateProcessingImageAction)
+## 9. Обновление описания изображения (UpdateProcessingImageAction)
 
 **Цель:** Изменить альт-текст загруженного изображения.
 
@@ -225,7 +246,7 @@
 
 ---
 
-## 9. Удаление изображения (DeleteProcessingImageAction)
+## 10. Удаление изображения (DeleteProcessingImageAction)
 
 **Цель:** Удалить изображение.
 
