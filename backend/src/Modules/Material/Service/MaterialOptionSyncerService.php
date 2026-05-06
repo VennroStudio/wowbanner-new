@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Service;
 
+use App\Components\Flusher\FlusherInterface;
 use App\Modules\Material\Command\MaterialOption\Create\CreateMaterialOptionCommand;
 use App\Modules\Material\Command\MaterialOption\Create\CreateMaterialOptionHandler;
 use App\Modules\Material\Command\MaterialOption\Delete\DeleteMaterialOptionCommand;
@@ -21,12 +22,14 @@ final readonly class MaterialOptionSyncerService
         private CreateMaterialOptionHandler $createHandler,
         private UpdateMaterialOptionHandler $updateHandler,
         private DeleteMaterialOptionHandler $deleteHandler,
+        private FlusherInterface $flusher,
     ) {}
 
     /**
      * @param list<MaterialOptionItem> $items
+     * @return list<int>
      */
-    public function sync(int $materialId, array $items): void
+    public function sync(int $materialId, array $items): array
     {
         $current = $this->optionRepository->findByMaterialId($materialId);
         $currentIds = array_map(static fn ($o) => (int) $o->id, $current);
@@ -47,6 +50,7 @@ final readonly class MaterialOptionSyncerService
             }
         }
 
+        $resolvedIds = [];
         foreach ($items as $item) {
             if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateMaterialOptionCommand(
@@ -55,14 +59,19 @@ final readonly class MaterialOptionSyncerService
                     pricingType: $item->pricingType,
                     isCut: $item->isCut,
                 ));
+                $resolvedIds[] = $item->id;
             } else {
-                $this->createHandler->handle(new CreateMaterialOptionCommand(
+                $option = $this->createHandler->handle(new CreateMaterialOptionCommand(
                     name: $item->name,
                     materialId: $materialId,
                     pricingType: $item->pricingType,
                     isCut: $item->isCut,
                 ));
+                $this->flusher->flush();
+                $resolvedIds[] = (int) $option->id;
             }
         }
+
+        return $resolvedIds;
     }
 }
