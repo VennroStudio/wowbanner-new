@@ -19,6 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_order_item_dpi_type', columns: ['dpi_type'])]
 #[ORM\Index(name: 'idx_order_item_variant_type', columns: ['variant_type'])]
 #[ORM\Index(name: 'idx_order_item_performer_id', columns: ['performer_id'])]
+#[ORM\Index(name: 'idx_order_item_source_item_id', columns: ['source_item_id'])]
 class OrderItem
 {
     #[ORM\Id]
@@ -28,6 +29,9 @@ class OrderItem
 
     #[ORM\Column(type: Types::INTEGER)]
     private(set) int $orderId;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private(set) ?int $sourceItemId;
 
     #[ORM\Column(type: Types::INTEGER)]
     private(set) int $printId;
@@ -73,6 +77,7 @@ class OrderItem
 
     private function __construct(
         int $orderId,
+        ?int $sourceItemId,
         int $printId,
         int $productId,
         int $materialId,
@@ -89,6 +94,7 @@ class OrderItem
         string $price,
     ) {
         $this->orderId = $orderId;
+        $this->sourceItemId = $sourceItemId;
         $this->printId = $printId;
         $this->productId = $productId;
         $this->materialId = $materialId;
@@ -107,6 +113,7 @@ class OrderItem
 
     public static function create(
         int $orderId,
+        ?int $sourceItemId,
         int $printId,
         int $productId,
         int $materialId,
@@ -124,6 +131,7 @@ class OrderItem
     ): self {
         return new self(
             orderId: $orderId,
+            sourceItemId: $sourceItemId,
             printId: $printId,
             productId: $productId,
             materialId: $materialId,
@@ -142,6 +150,7 @@ class OrderItem
     }
 
     public function edit(
+        ?int $sourceItemId,
         int $printId,
         int $productId,
         int $materialId,
@@ -157,6 +166,7 @@ class OrderItem
         bool $ready,
         string $price,
     ): void {
+        $this->sourceItemId = $sourceItemId;
         $this->printId = $printId;
         $this->productId = $productId;
         $this->materialId = $materialId;

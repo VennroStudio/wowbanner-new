@@ -17,6 +17,7 @@ final readonly class OrderItemByOrderId implements OrderItemModelInterface
     public function __construct(
         public int $id,
         public int $orderId,
+        public ?int $sourceItemId,
         public int $printId,
         public int $productId,
         public int $materialId,
@@ -37,6 +38,7 @@ final readonly class OrderItemByOrderId implements OrderItemModelInterface
      * @param array{
      *     id: int,
      *     order_id: int,
+     *     source_item_id: int|null,
      *     print_id: int,
      *     product_id: int,
      *     material_id: int,
@@ -58,6 +60,7 @@ final readonly class OrderItemByOrderId implements OrderItemModelInterface
         return new self(
             id: (int) $row['id'],
             orderId: (int) $row['order_id'],
+            sourceItemId: $row['source_item_id'] !== null ? (int) $row['source_item_id'] : null,
             printId: (int) $row['print_id'],
             productId: (int) $row['product_id'],
             materialId: (int) $row['material_id'],
@@ -87,6 +90,7 @@ final readonly class OrderItemByOrderId implements OrderItemModelInterface
         return [
             'id' => $this->id,
             'order_id' => $this->orderId,
+            'source_item_id' => $this->sourceItemId,
             'print_id' => $this->printId,
             'product_id' => $this->productId,
             'material_id' => $this->materialId,

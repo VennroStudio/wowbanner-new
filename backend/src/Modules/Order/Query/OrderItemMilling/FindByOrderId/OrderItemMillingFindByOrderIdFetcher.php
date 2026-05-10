@@ -30,7 +30,7 @@ final readonly class OrderItemMillingFindByOrderIdFetcher
     public function fetch(OrderItemMillingFindByOrderIdQuery $query): array
     {
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'order_id', 'print_id', 'material', 'performer_id', 'note', 'printed', 'ready', 'price')
+            ->select('id', 'order_id', 'source_item_id', 'print_id', 'material', 'performer_id', 'note', 'printed', 'ready', 'price')
             ->from(self::TABLE)
             ->where('order_id = :orderId')
             ->setParameter('orderId', $query->orderId)

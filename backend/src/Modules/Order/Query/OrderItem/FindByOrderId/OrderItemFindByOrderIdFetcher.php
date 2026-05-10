@@ -33,6 +33,7 @@ final readonly class OrderItemFindByOrderIdFetcher
             ->select(
                 'id',
                 'order_id',
+                'source_item_id',
                 'print_id',
                 'product_id',
                 'material_id',

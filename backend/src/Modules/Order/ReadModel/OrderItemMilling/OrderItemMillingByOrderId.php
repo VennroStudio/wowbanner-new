@@ -15,6 +15,7 @@ final readonly class OrderItemMillingByOrderId implements OrderItemMillingModelI
     public function __construct(
         public int $id,
         public int $orderId,
+        public ?int $sourceItemId,
         public int $printId,
         public string $material,
         public ?int $performerId,
@@ -28,6 +29,7 @@ final readonly class OrderItemMillingByOrderId implements OrderItemMillingModelI
      * @param array{
      *     id: int,
      *     order_id: int,
+     *     source_item_id: int|null,
      *     print_id: int,
      *     material: string,
      *     performer_id: int|null,
@@ -42,6 +44,7 @@ final readonly class OrderItemMillingByOrderId implements OrderItemMillingModelI
         return new self(
             id: (int) $row['id'],
             orderId: (int) $row['order_id'],
+            sourceItemId: $row['source_item_id'] !== null ? (int) $row['source_item_id'] : null,
             printId: (int) $row['print_id'],
             material: $row['material'],
             performerId: $row['performer_id'] !== null ? (int) $row['performer_id'] : null,
@@ -64,6 +67,7 @@ final readonly class OrderItemMillingByOrderId implements OrderItemMillingModelI
         return [
             'id' => $this->id,
             'order_id' => $this->orderId,
+            'source_item_id' => $this->sourceItemId,
             'print_id' => $this->printId,
             'material' => $this->material,
             'performer_id' => $this->performerId,

@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'order_item_millings')]
 #[ORM\Index(name: 'idx_order_item_milling_order_id', columns: ['order_id'])]
+#[ORM\Index(name: 'idx_order_item_milling_source_item_id', columns: ['source_item_id'])]
 #[ORM\Index(name: 'idx_order_item_milling_print_id', columns: ['print_id'])]
 #[ORM\Index(name: 'idx_order_item_milling_performer_id', columns: ['performer_id'])]
 class OrderItemMilling
@@ -21,6 +22,9 @@ class OrderItemMilling
 
     #[ORM\Column(type: Types::INTEGER)]
     private(set) int $orderId;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    private(set) ?int $sourceItemId;
 
     #[ORM\Column(type: Types::INTEGER)]
     private(set) int $printId;
@@ -45,6 +49,7 @@ class OrderItemMilling
 
     private function __construct(
         int $orderId,
+        ?int $sourceItemId,
         int $printId,
         string $material,
         ?int $performerId,
@@ -54,6 +59,7 @@ class OrderItemMilling
         string $price,
     ) {
         $this->orderId = $orderId;
+        $this->sourceItemId = $sourceItemId;
         $this->printId = $printId;
         $this->material = $material;
         $this->performerId = $performerId;
@@ -65,6 +71,7 @@ class OrderItemMilling
 
     public static function create(
         int $orderId,
+        ?int $sourceItemId,
         int $printId,
         string $material,
         ?int $performerId,
@@ -75,6 +82,7 @@ class OrderItemMilling
     ): self {
         return new self(
             orderId: $orderId,
+            sourceItemId: $sourceItemId,
             printId: $printId,
             material: $material,
             performerId: $performerId,
@@ -86,6 +94,7 @@ class OrderItemMilling
     }
 
     public function edit(
+        ?int $sourceItemId,
         int $printId,
         string $material,
         ?int $performerId,
@@ -94,6 +103,7 @@ class OrderItemMilling
         bool $ready,
         string $price,
     ): void {
+        $this->sourceItemId = $sourceItemId;
         $this->printId = $printId;
         $this->material = $material;
         $this->performerId = $performerId;
