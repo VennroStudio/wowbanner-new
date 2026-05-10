@@ -191,7 +191,9 @@ declare(strict_types=1);
 
 namespace App\Modules\{Module}\Entity\{Entity}\Fields\Enums;
 
-enum {EnumName}: int
+use App\Components\Enum\EnumInterface;
+
+enum {EnumName}: int implements EnumInterface
 {
     case ACTIVE = 1;
     case INACTIVE = 2;
@@ -201,6 +203,50 @@ enum {EnumName}: int
         return match ($this) {
             self::ACTIVE   => 'Активен',
             self::INACTIVE => 'Неактивен',
+        };
+    }
+}
+```
+
+### Enum для API-справочников
+
+- Если enum должен отдаваться во frontend как справочник `{ id, label }`, он должен реализовывать `App\Components\Enum\EnumInterface`
+- Такие enum используются через `EnumModel::fromEnumClass(...)`
+- Если набор значений зависит от роли пользователя, enum дополнительно реализует `App\Components\Enum\RoleAwareEnumInterface`
+- В этом случае логика доступных значений хранится в самом enum через `casesForRole(UserRole $role)`, а не размазывается по Action
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Entity\{Entity}\Fields\Enums;
+
+use App\Components\Enum\EnumInterface;
+use App\Components\Enum\RoleAwareEnumInterface;
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
+
+enum {EnumName}: int implements EnumInterface, RoleAwareEnumInterface
+{
+    case ONE = 1;
+    case TWO = 2;
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::ONE => 'Первый',
+            self::TWO => 'Второй',
+        };
+    }
+
+    /**
+     * @return list<self>
+     */
+    public static function casesForRole(UserRole $role): array
+    {
+        return match ($role) {
+            UserRole::ADMIN => self::cases(),
+            default => [self::ONE],
         };
     }
 }

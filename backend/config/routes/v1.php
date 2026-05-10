@@ -31,6 +31,7 @@ use App\Http\Action\v1\Material\MaterialImage\DeleteMaterialImageAction;
 use App\Http\Action\v1\Material\MaterialImage\UpdateMaterialImageAction;
 use App\Http\Action\v1\Material\UpdateMaterialAction;
 use App\Http\Action\v1\OpenApiAction;
+use App\Http\Action\v1\Order\GetOrderStatusTypesAction;
 use App\Http\Action\v1\Printing\CreatePrintingAction;
 use App\Http\Action\v1\Printing\DeletePrintingAction;
 use App\Http\Action\v1\Printing\GetPrintingByIdAction;
@@ -140,6 +141,10 @@ return static function (App $app): void {
             $group->patch('/update/{id}', UpdateProductAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeleteProductAction::class)->add(Authenticate::class);
             $group->get('/{id}', GetProductByIdAction::class)->add(Authenticate::class);
+        }));
+
+        $group->group('/orders', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('/status-types', GetOrderStatusTypesAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/clients', new Group(static function (RouteCollectorProxy $group): void {

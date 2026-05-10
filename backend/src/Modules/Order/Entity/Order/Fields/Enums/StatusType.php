@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Order\Entity\Order\Fields\Enums;
 
 use App\Components\Enum\EnumInterface;
+use App\Components\Enum\RoleAwareEnumInterface;
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
+use Override;
 
-enum StatusType: int implements EnumInterface
+enum StatusType: int implements EnumInterface, RoleAwareEnumInterface
 {
     case UNDER_APPROVAL = 1;
     case SENT_TO_PREPRESS = 2;
@@ -18,6 +21,7 @@ enum StatusType: int implements EnumInterface
     case READY = 8;
     case SHIPPED = 9;
 
+    #[Override]
     public function getLabel(): string
     {
         return match ($this) {
@@ -30,6 +34,22 @@ enum StatusType: int implements EnumInterface
             self::POST_PRINT_PROCESSING => 'После печатная обработка',
             self::READY => 'Готов',
             self::SHIPPED => 'Отгружен',
+        };
+    }
+
+    /**
+     * Пока текущая матрица ролей заказа явно не зафиксирована,
+     * все существующие роли получают полный список статусов.
+     *
+     * @return list<self>
+     */
+    public static function casesForRole(UserRole $role): array
+    {
+        return match ($role) {
+            UserRole::ADMIN,
+            UserRole::DEVELOPER,
+            UserRole::EDITOR,
+            UserRole::USER => self::cases(),
         };
     }
 }

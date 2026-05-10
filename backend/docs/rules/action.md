@@ -21,6 +21,7 @@
 - Параметр маршрута: `Route::getArgumentToInt($request, 'id')`
 - Защищённый маршрут: `RequestIdentity::get($request)`
 - Имена полей JSON совпадают с именами свойств Command/Query (camelCase)
+- Enum-справочники для frontend отдаются отдельными `GET` Action через `EnumModel`
 
 ---
 
@@ -172,6 +173,35 @@ public function handle(ServerRequestInterface $request): ResponseInterface
     return new JsonDataItemsResponse(
         count: $result->count,
         items: $this->unifier->unify(null, $result->items),
+    );
+}
+```
+
+### GET — enum-справочник
+
+Если endpoint отдаёт статический список enum-значений `{ id, label }`, Action не использует Fetcher/Unifier и отвечает напрямую через `EnumModel`.
+
+```php
+public function handle(ServerRequestInterface $request): ResponseInterface
+{
+    return new JsonDataResponse(EnumModel::fromEnumClass(SomeEnum::class));
+}
+```
+
+### GET — enum-справочник с учётом роли
+
+Если список enum-значений зависит от роли текущего пользователя:
+- маршрут должен быть защищён `Authenticate`
+- Action получает роль через `RequestIdentity::get($request)`
+- фильтрация выполняется не в Action, а в самом enum через `RoleAwareEnumInterface`
+
+```php
+public function handle(ServerRequestInterface $request): ResponseInterface
+{
+    $identity = RequestIdentity::get($request);
+
+    return new JsonDataResponse(
+        EnumModel::fromEnumClassForRole(SomeEnum::class, $identity->role),
     );
 }
 ```

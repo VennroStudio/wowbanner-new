@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Components\Enum;
 
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 use BackedEnum;
 
 final readonly class EnumModel
@@ -36,6 +37,19 @@ final readonly class EnumModel
         return array_map(
             static fn($case) => self::fromEnum($case),
             $enumClass::cases(),
+        );
+    }
+
+    /**
+     * @template T of BackedEnum&EnumInterface&RoleAwareEnumInterface
+     * @param class-string<T> $enumClass
+     * @return list<self>
+     */
+    public static function fromEnumClassForRole(string $enumClass, UserRole $role): array
+    {
+        return array_map(
+            static fn($case) => self::fromEnum($case),
+            $enumClass::casesForRole($role),
         );
     }
 }
