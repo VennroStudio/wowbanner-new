@@ -102,6 +102,11 @@ final readonly class OrderFindAllFetcher
                 ->setParameter('optionId', $query->optionId);
         }
 
+        if ($query->docs !== null) {
+            $qb->andWhere(ClientFindAllFetcher::ALIAS . '.docs = :docs')
+                ->setParameter('docs', $query->docs);
+        }
+
         if ($query->managerId !== null) {
             $qb->andWhere('o.manager_id = :managerId')
                 ->setParameter('managerId', $query->managerId);

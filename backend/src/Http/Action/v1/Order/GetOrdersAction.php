@@ -34,6 +34,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
         new OA\Parameter(name: 'printId', description: 'Фильтр по типу печати', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         new OA\Parameter(name: 'materialId', description: 'Фильтр по материалу', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         new OA\Parameter(name: 'optionId', description: 'Фильтр по опции материала', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
+        new OA\Parameter(name: 'docs', description: 'Фильтр по типу документа клиента', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         new OA\Parameter(name: 'managerId', description: 'Фильтр по менеджеру', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         new OA\Parameter(name: 'designerId', description: 'Фильтр по дизайнеру', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
         new OA\Parameter(name: 'statusType', description: 'Фильтр по статусу', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),

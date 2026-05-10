@@ -33,6 +33,9 @@ final class OrderFindAllQuery
     public ?int $optionId = null;
 
     #[Assert\Positive]
+    public ?int $docs = null;
+
+    #[Assert\Positive]
     public ?int $managerId = null;
 
     #[Assert\Positive]
