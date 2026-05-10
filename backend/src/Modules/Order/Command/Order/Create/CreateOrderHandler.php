@@ -50,6 +50,7 @@ final readonly class CreateOrderHandler
             orderId: (int) $order->id,
             delivery: $command->delivery,
             files: $command->files,
+            keepFileIds: null,
             items: $command->items,
             millings: $command->millings,
             payments: $command->payments,

@@ -31,7 +31,18 @@ use App\Http\Action\v1\Material\MaterialImage\DeleteMaterialImageAction;
 use App\Http\Action\v1\Material\MaterialImage\UpdateMaterialImageAction;
 use App\Http\Action\v1\Material\UpdateMaterialAction;
 use App\Http\Action\v1\OpenApiAction;
+use App\Http\Action\v1\Order\CreateOrderAction;
+use App\Http\Action\v1\Order\DeleteOrderAction;
+use App\Http\Action\v1\Order\GetOrderDeliveryTypesAction;
+use App\Http\Action\v1\Order\GetOrderByIdAction;
+use App\Http\Action\v1\Order\GetOrderPaymentOperationTypesAction;
+use App\Http\Action\v1\Order\GetOrderPaymentTypesAction;
+use App\Http\Action\v1\Order\GetOrderSectionTypesAction;
+use App\Http\Action\v1\Order\GetOrderServiceTypesAction;
 use App\Http\Action\v1\Order\GetOrderStatusTypesAction;
+use App\Http\Action\v1\Order\GetOrderStorageTypesAction;
+use App\Http\Action\v1\Order\GetOrdersAction;
+use App\Http\Action\v1\Order\UpdateOrderAction;
 use App\Http\Action\v1\Printing\CreatePrintingAction;
 use App\Http\Action\v1\Printing\DeletePrintingAction;
 use App\Http\Action\v1\Printing\GetPrintingByIdAction;
@@ -144,7 +155,18 @@ return static function (App $app): void {
         }));
 
         $group->group('/orders', new Group(static function (RouteCollectorProxy $group): void {
+            $group->get('', GetOrdersAction::class)->add(Authenticate::class);
             $group->get('/status-types', GetOrderStatusTypesAction::class)->add(Authenticate::class);
+            $group->get('/storage-types', GetOrderStorageTypesAction::class)->add(Authenticate::class);
+            $group->get('/delivery-types', GetOrderDeliveryTypesAction::class)->add(Authenticate::class);
+            $group->get('/payment-operation-types', GetOrderPaymentOperationTypesAction::class)->add(Authenticate::class);
+            $group->get('/payment-types', GetOrderPaymentTypesAction::class)->add(Authenticate::class);
+            $group->get('/section-types', GetOrderSectionTypesAction::class)->add(Authenticate::class);
+            $group->get('/service-types', GetOrderServiceTypesAction::class)->add(Authenticate::class);
+            $group->post('/create', CreateOrderAction::class)->add(Authenticate::class);
+            $group->patch('/update/{id}', UpdateOrderAction::class)->add(Authenticate::class);
+            $group->delete('/delete/{id}', DeleteOrderAction::class)->add(Authenticate::class);
+            $group->get('/{id}', GetOrderByIdAction::class)->add(Authenticate::class);
         }));
 
         $group->group('/clients', new Group(static function (RouteCollectorProxy $group): void {

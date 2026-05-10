@@ -49,6 +49,7 @@ final readonly class UpdateOrderHandler
             orderId: $command->id,
             delivery: $command->delivery,
             files: $command->files,
+            keepFileIds: $command->keepFileIds,
             items: $command->items,
             millings: $command->millings,
             payments: $command->payments,

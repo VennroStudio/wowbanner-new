@@ -26,6 +26,7 @@ final readonly class OrderStructureSyncerService
 
     /**
      * @param list<OrderFileItem> $files
+     * @param list<int>|null $keepFileIds
      * @param list<OrderItemItem> $items
      * @param list<OrderItemMillingItem> $millings
      * @param list<OrderPaymentItem> $payments
@@ -36,6 +37,7 @@ final readonly class OrderStructureSyncerService
         int $orderId,
         ?OrderDeliveryItem $delivery,
         array $files,
+        ?array $keepFileIds,
         array $items,
         array $millings,
         array $payments,
@@ -43,7 +45,7 @@ final readonly class OrderStructureSyncerService
         array $services,
     ): array {
         $this->deliverySyncerService->sync($orderId, $delivery);
-        $this->fileSyncerService->sync($orderId, $files);
+        $this->fileSyncerService->sync($orderId, $files, $keepFileIds);
         $pendingProcessings = $this->itemSyncerService->sync($orderId, $items);
         $this->itemMillingSyncerService->sync($orderId, $millings);
         $this->paymentSyncerService->sync($orderId, $payments);

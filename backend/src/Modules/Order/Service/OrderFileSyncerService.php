@@ -24,15 +24,19 @@ final readonly class OrderFileSyncerService
 
     /**
      * @param list<OrderFileItem> $items
+     * @param list<int>|null $keepFileIds
      */
-    public function sync(int $orderId, array $items): void
+    public function sync(int $orderId, array $items, ?array $keepFileIds = null): void
     {
         $currentItems = $this->repository->findByOrderId($orderId);
         $currentIds = array_map(static fn($item) => $item->id, $currentItems);
         $commandIds = array_filter(array_map(static fn(OrderFileItem $item) => $item->id, $items));
+        $retainedIds = $keepFileIds !== null
+            ? array_values(array_unique([...$keepFileIds, ...$commandIds]))
+            : $currentIds;
 
         foreach ($currentItems as $currentItem) {
-            if (!in_array($currentItem->id, $commandIds, true)) {
+            if (!in_array($currentItem->id, $retainedIds, true)) {
                 $this->deleteHandler->handle(new DeleteOrderFileCommand($currentItem->id));
             }
         }

@@ -58,6 +58,9 @@ final readonly class UpdateOrderCommand
         #[Assert\Valid]
         public array $files = [],
 
+        /** @var list<int>|null */
+        public ?array $keepFileIds = null,
+
         /** @var list<OrderItemItem> */
         #[Assert\Valid]
         public array $items = [],
