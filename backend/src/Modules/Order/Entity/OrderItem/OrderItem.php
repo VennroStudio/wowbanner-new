@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Entity\OrderItem;
 
+use App\Modules\Material\Entity\MaterialPricingByArea\Fields\Enums\DpiType;
+use App\Modules\Material\Entity\MaterialPricingByPiece\Fields\Enums\VariantType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'order_items')]
 #[ORM\Index(name: 'idx_order_item_order_id', columns: ['order_id'])]
-#[ORM\Index(name: 'idx_order_item_print_type_id', columns: ['print_type_id'])]
+#[ORM\Index(name: 'idx_order_item_print_id', columns: ['print_id'])]
 #[ORM\Index(name: 'idx_order_item_product_id', columns: ['product_id'])]
 #[ORM\Index(name: 'idx_order_item_material_id', columns: ['material_id'])]
 #[ORM\Index(name: 'idx_order_item_option_id', columns: ['option_id'])]
+#[ORM\Index(name: 'idx_order_item_dpi_type', columns: ['dpi_type'])]
+#[ORM\Index(name: 'idx_order_item_variant_type', columns: ['variant_type'])]
 #[ORM\Index(name: 'idx_order_item_performer_id', columns: ['performer_id'])]
 class OrderItem
 {
@@ -26,7 +30,7 @@ class OrderItem
     private(set) int $orderId;
 
     #[ORM\Column(type: Types::INTEGER)]
-    private(set) int $printTypeId;
+    private(set) int $printId;
 
     #[ORM\Column(type: Types::INTEGER)]
     private(set) int $productId;
@@ -37,11 +41,11 @@ class OrderItem
     #[ORM\Column(type: Types::INTEGER)]
     private(set) int $optionId;
 
-    #[ORM\Column(type: Types::INTEGER)]
-    private(set) int $dpiType;
+    #[ORM\Column(type: Types::INTEGER, enumType: DpiType::class)]
+    private(set) DpiType $dpiType;
 
-    #[ORM\Column(type: Types::INTEGER)]
-    private(set) int $variantType;
+    #[ORM\Column(type: Types::INTEGER, enumType: VariantType::class)]
+    private(set) VariantType $variantType;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private(set) string $width;
@@ -69,12 +73,12 @@ class OrderItem
 
     private function __construct(
         int $orderId,
-        int $printTypeId,
+        int $printId,
         int $productId,
         int $materialId,
         int $optionId,
-        int $dpiType,
-        int $variantType,
+        DpiType $dpiType,
+        VariantType $variantType,
         string $width,
         string $height,
         int $quantity,
@@ -85,7 +89,7 @@ class OrderItem
         string $price,
     ) {
         $this->orderId = $orderId;
-        $this->printTypeId = $printTypeId;
+        $this->printId = $printId;
         $this->productId = $productId;
         $this->materialId = $materialId;
         $this->optionId = $optionId;
@@ -103,12 +107,12 @@ class OrderItem
 
     public static function create(
         int $orderId,
-        int $printTypeId,
+        int $printId,
         int $productId,
         int $materialId,
         int $optionId,
-        int $dpiType,
-        int $variantType,
+        DpiType $dpiType,
+        VariantType $variantType,
         string $width,
         string $height,
         int $quantity,
@@ -120,7 +124,7 @@ class OrderItem
     ): self {
         return new self(
             orderId: $orderId,
-            printTypeId: $printTypeId,
+            printId: $printId,
             productId: $productId,
             materialId: $materialId,
             optionId: $optionId,
@@ -138,12 +142,12 @@ class OrderItem
     }
 
     public function edit(
-        int $printTypeId,
+        int $printId,
         int $productId,
         int $materialId,
         int $optionId,
-        int $dpiType,
-        int $variantType,
+        DpiType $dpiType,
+        VariantType $variantType,
         string $width,
         string $height,
         int $quantity,
@@ -153,7 +157,7 @@ class OrderItem
         bool $ready,
         string $price,
     ): void {
-        $this->printTypeId = $printTypeId;
+        $this->printId = $printId;
         $this->productId = $productId;
         $this->materialId = $materialId;
         $this->optionId = $optionId;

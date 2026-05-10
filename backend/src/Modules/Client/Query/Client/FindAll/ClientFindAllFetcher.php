@@ -10,16 +10,23 @@ use App\Modules\Client\Query\ClientPhone\FindByClientIds\ClientPhoneFindByClient
 use App\Modules\Client\ReadModel\Client\ClientFindAll;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 final readonly class ClientFindAllFetcher
 {
     private const string TABLE = 'clients';
+    public const string ALIAS = 'c';
 
     public function __construct(
         private Connection $connection,
         private ClientCompanyFindByClientIdsFetcher $companyFetcher,
         private ClientPhoneFindByClientIdsFetcher $phoneFetcher,
     ) {}
+
+    public function joinForFilter(QueryBuilder $qb, string $alias): void
+    {
+        $qb->leftJoin($alias, self::TABLE, self::ALIAS, self::ALIAS . '.id = ' . $alias . '.client_id');
+    }
 
     /**
      * @return ModelCountItemsResult<ClientFindAll>

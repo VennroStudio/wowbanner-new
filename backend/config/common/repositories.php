@@ -20,12 +20,18 @@ use App\Modules\Order\Entity\Order\OrderRepository;
 use App\Modules\Order\Entity\Order\Persistence\Doctrine\DoctrineOrderRepository;
 use App\Modules\Order\Entity\OrderDelivery\OrderDeliveryRepository;
 use App\Modules\Order\Entity\OrderDelivery\Persistence\Doctrine\DoctrineOrderDeliveryRepository;
+use App\Modules\Order\Entity\OrderFile\OrderFileRepository;
+use App\Modules\Order\Entity\OrderFile\Persistence\Doctrine\DoctrineOrderFileRepository;
 use App\Modules\Order\Entity\OrderItem\OrderItemRepository;
 use App\Modules\Order\Entity\OrderItem\Persistence\Doctrine\DoctrineOrderItemRepository;
 use App\Modules\Order\Entity\OrderItemMilling\OrderItemMillingRepository;
 use App\Modules\Order\Entity\OrderItemMilling\Persistence\Doctrine\DoctrineOrderItemMillingRepository;
 use App\Modules\Order\Entity\OrderItemProcessing\OrderItemProcessingRepository;
 use App\Modules\Order\Entity\OrderItemProcessing\Persistence\Doctrine\DoctrineOrderItemProcessingRepository;
+use App\Modules\Order\Entity\OrderNotification\OrderNotificationRepository;
+use App\Modules\Order\Entity\OrderNotification\Persistence\Doctrine\DoctrineOrderNotificationRepository;
+use App\Modules\Order\Entity\OrderPayment\OrderPaymentRepository;
+use App\Modules\Order\Entity\OrderPayment\Persistence\Doctrine\DoctrineOrderPaymentRepository;
 use App\Modules\Order\Entity\OrderSection\OrderSectionRepository;
 use App\Modules\Order\Entity\OrderSection\Persistence\Doctrine\DoctrineOrderSectionRepository;
 use App\Modules\Printing\Entity\Printing\Persistence\Doctrine\DoctrinePrintingRepository;
@@ -62,9 +68,12 @@ return [
     MaterialProcessingRepository::class     => get(DoctrineMaterialProcessingRepository::class),
     MaterialPricingCutRepository::class     => get(DoctrineMaterialPricingCutRepository::class),
     OrderRepository::class                  => get(DoctrineOrderRepository::class),
+    OrderFileRepository::class              => get(DoctrineOrderFileRepository::class),
     OrderItemRepository::class              => get(DoctrineOrderItemRepository::class),
     OrderItemMillingRepository::class       => get(DoctrineOrderItemMillingRepository::class),
     OrderItemProcessingRepository::class    => get(DoctrineOrderItemProcessingRepository::class),
+    OrderNotificationRepository::class      => get(DoctrineOrderNotificationRepository::class),
+    OrderPaymentRepository::class           => get(DoctrineOrderPaymentRepository::class),
     OrderSectionRepository::class           => get(DoctrineOrderSectionRepository::class),
     OrderDeliveryRepository::class          => get(DoctrineOrderDeliveryRepository::class),
     PrintingRepository::class      => get(DoctrinePrintingRepository::class),

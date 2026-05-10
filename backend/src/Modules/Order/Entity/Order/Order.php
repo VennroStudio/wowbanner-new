@@ -20,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(name: 'idx_order_status_type', columns: ['status_type'])]
 #[ORM\Index(name: 'idx_order_storage_type', columns: ['storage_type'])]
 #[ORM\Index(name: 'idx_order_created_at', columns: ['created_at'])]
+#[ORM\Index(name: 'idx_order_accepted_at', columns: ['accepted_at'])]
 #[ORM\Index(name: 'idx_order_deadline_at', columns: ['deadline_at'])]
 class Order
 {
@@ -70,14 +71,20 @@ class Order
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private(set) string $deliveryPrice;
 
-    #[ORM\Column(type: Types::BOOLEAN)]
-    private(set) bool $isFile;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private(set) DateTimeImmutable $acceptedAt;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private(set) DateTimeImmutable $deadlineAt;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private(set) DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private(set) DateTimeImmutable $deadlineAt;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private(set) ?DateTimeImmutable $archivedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private(set) ?DateTimeImmutable $deletedAt = null;
 
     private function __construct(
         int $creatorId,
@@ -94,7 +101,7 @@ class Order
         string $installationPrice,
         string $additionalPrice,
         string $deliveryPrice,
-        bool $isFile,
+        DateTimeImmutable $acceptedAt,
         DateTimeImmutable $deadlineAt,
     ) {
         $this->creatorId = $creatorId;
@@ -111,7 +118,7 @@ class Order
         $this->installationPrice = $installationPrice;
         $this->additionalPrice = $additionalPrice;
         $this->deliveryPrice = $deliveryPrice;
-        $this->isFile = $isFile;
+        $this->acceptedAt = $acceptedAt;
         $this->deadlineAt = $deadlineAt;
         $this->createdAt = UtcClock::now();
     }
@@ -131,7 +138,7 @@ class Order
         string $installationPrice,
         string $additionalPrice,
         string $deliveryPrice,
-        bool $isFile,
+        DateTimeImmutable $acceptedAt,
         DateTimeImmutable $deadlineAt,
     ): self {
         return new self(
@@ -149,7 +156,7 @@ class Order
             installationPrice: $installationPrice,
             additionalPrice: $additionalPrice,
             deliveryPrice: $deliveryPrice,
-            isFile: $isFile,
+            acceptedAt: $acceptedAt,
             deadlineAt: $deadlineAt,
         );
     }
@@ -168,7 +175,7 @@ class Order
         string $installationPrice,
         string $additionalPrice,
         string $deliveryPrice,
-        bool $isFile,
+        DateTimeImmutable $acceptedAt,
         DateTimeImmutable $deadlineAt,
     ): void {
         $this->managerId = $managerId;
@@ -184,7 +191,7 @@ class Order
         $this->installationPrice = $installationPrice;
         $this->additionalPrice = $additionalPrice;
         $this->deliveryPrice = $deliveryPrice;
-        $this->isFile = $isFile;
+        $this->acceptedAt = $acceptedAt;
         $this->deadlineAt = $deadlineAt;
     }
 }
