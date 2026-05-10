@@ -19,7 +19,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 #[OA\Get(
     path: '/orders/{id}',
-    description: 'Получение подробной информации о заказе со всеми вложенными сущностями',
+    description: 'Получение подробной информации о заказе',
     summary: 'Получить заказ по ID',
     security: [['bearerAuth' => []]],
     tags: ['Orders'],

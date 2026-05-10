@@ -21,7 +21,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 #[OA\Post(
     path: '/orders/create',
-    description: 'Создание нового заказа вместе с доставкой, файлами, позициями, платежами, секциями и услугами',
+    description: 'Создание нового заказа',
     summary: 'Создать заказ',
     security: [['bearerAuth' => []]],
     requestBody: new OA\RequestBody(
