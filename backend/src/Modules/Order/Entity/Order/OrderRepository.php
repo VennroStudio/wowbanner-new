@@ -8,6 +8,8 @@ interface OrderRepository
 {
     public function add(Order $order): void;
 
+    public function remove(Order $order): void;
+
     public function getById(int $id): Order;
 
     public function findById(int $id): ?Order;

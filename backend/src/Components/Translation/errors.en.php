@@ -11,4 +11,9 @@ return [
     'error.wrong_token_type'  => 'Wrong token type.',
     'error.invalid_claim'     => 'Invalid token claim.',
     'error.invalid_identity'  => 'Invalid identity.',
+    'error.yandex_disk.cannot_open_file' => 'Cannot open file for Yandex Disk.',
+    'error.yandex_disk.upload_failed' => 'Failed to upload file to Yandex Disk.',
+    'error.yandex_disk.delete_failed' => 'Failed to delete file from Yandex Disk.',
+    'error.yandex_disk.upload_link_failed' => 'Failed to get Yandex Disk upload link.',
+    'error.yandex_disk.download_link_failed' => 'Failed to get Yandex Disk download link.',
 ];

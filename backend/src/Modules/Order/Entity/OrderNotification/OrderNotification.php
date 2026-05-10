@@ -49,4 +49,9 @@ class OrderNotification
             notificationType: $notificationType,
         );
     }
+
+    public function edit(NotificationType $notificationType): void
+    {
+        $this->notificationType = $notificationType;
+    }
 }

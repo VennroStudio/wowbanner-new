@@ -29,6 +29,12 @@ final readonly class DoctrineOrderRepository implements OrderRepository
     }
 
     #[Override]
+    public function remove(Order $order): void
+    {
+        $this->em->remove($order);
+    }
+
+    #[Override]
     public function getById(int $id): Order
     {
         $order = $this->findById($id);

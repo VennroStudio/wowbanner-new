@@ -87,4 +87,20 @@ class OrderPayment
             confirmation: $confirmation,
         );
     }
+
+    public function edit(
+        int $clientId,
+        OperationType $operationType,
+        PaymentType $paymentType,
+        ?string $reason,
+        ?string $note,
+        bool $confirmation,
+    ): void {
+        $this->clientId = $clientId;
+        $this->operationType = $operationType;
+        $this->paymentType = $paymentType;
+        $this->reason = $reason;
+        $this->note = $note;
+        $this->confirmation = $confirmation;
+    }
 }

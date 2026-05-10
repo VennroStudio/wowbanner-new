@@ -61,4 +61,14 @@ class OrderFile
             originalName: $originalName,
         );
     }
+
+    public function edit(
+        string $diskPath,
+        string $fileName,
+        string $originalName,
+    ): void {
+        $this->diskPath = $diskPath;
+        $this->fileName = $fileName;
+        $this->originalName = $originalName;
+    }
 }
