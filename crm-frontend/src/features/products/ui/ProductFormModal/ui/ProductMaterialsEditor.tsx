@@ -14,6 +14,19 @@ interface ProductMaterialsEditorProps {
   disabled?: boolean;
 }
 
+const areMaterialOptionsEqual = (
+  left: MaterialOptionSelectOption[] | undefined,
+  right: MaterialOptionSelectOption[],
+) => {
+  if (!left) return false;
+  if (left.length !== right.length) return false;
+
+  return left.every((item, index) => {
+    const pair = right[index];
+    return pair != null && pair.id === item.id && pair.name === item.name;
+  });
+};
+
 export const ProductMaterialsEditor = ({
   items,
   materialOptionsById,
@@ -36,10 +49,14 @@ export const ProductMaterialsEditor = ({
   });
 
   useEffect(() => {
-    if (currentMaterialId > 0 && currentMaterialOptions.length > 0) {
+    if (currentMaterialId <= 0 || currentMaterialOptions.length === 0) {
+      return;
+    }
+
+    if (!areMaterialOptionsEqual(materialOptionsById[currentMaterialId], currentMaterialOptions)) {
       onChangeMaterialOptionsCache(currentMaterialId, currentMaterialOptions);
     }
-  }, [currentMaterialId, currentMaterialOptions, onChangeMaterialOptionsCache]);
+  }, [currentMaterialId, currentMaterialOptions, materialOptionsById, onChangeMaterialOptionsCache]);
 
   const optionList = useMemo(
     () => materialOptionsById[currentMaterialId] ?? currentMaterialOptions,

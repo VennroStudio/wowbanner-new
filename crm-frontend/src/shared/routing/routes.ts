@@ -5,5 +5,6 @@ export const ROUTES = {
   PROCESSINGS: '/processings',
   PRINTINGS: '/printings',
   PRODUCTS: '/products',
+  ORDERS: '/orders',
   CALCULATORS: '/calculators',
 } as const;

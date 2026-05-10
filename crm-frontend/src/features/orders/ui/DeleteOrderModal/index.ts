@@ -1,0 +1,1 @@
+export { DeleteOrderModal } from './DeleteOrderModal';

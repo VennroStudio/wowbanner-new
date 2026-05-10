@@ -36,6 +36,19 @@ interface ProductFormModalProps {
   onSuccess?: (mode: 'create' | 'edit') => void;
 }
 
+const areMaterialOptionsEqual = (
+  left: MaterialOptionSelectOption[] | undefined,
+  right: MaterialOptionSelectOption[],
+) => {
+  if (!left) return false;
+  if (left.length !== right.length) return false;
+
+  return left.every((item, index) => {
+    const pair = right[index];
+    return pair != null && pair.id === item.id && pair.name === item.name;
+  });
+};
+
 export const ProductFormModal = ({
   open,
   mode,
@@ -167,10 +180,16 @@ export const ProductFormModal = ({
     materialId: number,
     options: MaterialOptionSelectOption[],
   ) => {
-    setLoadedMaterialOptionsById((current) => ({
-      ...current,
-      [materialId]: options,
-    }));
+    setLoadedMaterialOptionsById((current) => {
+      if (areMaterialOptionsEqual(current[materialId], options)) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [materialId]: options,
+      };
+    });
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;

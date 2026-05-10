@@ -60,4 +60,18 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string | number) => `/products/update/${id}`,
     DELETE: (id: string | number) => `/products/delete/${id}`,
   },
+  ORDERS: {
+    LIST: '/orders',
+    CREATE: '/orders/create',
+    BY_ID: (id: string | number) => `/orders/${id}`,
+    UPDATE: (id: string | number) => `/orders/update/${id}`,
+    DELETE: (id: string | number) => `/orders/delete/${id}`,
+    STATUS_TYPES: '/orders/status-types',
+    STORAGE_TYPES: '/orders/storage-types',
+    DELIVERY_TYPES: '/orders/delivery-types',
+    PAYMENT_OPERATION_TYPES: '/orders/payment-operation-types',
+    PAYMENT_TYPES: '/orders/payment-types',
+    SECTION_TYPES: '/orders/section-types',
+    SERVICE_TYPES: '/orders/service-types',
+  },
 } as const;

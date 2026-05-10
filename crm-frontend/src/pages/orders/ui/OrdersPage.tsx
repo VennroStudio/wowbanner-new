@@ -1,0 +1,109 @@
+import {
+  useOrdersQuery,
+  useOrderStatusTypesQuery,
+  useOrderStorageTypesQuery,
+  useOrderServiceTypesQuery,
+} from '@/entities/order';
+import { usePrintingSelectQuery } from '@/entities/printing';
+import { useMaterialOptionSelectQuery, useMaterialSelectQuery } from '@/entities/material';
+import { useClientDocsTypesQuery } from '@/entities/client';
+import { AlertBanner } from '@/shared/ui';
+import { DeleteOrderModal, OrdersFilters, OrdersHeader, OrdersTable } from '@/features/orders';
+import { useOrdersPage } from '../model/useOrdersPage';
+
+const toOptionalNumber = (value: string) => (value ? Number(value) : undefined);
+
+export const OrdersPage = () => {
+  const perPage = 20;
+  const {
+    search,
+    setSearch,
+    debouncedSearch,
+    page,
+    setPage,
+    filters,
+    setFilter,
+    resetFilters,
+    deleteEntity,
+    setDeleteEntity,
+    notice,
+    setNotice,
+  } = useOrdersPage();
+
+  const { data, isLoading, isError } = useOrdersQuery({
+    search: debouncedSearch,
+    page,
+    perPage,
+    dateFrom: filters.dateFrom || undefined,
+    dateTo: filters.dateTo || undefined,
+    printId: toOptionalNumber(filters.printId),
+    materialId: toOptionalNumber(filters.materialId),
+    optionId: toOptionalNumber(filters.optionId),
+    docs: toOptionalNumber(filters.docs),
+    managerId: toOptionalNumber(filters.managerId),
+    designerId: toOptionalNumber(filters.designerId),
+    statusType: toOptionalNumber(filters.statusType),
+    storageType: toOptionalNumber(filters.storageType),
+    serviceType: toOptionalNumber(filters.serviceType),
+    archived: filters.archived || undefined,
+    deleted: filters.deleted || undefined,
+  });
+
+  const printingSelect = usePrintingSelectQuery();
+  const materialSelect = useMaterialSelectQuery();
+  const materialOptionSelect = useMaterialOptionSelectQuery(filters.materialId || 0, {
+    enabled: Boolean(filters.materialId),
+  });
+  const clientDocsTypes = useClientDocsTypesQuery();
+  const orderStatusTypes = useOrderStatusTypesQuery();
+  const orderStorageTypes = useOrderStorageTypesQuery();
+  const orderServiceTypes = useOrderServiceTypesQuery();
+
+  return (
+    <div className="h-full flex flex-col p-6 w-full">
+      {notice && (
+        <AlertBanner variant="success" className="mb-4">
+          {notice}
+        </AlertBanner>
+      )}
+
+      <OrdersHeader
+        search={search}
+        onSearchChange={setSearch}
+        onAdd={() => setNotice('Форма создания заказа будет следующим этапом.')}
+      />
+
+      <OrdersFilters
+        values={filters}
+        printingOptions={printingSelect.data ?? []}
+        materialOptions={materialSelect.data ?? []}
+        materialOptionOptions={materialOptionSelect.data ?? []}
+        docsOptions={clientDocsTypes.data ?? []}
+        statusOptions={orderStatusTypes.data ?? []}
+        storageOptions={orderStorageTypes.data ?? []}
+        serviceOptions={orderServiceTypes.data ?? []}
+        onChange={setFilter}
+        onReset={resetFilters}
+      />
+
+      <OrdersTable
+        orders={data?.data?.items}
+        total={data?.data?.count}
+        isLoading={isLoading}
+        isError={isError}
+        page={page}
+        perPage={perPage}
+        onPageChange={setPage}
+        onEdit={() => setNotice('Редактор заказа будет следующим этапом.')}
+        onDelete={setDeleteEntity}
+      />
+
+      <DeleteOrderModal
+        open={deleteEntity != null}
+        order={deleteEntity}
+        onClose={() => setDeleteEntity(null)}
+        onSuccess={() => setNotice('Заказ удалён')}
+      />
+    </div>
+  );
+};
