@@ -8,6 +8,7 @@ use App\Components\ReadModel\ModelCountItemsResult;
 use App\Modules\Client\Query\Client\FindAll\ClientFindAllFetcher;
 use App\Modules\Order\Query\OrderItem\FindByOrderId\OrderItemFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderItemMilling\FindByOrderId\OrderItemMillingFindByOrderIdFetcher;
+use App\Modules\Order\Query\OrderService\FindByOrderId\OrderServiceFindByOrderIdFetcher;
 use App\Modules\Order\ReadModel\Order\OrderFindAll;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -21,6 +22,7 @@ final readonly class OrderFindAllFetcher
         private ClientFindAllFetcher $clientFetcher,
         private OrderItemFindByOrderIdFetcher $orderItemFetcher,
         private OrderItemMillingFindByOrderIdFetcher $orderItemMillingFetcher,
+        private OrderServiceFindByOrderIdFetcher $orderServiceFetcher,
     ) {}
 
     /**
@@ -35,6 +37,7 @@ final readonly class OrderFindAllFetcher
         $this->clientFetcher->joinForFilter($qb, 'o');
         $this->orderItemFetcher->joinForFilter($qb, 'o');
         $this->orderItemMillingFetcher->joinForFilter($qb, 'o');
+        $this->orderServiceFetcher->joinForFilter($qb, 'o');
 
         if ($query->archived === true) {
             $qb->andWhere('o.archived_at IS NOT NULL');
@@ -104,6 +107,16 @@ final readonly class OrderFindAllFetcher
                 ->setParameter('statusType', $query->statusType);
         }
 
+        if ($query->storageType !== null) {
+            $qb->andWhere('o.storage_type = :storageType')
+                ->setParameter('storageType', $query->storageType);
+        }
+
+        if ($query->serviceType !== null) {
+            $qb->andWhere(OrderServiceFindByOrderIdFetcher::ALIAS . '.service_type = :serviceType')
+                ->setParameter('serviceType', $query->serviceType);
+        }
+
         $countQb = clone $qb;
         $total = (int) $countQb->select('COUNT(DISTINCT o.id)')->executeQuery()->fetchOne();
 
@@ -118,7 +131,6 @@ final readonly class OrderFindAllFetcher
             'o.status_type',
             'o.storage_type',
             'o.general_note',
-            'o.additional_note',
             'o.extension',
             'o.created_at',
             'o.accepted_at',

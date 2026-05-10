@@ -50,26 +50,8 @@ class Order
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private(set) ?string $generalNote;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private(set) ?string $additionalNote;
-
     #[ORM\Column(type: Types::STRING, length: 32, nullable: true)]
     private(set) ?string $extension;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private(set) string $printPrice;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private(set) string $layoutPrice;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private(set) string $installationPrice;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private(set) string $additionalPrice;
-
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private(set) string $deliveryPrice;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private(set) DateTimeImmutable $acceptedAt;
@@ -94,13 +76,7 @@ class Order
         StatusType $statusType,
         StorageType $storageType,
         ?string $generalNote,
-        ?string $additionalNote,
         ?string $extension,
-        string $printPrice,
-        string $layoutPrice,
-        string $installationPrice,
-        string $additionalPrice,
-        string $deliveryPrice,
         DateTimeImmutable $acceptedAt,
         DateTimeImmutable $deadlineAt,
     ) {
@@ -111,13 +87,7 @@ class Order
         $this->statusType = $statusType;
         $this->storageType = $storageType;
         $this->generalNote = $generalNote;
-        $this->additionalNote = $additionalNote;
         $this->extension = $extension;
-        $this->printPrice = $printPrice;
-        $this->layoutPrice = $layoutPrice;
-        $this->installationPrice = $installationPrice;
-        $this->additionalPrice = $additionalPrice;
-        $this->deliveryPrice = $deliveryPrice;
         $this->acceptedAt = $acceptedAt;
         $this->deadlineAt = $deadlineAt;
         $this->createdAt = UtcClock::now();
@@ -131,13 +101,7 @@ class Order
         StatusType $statusType,
         StorageType $storageType,
         ?string $generalNote,
-        ?string $additionalNote,
         ?string $extension,
-        string $printPrice,
-        string $layoutPrice,
-        string $installationPrice,
-        string $additionalPrice,
-        string $deliveryPrice,
         DateTimeImmutable $acceptedAt,
         DateTimeImmutable $deadlineAt,
     ): self {
@@ -149,13 +113,7 @@ class Order
             statusType: $statusType,
             storageType: $storageType,
             generalNote: $generalNote,
-            additionalNote: $additionalNote,
             extension: $extension,
-            printPrice: $printPrice,
-            layoutPrice: $layoutPrice,
-            installationPrice: $installationPrice,
-            additionalPrice: $additionalPrice,
-            deliveryPrice: $deliveryPrice,
             acceptedAt: $acceptedAt,
             deadlineAt: $deadlineAt,
         );
@@ -168,13 +126,7 @@ class Order
         StatusType $statusType,
         StorageType $storageType,
         ?string $generalNote,
-        ?string $additionalNote,
         ?string $extension,
-        string $printPrice,
-        string $layoutPrice,
-        string $installationPrice,
-        string $additionalPrice,
-        string $deliveryPrice,
         DateTimeImmutable $acceptedAt,
         DateTimeImmutable $deadlineAt,
     ): void {
@@ -184,13 +136,7 @@ class Order
         $this->statusType = $statusType;
         $this->storageType = $storageType;
         $this->generalNote = $generalNote;
-        $this->additionalNote = $additionalNote;
         $this->extension = $extension;
-        $this->printPrice = $printPrice;
-        $this->layoutPrice = $layoutPrice;
-        $this->installationPrice = $installationPrice;
-        $this->additionalPrice = $additionalPrice;
-        $this->deliveryPrice = $deliveryPrice;
         $this->acceptedAt = $acceptedAt;
         $this->deadlineAt = $deadlineAt;
     }

@@ -12,4 +12,5 @@ return [
     'error.order_payment_not_found' => 'Order payment not found.',
     'error.order_section_not_found' => 'Order section not found.',
     'error.order_delivery_not_found' => 'Order delivery not found.',
+    'error.order_service_not_found' => 'Order service not found.',
 ];

@@ -35,6 +35,12 @@ final class OrderFindAllQuery
     #[Assert\Positive]
     public ?int $statusType = null;
 
+    #[Assert\Positive]
+    public ?int $storageType = null;
+
+    #[Assert\Positive]
+    public ?int $serviceType = null;
+
     public ?bool $archived = null;
 
     public ?bool $deleted = null;

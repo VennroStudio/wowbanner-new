@@ -12,4 +12,5 @@ return [
     'error.order_payment_not_found' => 'Платёж заказа не найден.',
     'error.order_section_not_found' => 'Секция заказа не найдена.',
     'error.order_delivery_not_found' => 'Доставка заказа не найдена.',
+    'error.order_service_not_found' => 'Услуга заказа не найдена.',
 ];

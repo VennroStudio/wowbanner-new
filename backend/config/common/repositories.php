@@ -34,6 +34,8 @@ use App\Modules\Order\Entity\OrderPayment\OrderPaymentRepository;
 use App\Modules\Order\Entity\OrderPayment\Persistence\Doctrine\DoctrineOrderPaymentRepository;
 use App\Modules\Order\Entity\OrderSection\OrderSectionRepository;
 use App\Modules\Order\Entity\OrderSection\Persistence\Doctrine\DoctrineOrderSectionRepository;
+use App\Modules\Order\Entity\OrderService\OrderServiceRepository;
+use App\Modules\Order\Entity\OrderService\Persistence\Doctrine\DoctrineOrderServiceRepository;
 use App\Modules\Printing\Entity\Printing\Persistence\Doctrine\DoctrinePrintingRepository;
 use App\Modules\Printing\Entity\Printing\PrintingRepository;
 use App\Modules\User\Entity\User\Persistence\Doctrine\DoctrineUserRepository;
@@ -76,6 +78,7 @@ return [
     OrderPaymentRepository::class           => get(DoctrineOrderPaymentRepository::class),
     OrderSectionRepository::class           => get(DoctrineOrderSectionRepository::class),
     OrderDeliveryRepository::class          => get(DoctrineOrderDeliveryRepository::class),
+    OrderServiceRepository::class           => get(DoctrineOrderServiceRepository::class),
     PrintingRepository::class      => get(DoctrinePrintingRepository::class),
     UserRepository::class      => get(DoctrineUserRepository::class),
     UserTokenRepository::class => get(DoctrineUserTokenRepository::class),
