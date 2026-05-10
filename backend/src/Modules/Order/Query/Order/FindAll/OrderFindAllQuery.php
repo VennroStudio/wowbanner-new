@@ -17,6 +17,12 @@ final class OrderFindAllQuery
 
     public ?string $search = null;
 
+    #[Assert\Date]
+    public ?string $dateFrom = null;
+
+    #[Assert\Date]
+    public ?string $dateTo = null;
+
     #[Assert\Positive]
     public ?int $printId = null;
 

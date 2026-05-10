@@ -70,6 +70,16 @@ final readonly class OrderFindAllFetcher
             )->setParameter('search', '%' . $query->search . '%');
         }
 
+        if ($query->dateFrom !== null) {
+            $qb->andWhere('DATE(o.deadline_at) >= :dateFrom')
+                ->setParameter('dateFrom', $query->dateFrom);
+        }
+
+        if ($query->dateTo !== null) {
+            $qb->andWhere('DATE(o.accepted_at) <= :dateTo')
+                ->setParameter('dateTo', $query->dateTo);
+        }
+
         if ($query->printId !== null) {
             $itemAlias = OrderItemFindByOrderIdFetcher::ALIAS;
             $millingAlias = OrderItemMillingFindByOrderIdFetcher::ALIAS;
