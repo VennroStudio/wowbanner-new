@@ -9,21 +9,21 @@ use Override;
 
 enum ServiceType: int implements EnumInterface
 {
-    case INSTALLATION = 1;
-    case DELIVERY = 2;
-    case PRINT = 3;
-    case LAYOUT = 4;
-    case ADDITIONAL = 5;
+    case PRINT = 1;
+    case INSTALLATION = 2;
+    case LAYOUT = 3;
+    case ADDITIONAL = 4;
+    case DELIVERY = 5;
 
     #[Override]
     public function getLabel(): string
     {
         return match ($this) {
-            self::INSTALLATION => 'Монтаж',
-            self::DELIVERY => 'Доставка',
             self::PRINT => 'Печать',
+            self::INSTALLATION => 'Монтаж',
             self::LAYOUT => 'Макет',
             self::ADDITIONAL => 'Доп.услуги',
+            self::DELIVERY => 'Доставка',
         };
     }
 }
