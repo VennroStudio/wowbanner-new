@@ -28,6 +28,25 @@ export const buildCreateOrderBody = (
           comment: values.deliveryComment.trim() || null,
         }
       : null,
+    items: values.items.map((item) => ({
+      printId: Number(item.printId),
+      productId: Number(item.productId),
+      materialId: Number(item.materialId),
+      optionId: Number(item.optionId),
+      dpiType: Number(item.dpiType),
+      variantType: Number(item.variantType),
+      width: item.width.trim(),
+      height: item.height.trim(),
+      quantity: Number(item.quantity),
+      price: item.price.trim(),
+      performerId: item.performerId ? Number(item.performerId) : null,
+      note: item.note.trim() || null,
+      printed: item.printed,
+      ready: item.ready,
+      processings: item.processings.map((processingId) => ({
+        processingId: Number(processingId),
+      })),
+    })),
     sections: values.sections.map((sectionType) => ({
       sectionType: Number(sectionType),
     })),

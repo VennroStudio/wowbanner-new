@@ -2,6 +2,10 @@ import { useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateOrderCommand, useOrderDeliveryTypesQuery, useOrderSectionTypesQuery, useOrderServiceTypesQuery, useOrderStatusTypesQuery, useOrderStorageTypesQuery } from '@/entities/order';
+import { useMaterialDpiTypesQuery, useMaterialSelectQuery, useMaterialVariantTypesQuery } from '@/entities/material';
+import { useProcessingSelectQuery } from '@/entities/processing';
+import { usePrintingSelectQuery } from '@/entities/printing';
+import { useProductsQuery } from '@/entities/product';
 import { useSessionStore } from '@/entities/session/model/useSessionStore';
 import { useUserSelectQuery } from '@/entities/user';
 import { useModalFormState } from '@/shared/lib/useModalFormState';
@@ -10,6 +14,7 @@ import { fieldInputClass, fieldSelectClass, fieldTextareaClass, FormErrorBanner,
 import { buildCreateOrderBody } from './lib/orderFormMappers';
 import { getOrderFormDefaultValues, orderFormSchema, type OrderFormValues } from './lib/orderFormSchema';
 import { OrderClientSelectModal } from './ui/OrderClientSelectModal';
+import { OrderPrintItemsEditor } from './ui/OrderPrintItemsEditor';
 
 interface OrderFormModalProps {
   open: boolean;
@@ -64,13 +69,22 @@ export const OrderFormModal = ({
   } | null>(null);
   const [files, setFiles] = useState<File[]>([]);
 
-  const { data: managerOptions = [], isLoading: isLoadingManagers } = useUserSelectQuery(undefined, { enabled: open });
-  const { data: designerOptions = [], isLoading: isLoadingDesigners } = useUserSelectQuery(undefined, { enabled: open });
+  const { data: userOptions = [], isLoading: isLoadingUsers } = useUserSelectQuery(undefined, { enabled: open });
   const { data: statusOptions = [], isLoading: isLoadingStatuses } = useOrderStatusTypesQuery();
   const { data: storageOptions = [], isLoading: isLoadingStorages } = useOrderStorageTypesQuery();
   const { data: sectionOptions = [], isLoading: isLoadingSections } = useOrderSectionTypesQuery();
   const { data: deliveryOptions = [], isLoading: isLoadingDeliveryTypes } = useOrderDeliveryTypesQuery();
   const { data: serviceOptions = [], isLoading: isLoadingServiceTypes } = useOrderServiceTypesQuery();
+  const { data: printingOptions = [], isLoading: isLoadingPrintTypes } = usePrintingSelectQuery({ enabled: open });
+  const { data: materialOptions = [], isLoading: isLoadingMaterials } = useMaterialSelectQuery({ enabled: open });
+  const { data: processingOptions = [], isLoading: isLoadingProcessings } = useProcessingSelectQuery({ enabled: open });
+  const { data: dpiOptions = [], isLoading: isLoadingDpiTypes } = useMaterialDpiTypesQuery({ enabled: open });
+  const { data: variantOptions = [], isLoading: isLoadingVariantTypes } = useMaterialVariantTypesQuery({ enabled: open });
+  const { data: productsResponse, isLoading: isLoadingProducts } = useProductsQuery({
+    page: 1,
+    perPage: 500,
+    search: '',
+  });
 
   const {
     register,
@@ -90,26 +104,36 @@ export const OrderFormModal = ({
     keyName: 'fieldId',
   });
 
+  const { fields: itemFields, append: appendItem, remove: removeItem } = useFieldArray({
+    control,
+    name: 'items',
+    keyName: 'fieldId',
+  });
+
   const hasDelivery = useWatch({ control, name: 'hasDelivery' });
   const deadlineAt = useWatch({ control, name: 'deadlineAt' });
   const extension = useWatch({ control, name: 'extension' });
   const selectedSections = useWatch({ control, name: 'sections' });
   const selectedStorageType = useWatch({ control, name: 'storageType' });
-  const selectedStatusType = useWatch({ control, name: 'statusType' });
 
   const isDictsLoading =
-    isLoadingManagers ||
-    isLoadingDesigners ||
+    isLoadingUsers ||
     isLoadingStatuses ||
     isLoadingStorages ||
     isLoadingSections ||
     isLoadingDeliveryTypes ||
-    isLoadingServiceTypes;
+    isLoadingServiceTypes ||
+    isLoadingPrintTypes ||
+    isLoadingMaterials ||
+    isLoadingProcessings ||
+    isLoadingDpiTypes ||
+    isLoadingVariantTypes ||
+    isLoadingProducts;
 
-  const selectedStatusLabel = useMemo(
-    () => statusOptions.find((option) => String(option.id) === selectedStatusType)?.label ?? 'Не выбран',
-    [selectedStatusType, statusOptions],
-  );
+  const managerOptions = userOptions;
+  const designerOptions = userOptions;
+  const performerOptions = userOptions;
+  const productOptions = productsResponse?.data?.items ?? [];
 
   const extendedDeadlineLabel = useMemo(
     () => getExtendedDeadlineLabel(deadlineAt, extension),
@@ -301,6 +325,24 @@ export const OrderFormModal = ({
                   </div>
                 </div>
               </div>
+
+              <OrderPrintItemsEditor
+                control={control}
+                register={register}
+                setValue={setValue}
+                errors={errors}
+                fields={itemFields}
+                append={appendItem}
+                remove={removeItem}
+                printOptions={printingOptions}
+                productOptions={productOptions}
+                materialOptions={materialOptions}
+                performerOptions={performerOptions}
+                processingOptions={processingOptions}
+                dpiOptions={dpiOptions}
+                variantOptions={variantOptions}
+                disabled={isPending}
+              />
 
               <div className="border-t border-dashed border-slate-300 pt-5">
                 <div className="rounded-xl bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
