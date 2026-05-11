@@ -28,6 +28,9 @@ export const buildCreateOrderBody = (
           comment: values.deliveryComment.trim() || null,
         }
       : null,
+    sections: values.sections.map((sectionType) => ({
+      sectionType: Number(sectionType),
+    })),
     services: values.services.map((service) => ({
       serviceType: Number(service.serviceType),
       price: service.price.trim(),
