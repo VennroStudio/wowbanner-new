@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 
-export type ModalDialogSize = 'md' | '2xl' | '4xl' | '6xl';
+export type ModalDialogSize = 'md' | '2xl' | '4xl' | '6xl' | '7xl';
 
 const maxWidth: Record<ModalDialogSize, string> = {
   md: 'max-w-md',
   '2xl': 'max-w-2xl',
   '4xl': 'max-w-4xl',
   '6xl': 'max-w-6xl',
+  '7xl': 'max-w-7xl',
 };
 
 interface ModalDialogProps {

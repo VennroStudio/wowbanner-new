@@ -177,7 +177,7 @@ export const OrderFormModal = ({
         title="Новый заказ"
         titleId="order-form-title"
         onClose={handleClose}
-        size="6xl"
+        size="7xl"
       >
         {isDictsLoading ? (
           <div className="p-12 text-center text-sm text-slate-500">Загрузка…</div>
