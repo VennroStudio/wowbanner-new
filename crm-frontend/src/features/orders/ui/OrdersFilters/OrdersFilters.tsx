@@ -103,9 +103,6 @@ export const OrdersFilters = ({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h2 className="text-sm font-semibold text-slate-900">Фильтры заказов</h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Период, документы, материалы, услуги, ответственные и быстрые переключатели реестра.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -216,156 +213,155 @@ export const OrdersFilters = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Дата от</span>
-        <input
-          type="date"
-          value={values.dateFrom}
-          onChange={(e) => onChange('dateFrom', e.target.value)}
-          className={fieldInputClass}
-        />
-      </label>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <div className="rounded-xl border border-slate-200 p-3 space-y-3 xl:col-span-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Период</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-500">Дата от</span>
+              <input
+                type="date"
+                value={values.dateFrom}
+                onChange={(e) => onChange('dateFrom', e.target.value)}
+                className={fieldInputClass}
+              />
+            </label>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Дата до</span>
-        <input
-          type="date"
-          value={values.dateTo}
-          onChange={(e) => onChange('dateTo', e.target.value)}
-          className={fieldInputClass}
-        />
-      </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-500">Дата до</span>
+              <input
+                type="date"
+                value={values.dateTo}
+                onChange={(e) => onChange('dateTo', e.target.value)}
+                className={fieldInputClass}
+              />
+            </label>
+          </div>
+        </div>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Материал</span>
-        <select
-          value={values.materialId}
-          onChange={(e) => onChange('materialId', e.target.value)}
-          className={`${fieldSelectClass} ${values.materialId ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {materialOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
-      </label>
+        <div className="rounded-xl border border-slate-200 p-3 space-y-3 xl:col-span-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Материалы</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-500">Материал</span>
+              <select
+                value={values.materialId}
+                onChange={(e) => onChange('materialId', e.target.value)}
+                className={`${fieldSelectClass} ${values.materialId ? '' : selectPlaceholderClass}`}
+              >
+                <option value="">Все</option>
+                {materialOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Опция материала</span>
-        <select
-          value={values.optionId}
-          onChange={(e) => onChange('optionId', e.target.value)}
-          disabled={!values.materialId}
-          className={`${fieldSelectClass} ${values.optionId ? '' : selectPlaceholderClass} disabled:bg-slate-50 disabled:text-slate-400`}
-        >
-          <option value="">Все</option>
-          {materialOptionOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
-      </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-500">Опция материала</span>
+              <select
+                value={values.optionId}
+                onChange={(e) => onChange('optionId', e.target.value)}
+                disabled={!values.materialId}
+                className={`${fieldSelectClass} ${values.optionId ? '' : selectPlaceholderClass} disabled:bg-slate-50 disabled:text-slate-400`}
+              >
+                <option value="">Все</option>
+                {materialOptionOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Документы клиента</span>
-        <select
-          value={values.docs}
-          onChange={(e) => onChange('docs', e.target.value)}
-          className={`${fieldSelectClass} ${values.docs ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {docsOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+        <div className="rounded-xl border border-slate-200 p-3 space-y-3 xl:col-span-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ответственные</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-500">Менеджер</span>
+              <select
+                value={values.managerId}
+                onChange={(e) => onChange('managerId', e.target.value)}
+                className={`${fieldSelectClass} ${values.managerId ? '' : selectPlaceholderClass}`}
+              >
+                <option value="">Все</option>
+                {managerOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Статус</span>
-        <select
-          value={values.statusTypes[0] ?? ''}
-          onChange={(e) => onChange('statusTypes', e.target.value ? [Number(e.target.value)] : [])}
-          className={`${fieldSelectClass} ${values.statusTypes.length > 0 ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {statusOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-500">Дизайнер</span>
+              <select
+                value={values.designerId}
+                onChange={(e) => onChange('designerId', e.target.value)}
+                className={`${fieldSelectClass} ${values.designerId ? '' : selectPlaceholderClass}`}
+              >
+                <option value="">Все</option>
+                {designerOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Склад</span>
-        <select
-          value={values.storageType}
-          onChange={(e) => onChange('storageType', e.target.value)}
-          className={`${fieldSelectClass} ${values.storageType ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {storageOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+        <label className="block xl:col-span-4">
+          <span className="mb-1 block text-xs font-medium text-slate-500">Документы клиента</span>
+          <select
+            value={values.docs}
+            onChange={(e) => onChange('docs', e.target.value)}
+            className={`${fieldSelectClass} ${values.docs ? '' : selectPlaceholderClass}`}
+          >
+            <option value="">Все</option>
+            {docsOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Услуга</span>
-        <select
-          value={values.serviceType}
-          onChange={(e) => onChange('serviceType', e.target.value)}
-          className={`${fieldSelectClass} ${values.serviceType ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {serviceOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
+        <label className="block xl:col-span-4">
+          <span className="mb-1 block text-xs font-medium text-slate-500">Склад</span>
+          <select
+            value={values.storageType}
+            onChange={(e) => onChange('storageType', e.target.value)}
+            className={`${fieldSelectClass} ${values.storageType ? '' : selectPlaceholderClass}`}
+          >
+            <option value="">Все</option>
+            {storageOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Менеджер</span>
-        <select
-          value={values.managerId}
-          onChange={(e) => onChange('managerId', e.target.value)}
-          className={`${fieldSelectClass} ${values.managerId ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {managerOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Дизайнер</span>
-        <select
-          value={values.designerId}
-          onChange={(e) => onChange('designerId', e.target.value)}
-          className={`${fieldSelectClass} ${values.designerId ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {designerOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
-      </label>
+        <label className="block xl:col-span-4">
+          <span className="mb-1 block text-xs font-medium text-slate-500">Услуга</span>
+          <select
+            value={values.serviceType}
+            onChange={(e) => onChange('serviceType', e.target.value)}
+            className={`${fieldSelectClass} ${values.serviceType ? '' : selectPlaceholderClass}`}
+          >
+            <option value="">Все</option>
+            {serviceOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
     </div>
-  </div>
   );
 };
