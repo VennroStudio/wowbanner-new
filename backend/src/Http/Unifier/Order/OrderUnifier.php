@@ -6,6 +6,8 @@ namespace App\Http\Unifier\Order;
 
 use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
+use App\Modules\Client\Query\Client\GetById\ClientGetByIdFetcher;
+use App\Modules\Client\Query\Client\GetById\ClientGetByIdQuery;
 use App\Modules\Order\Query\OrderDelivery\FindByOrderId\OrderDeliveryFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderDelivery\FindByOrderId\OrderDeliveryFindByOrderIdQuery;
 use App\Modules\Order\Query\OrderFile\FindByOrderId\OrderFileFindByOrderIdFetcher;
@@ -34,12 +36,16 @@ use App\Modules\Order\ReadModel\OrderNotification\OrderNotificationByOrderId;
 use App\Modules\Order\ReadModel\OrderPayment\OrderPaymentByOrderId;
 use App\Modules\Order\ReadModel\OrderSection\OrderSectionByOrderId;
 use App\Modules\Order\ReadModel\OrderService\OrderServiceByOrderId;
+use App\Modules\User\Query\User\GetById\UserGetByIdFetcher;
+use App\Modules\User\Query\User\GetById\UserGetByIdQuery;
 use Doctrine\DBAL\Exception;
 use Override;
 
 final readonly class OrderUnifier implements UnifierInterface
 {
     public function __construct(
+        private ClientGetByIdFetcher $clientFetcher,
+        private UserGetByIdFetcher $userFetcher,
         private OrderDeliveryFindByOrderIdFetcher $deliveryFetcher,
         private OrderFileFindByOrderIdFetcher $fileFetcher,
         private OrderItemFindByOrderIdFetcher $itemFetcher,
@@ -90,6 +96,9 @@ final readonly class OrderUnifier implements UnifierInterface
         /** @var OrderModelInterface $item */
         $data = $item->toArray();
         $orderId = $item->getId();
+        $clientId = $item->getClientId();
+        $managerId = $item->getManagerId();
+        $designerId = $item->getDesignerId();
 
         $delivery = $this->deliveryFetcher->fetch(new OrderDeliveryFindByOrderIdQuery($orderId));
         $files = $this->fileFetcher->fetch(new OrderFileFindByOrderIdQuery($orderId));
@@ -99,9 +108,28 @@ final readonly class OrderUnifier implements UnifierInterface
         $sections = $this->sectionFetcher->fetch(new OrderSectionFindByOrderIdQuery($orderId));
         $services = $this->serviceFetcher->fetch(new OrderServiceFindByOrderIdQuery($orderId));
         $notifications = $this->notificationFetcher->fetch(new OrderNotificationFindByOrderIdQuery($orderId));
+        $client = $this->clientFetcher->fetch(new ClientGetByIdQuery($clientId));
+        $manager = $managerId !== null ? $this->userFetcher->fetch(new UserGetByIdQuery($managerId)) : null;
+        $designer = $designerId !== null ? $this->userFetcher->fetch(new UserGetByIdQuery($designerId)) : null;
 
         $data['delivery'] = $delivery !== null
             ? UnifierHelper::toArrayWithout($delivery, 'order_id')
+            : null;
+        $data['client'] = [
+            'id' => $client->id,
+            'name' => $this->buildClientName($client),
+        ];
+        $data['manager'] = $manager !== null
+            ? [
+                'id' => $manager->id,
+                'name' => $this->buildUserName($manager->firstName, $manager->lastName),
+            ]
+            : null;
+        $data['designer'] = $designer !== null
+            ? [
+                'id' => $designer->id,
+                'name' => $this->buildUserName($designer->firstName, $designer->lastName),
+            ]
             : null;
         $data['files'] = $this->mapFiles($files);
         $data['items'] = $this->mapItems($items);
@@ -222,5 +250,23 @@ final readonly class OrderUnifier implements UnifierInterface
         );
 
         return number_format($sum, 2, '.', '');
+    }
+
+    private function buildClientName(object $client): string
+    {
+        if ($client->oldFullName !== null && $client->oldFullName !== '') {
+            return $client->oldFullName;
+        }
+
+        return trim(implode(' ', array_filter([
+            $client->lastName,
+            $client->firstName,
+            $client->middleName,
+        ])));
+    }
+
+    private function buildUserName(string $firstName, string $lastName): string
+    {
+        return trim($lastName . ' ' . $firstName);
     }
 }

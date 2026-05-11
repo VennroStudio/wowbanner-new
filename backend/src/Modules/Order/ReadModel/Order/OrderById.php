@@ -70,6 +70,24 @@ final readonly class OrderById implements OrderModelInterface
     }
 
     #[Override]
+    public function getClientId(): int
+    {
+        return $this->clientId;
+    }
+
+    #[Override]
+    public function getManagerId(): ?int
+    {
+        return $this->managerId;
+    }
+
+    #[Override]
+    public function getDesignerId(): ?int
+    {
+        return $this->designerId;
+    }
+
+    #[Override]
     public function toArray(): array
     {
         return [
