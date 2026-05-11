@@ -47,6 +47,7 @@
         "materials": [
           {
             "id": 10,
+            "material_id": 3,
             "material_option_id": 5
           }
         ],
@@ -91,6 +92,7 @@
     "materials": [
       {
         "id": 10,
+        "material_id": 3,
         "material_option_id": 5
       }
     ],
@@ -127,7 +129,7 @@
 {
   "name": "Пример продукта",
   "materials": [
-    { "materialOptionId": 5 }
+    { "materialId": 3, "materialOptionId": 5 }
   ],
   "prints": [
     { "printId": 2 }
@@ -138,7 +140,7 @@
 **Валидация полей:**
 
 - `name` — обязательно, длина 2–255 символов
-- `materials` — опционально; элементы: `{ "id"?: number, "materialOptionId": number }` (для создания `id` не передаётся)
+- `materials` — опционально; элементы: `{ "id"?: number, "materialId": number, "materialOptionId": number }` (для создания `id` не передаётся)
 - `prints` — опционально; элементы: `{ "id"?: number, "printId": number }`
 
 **Успех (201):**
@@ -174,8 +176,8 @@
 {
   "name": "Обновлённое название",
   "materials": [
-    { "id": 10, "materialOptionId": 5 },
-    { "materialOptionId": 7 }
+    { "id": 10, "materialId": 3, "materialOptionId": 5 },
+    { "materialId": 4, "materialOptionId": 7 }
   ],
   "prints": [
     { "id": 20, "printId": 2 },

@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'product_materials')]
 #[ORM\Index(name: 'idx_product_id', columns: ['product_id'])]
+#[ORM\Index(name: 'idx_material_id', columns: ['material_id'])]
 #[ORM\Index(name: 'idx_material_option_id', columns: ['material_option_id'])]
 class ProductMaterial
 {
@@ -22,22 +23,27 @@ class ProductMaterial
     private(set) int $productId;
 
     #[ORM\Column(type: Types::INTEGER)]
+    private(set) int $materialId;
+
+    #[ORM\Column(type: Types::INTEGER)]
     private(set) int $materialOptionId;
 
-    private function __construct(int $productId, int $materialOptionId)
+    private function __construct(int $productId, int $materialId, int $materialOptionId)
     {
         $this->productId = $productId;
+        $this->materialId = $materialId;
         $this->materialOptionId = $materialOptionId;
     }
 
-    public static function create(int $productId, int $materialOptionId): self
+    public static function create(int $productId, int $materialId, int $materialOptionId): self
     {
-        return new self($productId, $materialOptionId);
+        return new self($productId, $materialId, $materialOptionId);
     }
 
-    public function edit(int $productId, int $materialOptionId): void
+    public function edit(int $productId, int $materialId, int $materialOptionId): void
     {
         $this->productId = $productId;
+        $this->materialId = $materialId;
         $this->materialOptionId = $materialOptionId;
     }
 }

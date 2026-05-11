@@ -34,6 +34,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
                     items: new OA\Items(
                         properties: [
                             new OA\Property(property: 'id', type: 'integer', nullable: true),
+                            new OA\Property(property: 'materialId', type: 'integer', example: 1),
                             new OA\Property(property: 'materialOptionId', type: 'integer', example: 1),
                         ]
                     )

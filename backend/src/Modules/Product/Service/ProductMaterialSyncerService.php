@@ -45,11 +45,13 @@ final readonly class ProductMaterialSyncerService
                 $this->updateHandler->handle(new UpdateProductMaterialCommand(
                     id: $item->id,
                     productId: $productId,
+                    materialId: $item->materialId,
                     materialOptionId: $item->materialOptionId,
                 ));
             } else {
                 $this->createHandler->handle(new CreateProductMaterialCommand(
                     productId: $productId,
+                    materialId: $item->materialId,
                     materialOptionId: $item->materialOptionId,
                 ));
             }

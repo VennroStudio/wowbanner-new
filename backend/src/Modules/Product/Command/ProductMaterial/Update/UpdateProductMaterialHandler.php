@@ -18,6 +18,7 @@ final readonly class UpdateProductMaterialHandler
 
         $link->edit(
             productId: $command->productId,
+            materialId: $command->materialId,
             materialOptionId: $command->materialOptionId,
         );
     }

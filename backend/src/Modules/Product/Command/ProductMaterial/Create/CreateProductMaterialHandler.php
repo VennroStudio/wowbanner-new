@@ -17,6 +17,7 @@ final readonly class CreateProductMaterialHandler
     {
         $link = ProductMaterial::create(
             productId: $command->productId,
+            materialId: $command->materialId,
             materialOptionId: $command->materialOptionId,
         );
 

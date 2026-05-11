@@ -22,6 +22,7 @@ const buildProductBody = (values: ProductFormValues) => ({
   name: values.name.trim(),
   materials: values.materials.map((item) => ({
     ...(item.id ? { id: item.id } : {}),
+    materialId: item.materialId,
     materialOptionId: item.materialOptionId,
   })),
   prints: values.prints.map((item) => ({

@@ -93,11 +93,11 @@ final readonly class ProductUnifier implements UnifierInterface
         $grouped = [];
         foreach ($items as $item) {
             $option = $this->materialOptionFetcher->fetch(new MaterialOptionGetByIdQuery($item->materialOptionId));
-            $material = $this->materialByIdFetcher->fetch(new MaterialGetByIdQuery($option->materialId));
+            $material = $this->materialByIdFetcher->fetch(new MaterialGetByIdQuery($item->materialId));
             $grouped[$item->productId][] = [
                 'id' => $item->id,
+                'material_id' => $item->materialId,
                 'material_option_id' => $item->materialOptionId,
-                'material_id' => $option->materialId,
                 'material_name' => $material->name,
                 'material_option_name' => $option->name,
             ];

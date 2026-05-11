@@ -54,6 +54,7 @@ final readonly class CreateProductHandler
         foreach ($items as $item) {
             $this->createMaterialHandler->handle(new CreateProductMaterialCommand(
                 productId: (int)$product->id,
+                materialId: $item->materialId,
                 materialOptionId: $item->materialOptionId,
             ));
         }

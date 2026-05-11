@@ -8,6 +8,7 @@ final readonly class CreateProductMaterialCommand
 {
     public function __construct(
         public int $productId,
+        public int $materialId,
         public int $materialOptionId,
     ) {}
 }

@@ -28,7 +28,7 @@ final readonly class ProductMaterialFindByProductIdsFetcher
         }
 
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'product_id', 'material_option_id')
+            ->select('id', 'product_id', 'material_id', 'material_option_id')
             ->from(self::TABLE)
             ->where('product_id IN (:ids)')
             ->setParameter('ids', $query->productIds, ArrayParameterType::INTEGER)

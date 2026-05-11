@@ -13,7 +13,8 @@ interface ProductMaterialModelInterface
     /**
      * @return array{
      *     id: int,
-     *     Product_id: int,
+     *     product_id: int,
+     *     material_id: int,
      *     material_option_id: int
      * }
      */
