@@ -505,7 +505,6 @@ export const OrderFormModal = ({
                     </option>
                   ))}
                 </select>
-                <span className="hidden text-sm text-slate-500 xl:inline">Текущий: {selectedStatusLabel}</span>
               </div>
 
               <div className="flex items-center gap-2">
