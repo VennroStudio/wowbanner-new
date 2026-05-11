@@ -7,6 +7,7 @@ import {
 import { usePrintingSelectQuery } from '@/entities/printing';
 import { useMaterialOptionSelectQuery, useMaterialSelectQuery } from '@/entities/material';
 import { useClientDocsTypesQuery } from '@/entities/client';
+import { useUserSelectQuery } from '@/entities/user';
 import { AlertBanner } from '@/shared/ui';
 import { DeleteOrderModal, OrdersFilters, OrdersHeader, OrdersTable } from '@/features/orders';
 import { useOrdersPage } from '../model/useOrdersPage';
@@ -24,6 +25,8 @@ export const OrdersPage = () => {
     filters,
     setFilter,
     resetFilters,
+    visibleColumns,
+    toggleColumn,
     deleteEntity,
     setDeleteEntity,
     notice,
@@ -36,13 +39,13 @@ export const OrdersPage = () => {
     perPage,
     dateFrom: filters.dateFrom || undefined,
     dateTo: filters.dateTo || undefined,
-    printId: toOptionalNumber(filters.printId),
+    printIds: filters.printIds.length > 0 ? filters.printIds : undefined,
     materialId: toOptionalNumber(filters.materialId),
     optionId: toOptionalNumber(filters.optionId),
     docs: toOptionalNumber(filters.docs),
     managerId: toOptionalNumber(filters.managerId),
     designerId: toOptionalNumber(filters.designerId),
-    statusType: toOptionalNumber(filters.statusType),
+    statusTypes: filters.statusTypes.length > 0 ? filters.statusTypes : undefined,
     storageType: toOptionalNumber(filters.storageType),
     serviceType: toOptionalNumber(filters.serviceType),
     archived: filters.archived || undefined,
@@ -55,6 +58,8 @@ export const OrdersPage = () => {
     enabled: Boolean(filters.materialId),
   });
   const clientDocsTypes = useClientDocsTypesQuery();
+  const managerSelect = useUserSelectQuery();
+  const designerSelect = useUserSelectQuery();
   const orderStatusTypes = useOrderStatusTypesQuery();
   const orderStorageTypes = useOrderStorageTypesQuery();
   const orderServiceTypes = useOrderServiceTypesQuery();
@@ -79,10 +84,14 @@ export const OrdersPage = () => {
         materialOptions={materialSelect.data ?? []}
         materialOptionOptions={materialOptionSelect.data ?? []}
         docsOptions={clientDocsTypes.data ?? []}
+        managerOptions={managerSelect.data ?? []}
+        designerOptions={designerSelect.data ?? []}
         statusOptions={orderStatusTypes.data ?? []}
         storageOptions={orderStorageTypes.data ?? []}
         serviceOptions={orderServiceTypes.data ?? []}
+        visibleColumns={visibleColumns}
         onChange={setFilter}
+        onToggleColumn={toggleColumn}
         onReset={resetFilters}
       />
 
@@ -93,9 +102,8 @@ export const OrdersPage = () => {
         isError={isError}
         page={page}
         perPage={perPage}
+        visibleColumns={visibleColumns}
         onPageChange={setPage}
-        onEdit={() => setNotice('Редактор заказа будет следующим этапом.')}
-        onDelete={setDeleteEntity}
       />
 
       <DeleteOrderModal

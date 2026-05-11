@@ -23,8 +23,13 @@ final class OrderFindAllQuery
     #[Assert\Date]
     public ?string $dateTo = null;
 
-    #[Assert\Positive]
-    public ?int $printId = null;
+    /**
+     * @var list<int>
+     */
+    #[Assert\All([
+        new Assert\Positive(),
+    ])]
+    public array $printIds = [];
 
     #[Assert\Positive]
     public ?int $materialId = null;
@@ -41,8 +46,13 @@ final class OrderFindAllQuery
     #[Assert\Positive]
     public ?int $designerId = null;
 
-    #[Assert\Positive]
-    public ?int $statusType = null;
+    /**
+     * @var list<int>
+     */
+    #[Assert\All([
+        new Assert\Positive(),
+    ])]
+    public array $statusTypes = [];
 
     #[Assert\Positive]
     public ?int $storageType = null;

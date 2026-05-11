@@ -10,6 +10,7 @@ use App\Modules\Order\Query\OrderItem\FindByOrderId\OrderItemFindByOrderIdFetche
 use App\Modules\Order\Query\OrderItemMilling\FindByOrderId\OrderItemMillingFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderService\FindByOrderId\OrderServiceFindByOrderIdFetcher;
 use App\Modules\Order\ReadModel\Order\OrderFindAll;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -80,16 +81,16 @@ final readonly class OrderFindAllFetcher
                 ->setParameter('dateTo', $query->dateTo);
         }
 
-        if ($query->printId !== null) {
+        if ($query->printIds !== []) {
             $itemAlias = OrderItemFindByOrderIdFetcher::ALIAS;
             $millingAlias = OrderItemMillingFindByOrderIdFetcher::ALIAS;
 
             $qb->andWhere(
                 $qb->expr()->or(
-                    "{$itemAlias}.print_id = :printId",
-                    "{$millingAlias}.print_id = :printId"
+                    "{$itemAlias}.print_id IN (:printIds)",
+                    "{$millingAlias}.print_id IN (:printIds)"
                 )
-            )->setParameter('printId', $query->printId);
+            )->setParameter('printIds', $query->printIds, ArrayParameterType::INTEGER);
         }
 
         if ($query->materialId !== null) {
@@ -117,9 +118,9 @@ final readonly class OrderFindAllFetcher
                 ->setParameter('designerId', $query->designerId);
         }
 
-        if ($query->statusType !== null) {
-            $qb->andWhere('o.status_type = :statusType')
-                ->setParameter('statusType', $query->statusType);
+        if ($query->statusTypes !== []) {
+            $qb->andWhere('o.status_type IN (:statusTypes)')
+                ->setParameter('statusTypes', $query->statusTypes, ArrayParameterType::INTEGER);
         }
 
         if ($query->storageType !== null) {

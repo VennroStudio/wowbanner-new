@@ -5,6 +5,11 @@ export interface OrderEnumRef {
   label: string;
 }
 
+export interface OrderEntitySummary {
+  id: number;
+  name: string;
+}
+
 export interface OrderDelivery {
   id: number;
   delivery_type: OrderEnumRef;
@@ -92,6 +97,9 @@ export interface Order {
   manager_id: number | null;
   designer_id: number | null;
   client_id: number;
+  client: OrderEntitySummary;
+  manager: OrderEntitySummary | null;
+  designer: OrderEntitySummary | null;
   status_type: OrderEnumRef;
   storage_type: OrderEnumRef;
   general_note: string | null;
@@ -208,13 +216,13 @@ export interface GetOrdersParams {
   search?: string;
   dateFrom?: string;
   dateTo?: string;
-  printId?: number;
+  printIds?: number[];
   materialId?: number;
   optionId?: number;
   docs?: number;
   managerId?: number;
   designerId?: number;
-  statusType?: number;
+  statusTypes?: number[];
   storageType?: number;
   serviceType?: number;
   archived?: boolean;

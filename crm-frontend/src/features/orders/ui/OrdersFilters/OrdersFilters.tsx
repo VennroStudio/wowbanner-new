@@ -1,19 +1,22 @@
+import { useEffect, useRef, useState } from 'react';
 import type { ClientEnumOption } from '@/entities/client';
 import type { MaterialSelectOption, MaterialOptionSelectOption } from '@/entities/material';
 import type { OrderEnumRef } from '@/entities/order';
 import type { PrintingSelectOption } from '@/entities/printing';
+import type { UserSelectOption } from '@/entities/user';
 import { fieldInputClass, fieldSelectClass } from '@/shared/ui';
+import { ORDER_TABLE_COLUMNS, type OrderTableColumnKey } from '../../model/orderTableColumns';
 
 export interface OrdersFilterValues {
   dateFrom: string;
   dateTo: string;
-  printId: string;
+  printIds: number[];
   materialId: string;
   optionId: string;
   docs: string;
   managerId: string;
   designerId: string;
-  statusType: string;
+  statusTypes: number[];
   storageType: string;
   serviceType: string;
   archived: boolean;
@@ -26,14 +29,27 @@ interface OrdersFiltersProps {
   materialOptions: MaterialSelectOption[];
   materialOptionOptions: MaterialOptionSelectOption[];
   docsOptions: ClientEnumOption[];
+  managerOptions: UserSelectOption[];
+  designerOptions: UserSelectOption[];
   statusOptions: OrderEnumRef[];
   storageOptions: OrderEnumRef[];
   serviceOptions: OrderEnumRef[];
+  visibleColumns: Record<OrderTableColumnKey, boolean>;
   onChange: <K extends keyof OrdersFilterValues>(key: K, value: OrdersFilterValues[K]) => void;
+  onToggleColumn: (key: OrderTableColumnKey) => void;
   onReset: () => void;
 }
 
 const selectPlaceholderClass = 'text-slate-500';
+const chipPalette = [
+  'bg-emerald-100 text-emerald-700 border-emerald-200',
+  'bg-sky-100 text-sky-700 border-sky-200',
+  'bg-amber-100 text-amber-700 border-amber-200',
+  'bg-rose-100 text-rose-700 border-rose-200',
+  'bg-violet-100 text-violet-700 border-violet-200',
+  'bg-cyan-100 text-cyan-700 border-cyan-200',
+  'bg-lime-100 text-lime-700 border-lime-200',
+];
 
 export const OrdersFilters = ({
   values,
@@ -41,29 +57,166 @@ export const OrdersFilters = ({
   materialOptions,
   materialOptionOptions,
   docsOptions,
+  managerOptions,
+  designerOptions,
   statusOptions,
   storageOptions,
   serviceOptions,
+  visibleColumns,
   onChange,
+  onToggleColumn,
   onReset,
-}: OrdersFiltersProps) => (
-  <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
-    <div className="mb-4 flex items-center justify-between gap-3">
-      <div>
-        <h2 className="text-sm font-semibold text-slate-900">Фильтры</h2>
-        <p className="text-xs text-slate-500 mt-1">Период, документы клиента, печать, материал и служебные признаки заказа.</p>
+}: OrdersFiltersProps) => {
+  const [showColumnsMenu, setShowColumnsMenu] = useState(false);
+  const columnsMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!showColumnsMenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (columnsMenuRef.current?.contains(event.target as Node)) return;
+      setShowColumnsMenu(false);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showColumnsMenu]);
+
+  const togglePrint = (printId: number) => {
+    const next = values.printIds.includes(printId)
+      ? values.printIds.filter((item) => item !== printId)
+      : [...values.printIds, printId];
+
+    onChange('printIds', next);
+  };
+
+  const toggleStatus = (statusId: number) => {
+    const next = values.statusTypes.includes(statusId)
+      ? values.statusTypes.filter((item) => item !== statusId)
+      : [...values.statusTypes, statusId];
+
+    onChange('statusTypes', next);
+  };
+
+  return (
+    <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 space-y-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-900">Фильтры заказов</h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Период, документы, материалы, услуги, ответственные и быстрые переключатели реестра.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={values.archived}
+              onChange={(e) => onChange('archived', e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            Архивные
+          </label>
+
+          <label className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={values.deleted}
+              onChange={(e) => onChange('deleted', e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            />
+            Удалённые
+          </label>
+
+          <div className="relative" ref={columnsMenuRef}>
+            <button
+              type="button"
+              onClick={() => setShowColumnsMenu((current) => !current)}
+              className="px-3 py-2 text-sm font-medium text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              Видимость столбцов
+            </button>
+
+            {showColumnsMenu ? (
+              <div className="absolute right-0 top-full z-20 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {ORDER_TABLE_COLUMNS.map((column) => (
+                    <label key={column.key} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50">
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns[column.key]}
+                        onChange={() => onToggleColumn(column.key)}
+                        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-slate-700">{column.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            onClick={onReset}
+            className="px-3 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+          >
+            Сбросить фильтры
+          </button>
+        </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onReset}
-        className="px-3 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
-      >
-        Сбросить
-      </button>
-    </div>
+      <div className="space-y-3">
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-500">Статусы</p>
+          <div className="flex flex-wrap gap-2">
+            {statusOptions.map((option, index) => {
+              const selected = values.statusTypes.includes(option.id);
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => toggleStatus(option.id)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                    selected
+                      ? chipPalette[index % chipPalette.length]
+                      : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-500">Типы печати</p>
+          <div className="flex flex-wrap gap-2">
+            {printingOptions.map((option, index) => {
+              const selected = values.printIds.includes(option.id);
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => togglePrint(option.id)}
+                  className={`inline-flex h-9 min-w-9 items-center justify-center rounded-full border px-3 text-xs font-semibold transition-colors cursor-pointer ${
+                    selected
+                      ? chipPalette[index % chipPalette.length]
+                      : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                  }`}
+                  title={option.name}
+                >
+                  {option.name.slice(0, 2).toUpperCase()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-slate-500">Дата от</span>
         <input
@@ -82,22 +235,6 @@ export const OrdersFilters = ({
           onChange={(e) => onChange('dateTo', e.target.value)}
           className={fieldInputClass}
         />
-      </label>
-
-      <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Тип печати</span>
-        <select
-          value={values.printId}
-          onChange={(e) => onChange('printId', e.target.value)}
-          className={`${fieldSelectClass} ${values.printId ? '' : selectPlaceholderClass}`}
-        >
-          <option value="">Все</option>
-          {printingOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
       </label>
 
       <label className="block">
@@ -152,9 +289,9 @@ export const OrdersFilters = ({
       <label className="block">
         <span className="mb-1 block text-xs font-medium text-slate-500">Статус</span>
         <select
-          value={values.statusType}
-          onChange={(e) => onChange('statusType', e.target.value)}
-          className={`${fieldSelectClass} ${values.statusType ? '' : selectPlaceholderClass}`}
+          value={values.statusTypes[0] ?? ''}
+          onChange={(e) => onChange('statusTypes', e.target.value ? [Number(e.target.value)] : [])}
+          className={`${fieldSelectClass} ${values.statusTypes.length > 0 ? '' : selectPlaceholderClass}`}
         >
           <option value="">Все</option>
           {statusOptions.map((option) => (
@@ -198,48 +335,37 @@ export const OrdersFilters = ({
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Менеджер ID</span>
-        <input
-          type="number"
-          min="1"
+        <span className="mb-1 block text-xs font-medium text-slate-500">Менеджер</span>
+        <select
           value={values.managerId}
           onChange={(e) => onChange('managerId', e.target.value)}
-          placeholder="Например, 8"
-          className={fieldInputClass}
-        />
+          className={`${fieldSelectClass} ${values.managerId ? '' : selectPlaceholderClass}`}
+        >
+          <option value="">Все</option>
+          {managerOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.name}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-xs font-medium text-slate-500">Дизайнер ID</span>
-        <input
-          type="number"
-          min="1"
+        <span className="mb-1 block text-xs font-medium text-slate-500">Дизайнер</span>
+        <select
           value={values.designerId}
           onChange={(e) => onChange('designerId', e.target.value)}
-          placeholder="Например, 12"
-          className={fieldInputClass}
-        />
-      </label>
-
-      <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5">
-        <input
-          type="checkbox"
-          checked={values.archived}
-          onChange={(e) => onChange('archived', e.target.checked)}
-          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-        />
-        <span className="text-sm text-slate-700">Архивные</span>
-      </label>
-
-      <label className="flex items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5">
-        <input
-          type="checkbox"
-          checked={values.deleted}
-          onChange={(e) => onChange('deleted', e.target.checked)}
-          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-        />
-        <span className="text-sm text-slate-700">Удалённые</span>
+          className={`${fieldSelectClass} ${values.designerId ? '' : selectPlaceholderClass}`}
+        >
+          <option value="">Все</option>
+          {designerOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.name}
+            </option>
+          ))}
+        </select>
       </label>
     </div>
   </div>
-);
+  );
+};

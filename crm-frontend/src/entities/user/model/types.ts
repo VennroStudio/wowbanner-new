@@ -14,3 +14,13 @@ export interface User {
   created_at: string;
   updated_at: string;
 }
+
+export interface UserSelectOption {
+  id: number;
+  name: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: UserRoleRef;
+  status: UserRoleRef;
+}

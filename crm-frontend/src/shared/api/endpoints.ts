@@ -5,6 +5,7 @@ export const API_ENDPOINTS = {
   },
   USERS: {
     BY_ID: (id: string | number) => `/users/${id}`,
+    SELECT: '/users/select',
   },
   CLIENTS: {
     LIST: '/clients',

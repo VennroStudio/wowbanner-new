@@ -1,14 +1,12 @@
 export const OrdersTableSkeleton = () => (
   <>
     {Array.from({ length: 6 }).map((_, index) => (
-      <tr key={index} className="border-b border-slate-100 last:border-0">
-        <td className="px-5 py-4"><div className="h-4 w-12 rounded bg-slate-100 animate-pulse" /></td>
-        <td className="px-5 py-4"><div className="h-10 w-40 rounded bg-slate-100 animate-pulse" /></td>
-        <td className="px-5 py-4"><div className="h-10 w-24 rounded bg-slate-100 animate-pulse" /></td>
-        <td className="px-5 py-4"><div className="h-10 w-36 rounded bg-slate-100 animate-pulse" /></td>
-        <td className="px-5 py-4"><div className="h-8 w-24 rounded bg-slate-100 animate-pulse" /></td>
-        <td className="px-5 py-4"><div className="h-10 w-44 rounded bg-slate-100 animate-pulse" /></td>
-        <td className="px-5 py-4"><div className="h-8 w-28 rounded bg-slate-100 animate-pulse" /></td>
+      <tr key={index} className="border-b border-amber-100 last:border-0 bg-amber-50/40">
+        {Array.from({ length: 14 }).map((_, cellIndex) => (
+          <td key={cellIndex} className="px-4 py-4">
+            <div className="h-8 w-24 rounded bg-slate-100 animate-pulse" />
+          </td>
+        ))}
       </tr>
     ))}
   </>

@@ -1,5 +1,6 @@
 import type { Order } from '@/entities/order';
 import { PaginationBar } from '@/shared/ui';
+import { ORDER_TABLE_COLUMNS, type OrderTableColumnKey } from '../../model/orderTableColumns';
 import { OrderTableRow } from './OrderTableRow';
 import { OrdersTableSkeleton } from './OrdersTableSkeleton';
 import { OrdersTableEmpty } from './OrdersTableEmpty';
@@ -12,9 +13,8 @@ interface OrdersTableProps {
   isError: boolean;
   page: number;
   perPage: number;
+  visibleColumns: Record<OrderTableColumnKey, boolean>;
   onPageChange: (page: number) => void;
-  onEdit?: (order: Order) => void;
-  onDelete?: (order: Order) => void;
 }
 
 export const OrdersTable = ({
@@ -24,26 +24,24 @@ export const OrdersTable = ({
   isError,
   page,
   perPage,
+  visibleColumns,
   onPageChange,
-  onEdit,
-  onDelete,
 }: OrdersTableProps) => {
   const totalPages = total ? Math.ceil(total / perPage) : 1;
   const hasData = !isLoading && !isError && orders && orders.length > 0;
+  const visibleHeaders = ORDER_TABLE_COLUMNS.filter((column) => visibleColumns[column.key]);
 
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col flex-1 min-h-[420px]">
       <div className="overflow-x-auto flex-1">
-        <table className="w-full text-left border-collapse table-fixed">
+        <table className="w-full text-left border-collapse min-w-[1440px]">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="px-5 py-3 w-[80px] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">ID</th>
-              <th className="px-5 py-3 w-[19%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Клиент и ответственные</th>
-              <th className="px-5 py-3 w-[14%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Статус / склад</th>
-              <th className="px-5 py-3 w-[18%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Период</th>
-              <th className="px-5 py-3 w-[12%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Сумма</th>
-              <th className="px-5 py-3 w-[22%] text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Состав</th>
-              <th className="px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Действия</th>
+            <tr className="bg-slate-800 border-b border-slate-700">
+              {visibleHeaders.map((column) => (
+                <th key={column.key} className="px-4 py-3 text-[11px] font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                  {column.label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -58,8 +56,7 @@ export const OrdersTable = ({
                 <OrderTableRow
                   key={order.id}
                   order={order}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
+                  visibleColumns={visibleColumns}
                 />
               ))
             )}
