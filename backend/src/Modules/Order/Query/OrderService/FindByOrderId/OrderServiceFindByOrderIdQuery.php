@@ -6,8 +6,10 @@ namespace App\Modules\Order\Query\OrderService\FindByOrderId;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class OrderServiceFindByOrderIdQuery
+final readonly class OrderServiceFindByOrderIdQuery
 {
-    #[Assert\Positive]
-    public int $orderId;
+    public function __construct(
+        #[Assert\Positive]
+        public int $orderId,
+    ) {}
 }
