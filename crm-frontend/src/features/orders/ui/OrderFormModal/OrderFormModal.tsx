@@ -18,7 +18,7 @@ interface OrderFormModalProps {
 }
 
 const sectionChipClass = (selected: boolean) =>
-  `inline-flex h-11 min-w-11 items-center justify-center rounded-lg border text-sm font-semibold transition-colors cursor-pointer ${
+  `inline-flex h-9 min-w-9 items-center justify-center rounded-md border text-xs font-semibold transition-colors cursor-pointer ${
     selected
       ? 'border-blue-600 bg-blue-600 text-white'
       : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -186,199 +186,248 @@ export const OrderFormModal = ({
             <div className="overflow-y-auto px-5 py-4 space-y-5">
               <FormErrorBanner message={submitError} />
 
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr_1fr]">
-                <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ответственные</p>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-3 min-h-[150px]">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ответственные</p>
 
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    <div className="rounded-lg border border-slate-200 px-3 py-2">
-                      <div className="text-xs font-medium text-slate-500">Создал(а)</div>
-                      <div className="mt-1 text-sm font-medium text-slate-800">
-                        {formatUserName(currentUser?.first_name, currentUser?.last_name)}
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                        <div className="rounded-lg border border-slate-200 px-3 py-2">
+                          <div className="text-xs font-medium text-slate-500">Создал(а)</div>
+                          <div className="mt-1 text-sm font-medium text-slate-800">
+                            {formatUserName(currentUser?.first_name, currentUser?.last_name)}
+                          </div>
+                        </div>
+
+                        <label className="block">
+                          <span className="mb-1 block text-xs font-medium text-slate-600">Менеджер</span>
+                          <select className={fieldSelectClass} {...register('managerId')}>
+                            <option value="">Не выбран</option>
+                            {managerOptions.map((option) => (
+                              <option key={option.id} value={option.id}>
+                                {option.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-1 block text-xs font-medium text-slate-600">Дизайнер</span>
+                          <select className={fieldSelectClass} {...register('designerId')}>
+                            <option value="">Не выбран</option>
+                            {designerOptions.map((option) => (
+                              <option key={option.id} value={option.id}>
+                                {option.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
                       </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-3 min-h-[150px]">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Сроки</p>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <label className="block">
+                        <span className="mb-1 block text-xs font-medium text-slate-600">Дата постановки *</span>
+                        <input type="datetime-local" className={fieldInputClass} {...register('acceptedAt')} />
+                        {errors.acceptedAt ? <p className="mt-1 text-xs text-red-600">{errors.acceptedAt.message}</p> : null}
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-1 block text-xs font-medium text-slate-600">Дата сдачи *</span>
+                        <input type="datetime-local" className={fieldInputClass} {...register('deadlineAt')} />
+                        {errors.deadlineAt ? <p className="mt-1 text-xs text-red-600">{errors.deadlineAt.message}</p> : null}
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-1 block text-xs font-medium text-slate-600">Расширение (дней)</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          className={fieldInputClass}
+                          placeholder="0"
+                          {...register('extension')}
+                        />
+                      </label>
                     </div>
 
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Менеджер</span>
-                      <select className={fieldSelectClass} {...register('managerId')}>
-                        <option value="">Не выбран</option>
-                        {managerOptions.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Дизайнер</span>
-                      <select className={fieldSelectClass} {...register('designerId')}>
-                        <option value="">Не выбран</option>
-                        {designerOptions.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Заказчик</p>
-                    <button
-                      type="button"
-                      onClick={() => setIsClientModalOpen(true)}
-                      className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
-                    >
-                      {selectedClient ? 'Сменить клиента' : 'Добавить клиента'}
-                    </button>
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                      Итоговый срок с расширением: <span className="font-medium text-slate-900">{extendedDeadlineLabel}</span>
+                    </div>
                   </div>
 
-                  <input type="hidden" {...register('clientId')} />
-                  {errors.clientId ? <p className="text-xs text-red-600">{errors.clientId.message}</p> : null}
-
-                  {selectedClient ? (
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                      <div className="rounded-lg border border-slate-200 px-3 py-2">
-                        <div className="text-xs font-medium text-slate-500">Клиент № {selectedClient.id}</div>
-                        <div className="mt-1 text-sm font-medium text-slate-800">{selectedClient.name}</div>
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-3 min-h-[190px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Заказчик</p>
+                        <button
+                          type="button"
+                          onClick={() => setIsClientModalOpen(true)}
+                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+                        >
+                          {selectedClient ? 'Сменить клиента' : 'Добавить клиента'}
+                        </button>
                       </div>
-                      <div className="rounded-lg border border-slate-200 px-3 py-2">
-                        <div className="text-xs font-medium text-slate-500">Контакты</div>
-                        <div className="mt-1 text-sm text-slate-700">{selectedClient.phone || 'Телефон не указан'}</div>
-                        <div className="text-sm text-slate-700">{selectedClient.email || 'Email не указан'}</div>
-                        <div className="text-sm text-slate-500">Документы: {selectedClient.docs || '—'}</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-dashed border-slate-300 px-4 py-5 text-sm text-slate-500">
-                      Клиент пока не выбран.
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_1fr]">
-                <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Склад и секции</p>
+                      <input type="hidden" {...register('clientId')} />
+                      {errors.clientId ? <p className="text-xs text-red-600">{errors.clientId.message}</p> : null}
 
-                  <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-slate-600">Склад *</span>
-                    <select className={fieldSelectClass} {...register('storageType')}>
-                      <option value="">Выберите склад</option>
-                      {storageOptions.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.storageType ? <p className="mt-1 text-xs text-red-600">{errors.storageType.message}</p> : null}
-                  </label>
-
-                  <div>
-                    <div className="mb-2 text-xs font-medium text-slate-600">
-                      Секции {selectedStorageType ? '' : '(сначала выберите склад)'}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {sectionOptions.map((section) => {
-                        const selected = (selectedSections ?? []).includes(String(section.id));
-                        return (
-                          <button
-                            key={section.id}
-                            type="button"
-                            disabled={!selectedStorageType}
-                            onClick={() => toggleSection(String(section.id))}
-                            className={`${sectionChipClass(selected)} disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300`}
-                            title={section.label}
-                          >
-                            {section.label.replace(/\D+/g, '') || section.id}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Сроки</p>
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Дата постановки *</span>
-                      <input type="datetime-local" className={fieldInputClass} {...register('acceptedAt')} />
-                      {errors.acceptedAt ? <p className="mt-1 text-xs text-red-600">{errors.acceptedAt.message}</p> : null}
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Дата сдачи *</span>
-                      <input type="datetime-local" className={fieldInputClass} {...register('deadlineAt')} />
-                      {errors.deadlineAt ? <p className="mt-1 text-xs text-red-600">{errors.deadlineAt.message}</p> : null}
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Расширение (дней)</span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        className={fieldInputClass}
-                        placeholder="0"
-                        {...register('extension')}
-                      />
-                    </label>
+                      {selectedClient ? (
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                          <div className="rounded-lg border border-slate-200 px-3 py-2">
+                            <div className="text-xs font-medium text-slate-500">Клиент № {selectedClient.id}</div>
+                            <div className="mt-1 text-sm font-medium text-slate-800">{selectedClient.name}</div>
+                          </div>
+                          <div className="rounded-lg border border-slate-200 px-3 py-2">
+                            <div className="text-xs font-medium text-slate-500">Контакты</div>
+                            <div className="mt-1 text-sm text-slate-700">{selectedClient.phone || 'Телефон не указан'}</div>
+                            <div className="text-sm text-slate-700">{selectedClient.email || 'Email не указан'}</div>
+                            <div className="text-sm text-slate-500">Документы: {selectedClient.docs || '—'}</div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex min-h-[112px] items-center rounded-lg border border-dashed border-slate-300 px-4 py-5 text-sm text-slate-500">
+                          Клиент пока не выбран.
+                        </div>
+                      )}
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                    Итоговый срок с расширением: <span className="font-medium text-slate-900">{extendedDeadlineLabel}</span>
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-3 min-h-[190px]">
+                      <label className="block h-full">
+                        <span className="mb-1 block text-xs font-medium text-slate-600">Общее примечание к заказу</span>
+                        <textarea rows={6} className={`${fieldTextareaClass} min-h-[128px]`} {...register('generalNote')} />
+                      </label>
                   </div>
                 </div>
               </div>
 
-              <label className="block">
-                <span className="mb-1 block text-xs font-medium text-slate-600">Общее примечание к заказу</span>
-                <textarea rows={4} className={fieldTextareaClass} {...register('generalNote')} />
-              </label>
+              <div className="border-t border-dashed border-slate-300 pt-5">
+                <div className="rounded-xl bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Нижняя часть заказа
+                </div>
+              </div>
 
-              <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                    {...register('hasDelivery')}
-                  />
-                  Есть доставка
-                </label>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
+                <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Склад и секции</p>
 
-                {hasDelivery ? (
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
                     <label className="block">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Тип доставки *</span>
-                      <select className={fieldSelectClass} {...register('deliveryType')}>
-                        <option value="">Выберите тип</option>
-                        {deliveryOptions.map((option) => (
+                      <span className="mb-1 block text-xs font-medium text-slate-600">Склад *</span>
+                      <select className={fieldSelectClass} {...register('storageType')}>
+                        <option value="">Выберите склад</option>
+                        {storageOptions.map((option) => (
                           <option key={option.id} value={option.id}>
                             {option.label}
                           </option>
                         ))}
                       </select>
-                      {errors.deliveryType ? <p className="mt-1 text-xs text-red-600">{errors.deliveryType.message}</p> : null}
+                      {errors.storageType ? <p className="mt-1 text-xs text-red-600">{errors.storageType.message}</p> : null}
                     </label>
 
-                    <label className="block lg:col-span-2">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Адрес</span>
-                      <input type="text" className={fieldInputClass} {...register('deliveryAddress')} />
-                    </label>
-
-                    <label className="block lg:col-span-3">
-                      <span className="mb-1 block text-xs font-medium text-slate-600">Комментарий к доставке</span>
-                      <textarea rows={2} className={fieldTextareaClass} {...register('deliveryComment')} />
-                    </label>
+                    <div>
+                      <div className="mb-2 text-xs font-medium text-slate-600">
+                        Секции {selectedStorageType ? '' : '(сначала выберите склад)'}
+                      </div>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {sectionOptions.map((section) => {
+                          const selected = (selectedSections ?? []).includes(String(section.id));
+                          return (
+                            <button
+                              key={section.id}
+                              type="button"
+                              disabled={!selectedStorageType}
+                              onClick={() => toggleSection(String(section.id))}
+                              className={`${sectionChipClass(selected)} disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-300`}
+                              title={section.label}
+                            >
+                              {section.label.replace(/\D+/g, '') || section.id}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                ) : null}
-              </div>
 
-              <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Файлы</p>
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFilesChange(e.target.files)}
+                      className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
+                    />
+
+                    {files.length > 0 ? (
+                      <div className="space-y-2">
+                        {files.map((file, index) => (
+                          <div
+                            key={`${file.name}-${index}`}
+                            className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-slate-700">{file.name}</p>
+                              <p className="text-xs text-slate-500">{Math.round(file.size / 1024)} КБ</p>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFile(index)}
+                              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
+                            >
+                              Убрать
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500">Файлы пока не добавлены.</p>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Доставка</p>
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        {...register('hasDelivery')}
+                      />
+                      Есть доставка
+                    </label>
+
+                    {hasDelivery ? (
+                      <div className="space-y-3">
+                        <label className="block">
+                          <span className="mb-1 block text-xs font-medium text-slate-600">Тип доставки *</span>
+                          <select className={fieldSelectClass} {...register('deliveryType')}>
+                            <option value="">Выберите тип</option>
+                            {deliveryOptions.map((option) => (
+                              <option key={option.id} value={option.id}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.deliveryType ? <p className="mt-1 text-xs text-red-600">{errors.deliveryType.message}</p> : null}
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-1 block text-xs font-medium text-slate-600">Адрес</span>
+                          <input type="text" className={fieldInputClass} {...register('deliveryAddress')} />
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-1 block text-xs font-medium text-slate-600">Комментарий</span>
+                          <textarea rows={4} className={fieldTextareaClass} {...register('deliveryComment')} />
+                        </label>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-slate-500">Доставка пока не требуется.</p>
+                    )}
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Услуги</p>
                   <button
@@ -390,89 +439,55 @@ export const OrderFormModal = ({
                   </button>
                 </div>
 
-                {serviceFields.length === 0 ? (
-                  <p className="text-sm text-slate-500">Пока без услуг.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {serviceFields.map((field, index) => (
-                      <div key={field.fieldId} className="rounded-xl border border-slate-200 p-3">
-                        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_180px_auto]">
-                          <label className="block">
-                            <span className="mb-1 block text-xs font-medium text-slate-600">Услуга</span>
-                            <select className={fieldSelectClass} {...register(`services.${index}.serviceType`)}>
-                              <option value="">Выберите услугу</option>
-                              {serviceOptions.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                            {errors.services?.[index]?.serviceType ? (
-                              <p className="mt-1 text-xs text-red-600">{errors.services[index]?.serviceType?.message}</p>
-                            ) : null}
-                          </label>
+                <div className="rounded-xl border border-slate-200 p-4 space-y-3">
+                  {serviceFields.length === 0 ? (
+                    <p className="text-sm text-slate-500">Пока без услуг.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                      {serviceFields.map((field, index) => (
+                        <div key={field.fieldId} className="rounded-xl border border-slate-200 p-3">
+                          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_180px]">
+                            <label className="block">
+                              <span className="mb-1 block text-xs font-medium text-slate-600">Услуга</span>
+                              <select className={fieldSelectClass} {...register(`services.${index}.serviceType`)}>
+                                <option value="">Выберите услугу</option>
+                                {serviceOptions.map((option) => (
+                                  <option key={option.id} value={option.id}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                              {errors.services?.[index]?.serviceType ? (
+                                <p className="mt-1 text-xs text-red-600">{errors.services[index]?.serviceType?.message}</p>
+                              ) : null}
+                            </label>
 
-                          <label className="block">
-                            <span className="mb-1 block text-xs font-medium text-slate-600">Цена</span>
-                            <input className={fieldInputClass} {...register(`services.${index}.price`)} />
-                            {errors.services?.[index]?.price ? (
-                              <p className="mt-1 text-xs text-red-600">{errors.services[index]?.price?.message}</p>
-                            ) : null}
-                          </label>
-
-                          <div className="flex items-end">
-                            <button
-                              type="button"
-                              onClick={() => removeService(index)}
-                              className="w-full rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer"
-                            >
-                              Удалить
-                            </button>
+                            <label className="block">
+                              <span className="mb-1 block text-xs font-medium text-slate-600">Цена</span>
+                              <input className={fieldInputClass} {...register(`services.${index}.price`)} />
+                              {errors.services?.[index]?.price ? (
+                                <p className="mt-1 text-xs text-red-600">{errors.services[index]?.price?.message}</p>
+                              ) : null}
+                            </label>
                           </div>
+
+                          <label className="mt-3 block">
+                            <span className="mb-1 block text-xs font-medium text-slate-600">Примечание</span>
+                            <input className={fieldInputClass} {...register(`services.${index}.note`)} />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => removeService(index)}
+                            className="mt-3 w-full rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer"
+                          >
+                            Удалить
+                          </button>
                         </div>
-
-                        <label className="mt-3 block">
-                          <span className="mb-1 block text-xs font-medium text-slate-600">Примечание</span>
-                          <input className={fieldInputClass} {...register(`services.${index}.note`)} />
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Файлы</p>
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => handleFilesChange(e.target.files)}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
-                />
-
-                {files.length > 0 ? (
-                  <div className="space-y-2">
-                    {files.map((file, index) => (
-                      <div
-                        key={`${file.name}-${index}`}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2"
-                      >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-slate-700">{file.name}</p>
-                          <p className="text-xs text-slate-500">{Math.round(file.size / 1024)} КБ</p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFile(index)}
-                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
-                        >
-                          Убрать
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
