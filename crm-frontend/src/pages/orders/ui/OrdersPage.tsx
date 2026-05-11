@@ -9,13 +9,16 @@ import { useMaterialOptionSelectQuery, useMaterialSelectQuery } from '@/entities
 import { useClientDocsTypesQuery } from '@/entities/client';
 import { useUserSelectQuery } from '@/entities/user';
 import { AlertBanner } from '@/shared/ui';
-import { DeleteOrderModal, OrdersFilters, OrdersHeader, OrdersTable } from '@/features/orders';
+import { DeleteOrderModal, OrderFormModal, OrdersFilters, OrdersHeader, OrdersTable } from '@/features/orders';
+import { useState } from 'react';
 import { useOrdersPage } from '../model/useOrdersPage';
 
 const toOptionalNumber = (value: string) => (value ? Number(value) : undefined);
 
 export const OrdersPage = () => {
   const perPage = 20;
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createModalKey, setCreateModalKey] = useState(0);
   const {
     search,
     setSearch,
@@ -75,7 +78,10 @@ export const OrdersPage = () => {
       <OrdersHeader
         search={search}
         onSearchChange={setSearch}
-        onAdd={() => setNotice('Форма создания заказа будет следующим этапом.')}
+        onAdd={() => {
+          setCreateModalKey((current) => current + 1);
+          setIsCreateOpen(true);
+        }}
       />
 
       <OrdersFilters
@@ -111,6 +117,13 @@ export const OrdersPage = () => {
         order={deleteEntity}
         onClose={() => setDeleteEntity(null)}
         onSuccess={() => setNotice('Заказ удалён')}
+      />
+
+      <OrderFormModal
+        key={createModalKey}
+        open={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onSuccess={() => setNotice('Заказ создан')}
       />
     </div>
   );
