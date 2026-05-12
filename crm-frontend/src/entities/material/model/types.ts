@@ -15,6 +15,11 @@ export interface MaterialOptionSelectOption {
   name: string;
 }
 
+export interface MaterialProcessingSelectOption {
+  id: number;
+  name: string;
+}
+
 export interface MaterialImage {
   id: number;
   path: string;

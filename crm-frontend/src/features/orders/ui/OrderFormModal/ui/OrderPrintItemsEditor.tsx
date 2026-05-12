@@ -1,11 +1,25 @@
 import { useEffect, useMemo } from 'react';
-import { useWatch, type FieldArrayWithId, type FieldErrors, type UseFieldArrayAppend, type UseFieldArrayRemove, type UseFormRegister, type UseFormSetValue, type Control } from 'react-hook-form';
-import type { MaterialOptionSelectOption, MaterialSelectOption } from '@/entities/material';
-import { useMaterialOptionSelectQuery } from '@/entities/material';
-import type { ProcessingSelectOption } from '@/entities/processing';
+import {
+  useWatch,
+  type Control,
+  type FieldArrayWithId,
+  type FieldErrors,
+  type UseFieldArrayAppend,
+  type UseFieldArrayRemove,
+  type UseFormRegister,
+  type UseFormSetValue,
+} from 'react-hook-form';
+import {
+  useMaterialProcessingSelectQuery,
+} from '@/entities/material';
 import type { PrintingSelectOption } from '@/entities/printing';
-import type { Product } from '@/entities/product';
-import type { UserSelectOption } from '@/entities/user/model/types';
+import {
+  useProductQuery,
+  useProductSelectQuery,
+  type ProductMaterialLink,
+  type ProductSelectOption,
+} from '@/entities/product';
+import type { UserSelectOption } from '@/entities/user';
 import { fieldInputClass, fieldSelectClass, fieldTextareaClass } from '@/shared/ui';
 import { createOrderItemDefaultValue, type OrderFormValues } from '../lib/orderFormSchema';
 
@@ -34,10 +48,25 @@ interface OrderPrintItemsEditorProps {
   append: UseFieldArrayAppend<OrderFormValues, 'items'>;
   remove: UseFieldArrayRemove;
   printOptions: PrintingSelectOption[];
-  productOptions: Product[];
-  materialOptions: MaterialSelectOption[];
   performerOptions: UserSelectOption[];
-  processingOptions: ProcessingSelectOption[];
+  dpiOptions: Array<{ id: number; label: string }>;
+  variantOptions: Array<{ id: number; label: string }>;
+  disabled?: boolean;
+}
+
+interface OrderPrintGroupProps {
+  printId: string;
+  printName: string;
+  groupIndex: number;
+  indices: number[];
+  fields: ItemField[];
+  control: Control<OrderFormValues>;
+  register: UseFormRegister<OrderFormValues>;
+  setValue: UseFormSetValue<OrderFormValues>;
+  errors: FieldErrors<OrderFormValues>;
+  append: UseFieldArrayAppend<OrderFormValues, 'items'>;
+  remove: UseFieldArrayRemove;
+  performerOptions: UserSelectOption[];
   dpiOptions: Array<{ id: number; label: string }>;
   variantOptions: Array<{ id: number; label: string }>;
   disabled?: boolean;
@@ -50,15 +79,40 @@ interface OrderPrintItemCardProps {
   register: UseFormRegister<OrderFormValues>;
   setValue: UseFormSetValue<OrderFormValues>;
   errors: FieldErrors<OrderFormValues>;
-  productOptions: Product[];
-  materialOptions: MaterialSelectOption[];
+  productOptions: ProductSelectOption[];
   performerOptions: UserSelectOption[];
-  processingOptions: ProcessingSelectOption[];
   dpiOptions: Array<{ id: number; label: string }>;
   variantOptions: Array<{ id: number; label: string }>;
   onRemove: () => void;
   disabled?: boolean;
 }
+
+const buildMaterialOptions = (productMaterials: ProductMaterialLink[]) => {
+  const unique = new Map<number, { id: number; name: string }>();
+
+  productMaterials.forEach((material) => {
+    if (!unique.has(material.material_id)) {
+      unique.set(material.material_id, {
+        id: material.material_id,
+        name: material.material_name || `Материал #${material.material_id}`,
+      });
+    }
+  });
+
+  return Array.from(unique.values());
+};
+
+const buildOptionOptions = (
+  productMaterials: ProductMaterialLink[],
+  materialId: number,
+) => {
+  return productMaterials
+    .filter((material) => material.material_id === materialId)
+    .map((material) => ({
+      id: material.material_option_id,
+      name: material.material_option_name || `Опция #${material.material_option_id}`,
+    }));
+};
 
 const OrderPrintItemCard = ({
   index,
@@ -68,47 +122,146 @@ const OrderPrintItemCard = ({
   setValue,
   errors,
   productOptions,
-  materialOptions,
   performerOptions,
-  processingOptions,
   dpiOptions,
   variantOptions,
   onRemove,
   disabled = false,
 }: OrderPrintItemCardProps) => {
-  const materialId = useMemo(() => `items.${index}.materialId` as const, [index]);
+  const productIdPath = useMemo(() => `items.${index}.productId` as const, [index]);
+  const materialIdPath = useMemo(() => `items.${index}.materialId` as const, [index]);
   const optionIdPath = useMemo(() => `items.${index}.optionId` as const, [index]);
   const processingsPath = useMemo(() => `items.${index}.processings` as const, [index]);
 
-  const currentMaterialIdRaw = useWatch({ control, name: materialId }) ?? '';
+  const currentProductIdRaw = useWatch({ control, name: productIdPath }) ?? '';
+  const currentMaterialIdRaw = useWatch({ control, name: materialIdPath }) ?? '';
   const currentOptionIdRaw = useWatch({ control, name: optionIdPath }) ?? '';
-  const selectedProcessings = useWatch({ control, name: processingsPath }) ?? [];
-  const currentMaterialId = Number(currentMaterialIdRaw);
+  const selectedProcessingsWatch = useWatch({ control, name: processingsPath });
+  const selectedProcessings = useMemo(
+    () => selectedProcessingsWatch ?? [],
+    [selectedProcessingsWatch],
+  );
 
-  const { data: currentMaterialOptions = [] } = useMaterialOptionSelectQuery(currentMaterialId, {
-    enabled: currentMaterialId > 0,
+  const currentProductId = Number(currentProductIdRaw);
+  const currentMaterialId = Number(currentMaterialIdRaw);
+  const currentOptionId = Number(currentOptionIdRaw);
+
+  const { data: selectedProductResponse } = useProductQuery(currentProductId, {
+    enabled: currentProductId > 0,
   });
+
+  const productMaterials = useMemo(
+    () => selectedProductResponse?.data?.materials ?? [],
+    [selectedProductResponse?.data?.materials],
+  );
+  const availableMaterials = useMemo(
+    () => buildMaterialOptions(productMaterials),
+    [productMaterials],
+  );
+  const availableOptions = useMemo(
+    () => buildOptionOptions(productMaterials, currentMaterialId),
+    [currentMaterialId, productMaterials],
+  );
+
+  const { data: resolvedProcessingOptions = [] } = useMaterialProcessingSelectQuery(
+    currentMaterialId,
+    currentOptionId,
+    { enabled: currentMaterialId > 0 && currentOptionId > 0 },
+  );
+
+  useEffect(() => {
+    if (!currentProductId) {
+      if (currentMaterialIdRaw) {
+        setValue(materialIdPath, '', { shouldDirty: true, shouldValidate: true });
+      }
+      if (currentOptionIdRaw) {
+        setValue(optionIdPath, '', { shouldDirty: true, shouldValidate: true });
+      }
+      if (selectedProcessings.length > 0) {
+        setValue(processingsPath, [], { shouldDirty: true, shouldValidate: true });
+      }
+      return;
+    }
+
+    if (availableMaterials.length === 0) {
+      if (currentMaterialIdRaw) {
+        setValue(materialIdPath, '', { shouldDirty: true, shouldValidate: true });
+      }
+      if (currentOptionIdRaw) {
+        setValue(optionIdPath, '', { shouldDirty: true, shouldValidate: true });
+      }
+      if (selectedProcessings.length > 0) {
+        setValue(processingsPath, [], { shouldDirty: true, shouldValidate: true });
+      }
+      return;
+    }
+
+    const hasCurrentMaterial = availableMaterials.some((material) => String(material.id) === currentMaterialIdRaw);
+    if (!hasCurrentMaterial) {
+      setValue(materialIdPath, String(availableMaterials[0].id), { shouldDirty: true, shouldValidate: true });
+    }
+  }, [
+    availableMaterials,
+    currentMaterialIdRaw,
+    currentOptionIdRaw,
+    currentProductId,
+    materialIdPath,
+    optionIdPath,
+    processingsPath,
+    selectedProcessings.length,
+    setValue,
+  ]);
 
   useEffect(() => {
     if (!currentMaterialId) {
       if (currentOptionIdRaw) {
         setValue(optionIdPath, '', { shouldDirty: true, shouldValidate: true });
       }
-      return;
-    }
-
-    if (currentMaterialOptions.length === 0) {
-      if (currentOptionIdRaw) {
-        setValue(optionIdPath, '', { shouldDirty: true, shouldValidate: true });
+      if (selectedProcessings.length > 0) {
+        setValue(processingsPath, [], { shouldDirty: true, shouldValidate: true });
       }
       return;
     }
 
-    const hasCurrentOption = currentMaterialOptions.some((option) => String(option.id) === currentOptionIdRaw);
-    if (!hasCurrentOption) {
-      setValue(optionIdPath, String(currentMaterialOptions[0].id), { shouldDirty: true, shouldValidate: true });
+    if (availableOptions.length === 0) {
+      if (currentOptionIdRaw) {
+        setValue(optionIdPath, '', { shouldDirty: true, shouldValidate: true });
+      }
+      if (selectedProcessings.length > 0) {
+        setValue(processingsPath, [], { shouldDirty: true, shouldValidate: true });
+      }
+      return;
     }
-  }, [currentMaterialId, currentMaterialOptions, currentOptionIdRaw, optionIdPath, setValue]);
+
+    const hasCurrentOption = availableOptions.some((option) => String(option.id) === currentOptionIdRaw);
+    if (!hasCurrentOption) {
+      setValue(optionIdPath, String(availableOptions[0].id), { shouldDirty: true, shouldValidate: true });
+    }
+  }, [
+    availableOptions,
+    currentMaterialId,
+    currentOptionIdRaw,
+    optionIdPath,
+    processingsPath,
+    selectedProcessings.length,
+    setValue,
+  ]);
+
+  useEffect(() => {
+    if (resolvedProcessingOptions.length === 0) {
+      if (selectedProcessings.length > 0) {
+        setValue(processingsPath, [], { shouldDirty: true, shouldValidate: true });
+      }
+      return;
+    }
+
+    const allowed = new Set(resolvedProcessingOptions.map((option) => String(option.id)));
+    const next = selectedProcessings.filter((value) => allowed.has(value));
+
+    if (next.length !== selectedProcessings.length) {
+      setValue(processingsPath, next, { shouldDirty: true, shouldValidate: true });
+    }
+  }, [processingsPath, resolvedProcessingOptions, selectedProcessings, setValue]);
 
   const toggleProcessing = (processingId: number) => {
     const key = String(processingId);
@@ -153,7 +306,7 @@ const OrderPrintItemCard = ({
           <span className="mb-1 block text-xs font-medium text-slate-600">Материал</span>
           <select className={fieldSelectClass} {...register(`items.${index}.materialId`)}>
             <option value="">Выберите материал</option>
-            {materialOptions.map((material) => (
+            {availableMaterials.map((material) => (
               <option key={material.id} value={material.id}>
                 {material.name}
               </option>
@@ -166,7 +319,7 @@ const OrderPrintItemCard = ({
           <span className="mb-1 block text-xs font-medium text-slate-600">Опция материала</span>
           <select className={fieldSelectClass} {...register(`items.${index}.optionId`)}>
             <option value="">Выберите опцию</option>
-            {currentMaterialOptions.map((option: MaterialOptionSelectOption) => (
+            {availableOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.name}
               </option>
@@ -250,23 +403,29 @@ const OrderPrintItemCard = ({
           <div>
             <span className="mb-2 block text-xs font-medium text-slate-600">Обработки</span>
             <div className="flex flex-wrap gap-2">
-              {processingOptions.map((processing) => {
-                const selected = selectedProcessings.includes(String(processing.id));
-                return (
-                  <button
-                    key={processing.id}
-                    type="button"
-                    onClick={() => toggleProcessing(processing.id)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                      selected
-                        ? 'border-blue-600 bg-blue-600 text-white'
-                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {processing.name}
-                  </button>
-                );
-              })}
+              {resolvedProcessingOptions.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-slate-500">
+                  Сначала выберите продукцию, материал и опцию материала.
+                </div>
+              ) : (
+                resolvedProcessingOptions.map((processing) => {
+                  const selected = selectedProcessings.includes(String(processing.id));
+                  return (
+                    <button
+                      key={processing.id}
+                      type="button"
+                      onClick={() => toggleProcessing(processing.id)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                        selected
+                          ? 'border-blue-600 bg-blue-600 text-white'
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {processing.name}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -286,6 +445,74 @@ const OrderPrintItemCard = ({
   );
 };
 
+const OrderPrintGroup = ({
+  printId,
+  printName,
+  groupIndex,
+  indices,
+  fields,
+  control,
+  register,
+  setValue,
+  errors,
+  append,
+  remove,
+  performerOptions,
+  dpiOptions,
+  variantOptions,
+  disabled = false,
+}: OrderPrintGroupProps) => {
+  const { data: productOptions = [] } = useProductSelectQuery(Number(printId), {
+    enabled: Number(printId) > 0,
+  });
+
+  const addPrintGroup = () => {
+    append(createOrderItemDefaultValue(Number(printId)));
+  };
+
+  return (
+    <div className="rounded-2xl border border-slate-200 p-4 space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-semibold ${getPrintChipClass(groupIndex)}`}>
+            {printName}
+          </span>
+          <span className="text-sm text-slate-500">Позиции: {indices.length}</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={addPrintGroup}
+          className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
+          disabled={disabled}
+        >
+          + Добавить позицию
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {indices.map((index) => (
+          <OrderPrintItemCard
+            key={fields[index]?.fieldId ?? `${printId}-${index}`}
+            index={index}
+            fieldId={fields[index]?.fieldId ?? `${printId}-${index}`}
+            control={control}
+            register={register}
+            setValue={setValue}
+            errors={errors}
+            productOptions={productOptions}
+            performerOptions={performerOptions}
+            dpiOptions={dpiOptions}
+            variantOptions={variantOptions}
+            onRemove={() => remove(index)}
+            disabled={disabled}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const OrderPrintItemsEditor = ({
   control,
   register,
@@ -295,10 +522,7 @@ export const OrderPrintItemsEditor = ({
   append,
   remove,
   printOptions,
-  productOptions,
-  materialOptions,
   performerOptions,
-  processingOptions,
   dpiOptions,
   variantOptions,
   disabled = false,
@@ -335,7 +559,7 @@ export const OrderPrintItemsEditor = ({
     <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Характеристики заказа</p>
-        <p className="mt-1 text-sm text-slate-500">Нажмите на тип печати, чтобы добавить позицию этого типа в заказ.</p>
+        <p className="mt-1 text-sm text-slate-500">Выберите тип печати, затем заполните позиции именно для него.</p>
       </div>
 
       <div className="space-y-2">
@@ -365,48 +589,26 @@ export const OrderPrintItemsEditor = ({
         <div className="space-y-4">
           {Array.from(groupedItems.entries()).map(([printId, indices], groupIndex) => {
             const printOption = printOptions.find((option) => String(option.id) === printId);
+
             return (
-              <div key={printId} className="rounded-2xl border border-slate-200 p-4 space-y-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-semibold ${getPrintChipClass(groupIndex)}`}>
-                      {printOption?.name ?? `Печать #${printId}`}
-                    </span>
-                    <span className="text-sm text-slate-500">Позиции: {indices.length}</span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => addPrintGroup(Number(printId))}
-                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
-                    disabled={disabled}
-                  >
-                    + Добавить позицию
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {indices.map((index) => (
-                    <OrderPrintItemCard
-                      key={fields[index]?.fieldId ?? `${printId}-${index}`}
-                      index={index}
-                      fieldId={fields[index]?.fieldId ?? `${printId}-${index}`}
-                      control={control}
-                      register={register}
-                      setValue={setValue}
-                      errors={errors}
-                      productOptions={productOptions}
-                      materialOptions={materialOptions}
-                      performerOptions={performerOptions}
-                      processingOptions={processingOptions}
-                      dpiOptions={dpiOptions}
-                      variantOptions={variantOptions}
-                      onRemove={() => remove(index)}
-                      disabled={disabled}
-                    />
-                  ))}
-                </div>
-              </div>
+              <OrderPrintGroup
+                key={printId}
+                printId={printId}
+                printName={printOption?.name ?? `Печать #${printId}`}
+                groupIndex={groupIndex}
+                indices={indices}
+                fields={fields}
+                control={control}
+                register={register}
+                setValue={setValue}
+                errors={errors}
+                append={append}
+                remove={remove}
+                performerOptions={performerOptions}
+                dpiOptions={dpiOptions}
+                variantOptions={variantOptions}
+                disabled={disabled}
+              />
             );
           })}
         </div>

@@ -4,7 +4,9 @@ export type {
   ProductPrintLink,
   ProductMaterialPayload,
   ProductPrintPayload,
+  ProductSelectOption,
   GetProductsParams,
+  GetProductSelectParams,
   PaginatedProductsResponse,
 } from './model/types';
 
@@ -13,6 +15,7 @@ export type { CreateProductBody, UpdateProductBody } from './api/product.api';
 export { productKeys } from './model/query-keys';
 
 export { useProductsQuery } from './model/useProductsQuery';
+export { useProductSelectQuery } from './model/useProductSelectQuery';
 export { useProductQuery } from './model/useProductQuery';
 export { useCreateProductCommand } from './model/useCreateProductCommand';
 export { useUpdateProductCommand } from './model/useUpdateProductCommand';

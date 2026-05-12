@@ -2,11 +2,13 @@ import { apiClient } from '@/shared/api/client';
 import { API_ENDPOINTS } from '@/shared/api/endpoints';
 import type { ApiDataResponse, ApiMutationResponse } from '@/shared/api/types';
 import type {
+  GetProductSelectParams,
   GetProductsParams,
   PaginatedProductsResponse,
   Product,
   ProductMaterialPayload,
   ProductPrintPayload,
+  ProductSelectOption,
 } from '../model/types';
 
 export type CreateProductBody = {
@@ -27,6 +29,19 @@ export const productApi = {
       },
     });
     return data;
+  },
+
+  getProductSelectOptions: async (params?: GetProductSelectParams): Promise<ProductSelectOption[]> => {
+    const { data } = await apiClient.get<ApiDataResponse<ProductSelectOption[]>>(
+      API_ENDPOINTS.PRODUCTS.SELECT,
+      {
+        params: {
+          printId: params?.printId,
+        },
+      },
+    );
+
+    return data.data;
   },
 
   getProduct: async (id: number | string) => {

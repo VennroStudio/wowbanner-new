@@ -14,6 +14,11 @@ export interface ProductPrintLink {
   print_name?: string;
 }
 
+export interface ProductSelectOption {
+  id: number;
+  name: string;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -36,6 +41,10 @@ export interface GetProductsParams {
   page?: number;
   perPage?: number;
   search?: string;
+}
+
+export interface GetProductSelectParams {
+  printId?: number;
 }
 
 export type PaginatedProductsResponse = PaginatedResponse<Product>;

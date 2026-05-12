@@ -2,10 +2,8 @@ import { useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateOrderCommand, useOrderDeliveryTypesQuery, useOrderSectionTypesQuery, useOrderServiceTypesQuery, useOrderStatusTypesQuery, useOrderStorageTypesQuery } from '@/entities/order';
-import { useMaterialDpiTypesQuery, useMaterialSelectQuery, useMaterialVariantTypesQuery } from '@/entities/material';
-import { useProcessingSelectQuery } from '@/entities/processing';
+import { useMaterialDpiTypesQuery, useMaterialVariantTypesQuery } from '@/entities/material';
 import { usePrintingSelectQuery } from '@/entities/printing';
-import { useProductsQuery } from '@/entities/product';
 import { useSessionStore } from '@/entities/session/model/useSessionStore';
 import { useUserSelectQuery } from '@/entities/user';
 import { useModalFormState } from '@/shared/lib/useModalFormState';
@@ -76,15 +74,8 @@ export const OrderFormModal = ({
   const { data: deliveryOptions = [], isLoading: isLoadingDeliveryTypes } = useOrderDeliveryTypesQuery();
   const { data: serviceOptions = [], isLoading: isLoadingServiceTypes } = useOrderServiceTypesQuery();
   const { data: printingOptions = [], isLoading: isLoadingPrintTypes } = usePrintingSelectQuery({ enabled: open });
-  const { data: materialOptions = [], isLoading: isLoadingMaterials } = useMaterialSelectQuery({ enabled: open });
-  const { data: processingOptions = [], isLoading: isLoadingProcessings } = useProcessingSelectQuery({ enabled: open });
   const { data: dpiOptions = [], isLoading: isLoadingDpiTypes } = useMaterialDpiTypesQuery({ enabled: open });
   const { data: variantOptions = [], isLoading: isLoadingVariantTypes } = useMaterialVariantTypesQuery({ enabled: open });
-  const { data: productsResponse, isLoading: isLoadingProducts } = useProductsQuery({
-    page: 1,
-    perPage: 500,
-    search: '',
-  });
 
   const {
     register,
@@ -124,16 +115,12 @@ export const OrderFormModal = ({
     isLoadingDeliveryTypes ||
     isLoadingServiceTypes ||
     isLoadingPrintTypes ||
-    isLoadingMaterials ||
-    isLoadingProcessings ||
     isLoadingDpiTypes ||
-    isLoadingVariantTypes ||
-    isLoadingProducts;
+    isLoadingVariantTypes;
 
   const managerOptions = userOptions;
   const designerOptions = userOptions;
   const performerOptions = userOptions;
-  const productOptions = productsResponse?.data?.items ?? [];
 
   const extendedDeadlineLabel = useMemo(
     () => getExtendedDeadlineLabel(deadlineAt, extension),
@@ -335,10 +322,7 @@ export const OrderFormModal = ({
                 append={appendItem}
                 remove={removeItem}
                 printOptions={printingOptions}
-                productOptions={productOptions}
-                materialOptions={materialOptions}
                 performerOptions={performerOptions}
-                processingOptions={processingOptions}
                 dpiOptions={dpiOptions}
                 variantOptions={variantOptions}
                 disabled={isPending}
