@@ -201,6 +201,9 @@ const OrderPrintItemCard = ({
     return variantOptions.filter((option) => allowedIds.has(option.id));
   }, [selectedMaterialOption, variantOptions]);
 
+  const needsDpi = selectedMaterialOption?.pricingType.id === 1;
+  const needsVariant = selectedMaterialOption?.pricingType.id === 2;
+
   useEffect(() => {
     if (!currentProductId) {
       if (currentMaterialIdRaw) {
@@ -325,6 +328,18 @@ const OrderPrintItemCard = ({
     }
   }, [availableVariantOptions, currentVariantRaw, setValue, variantPath]);
 
+  useEffect(() => {
+    if (needsDpi && !currentVariantRaw && variantOptions[0]) {
+      setValue(variantPath, String(variantOptions[0].id), { shouldDirty: true, shouldValidate: true });
+    }
+  }, [currentVariantRaw, needsDpi, setValue, variantOptions, variantPath]);
+
+  useEffect(() => {
+    if (needsVariant && !currentDpiRaw && dpiOptions[0]) {
+      setValue(dpiPath, String(dpiOptions[0].id), { shouldDirty: true, shouldValidate: true });
+    }
+  }, [currentDpiRaw, dpiOptions, dpiPath, needsVariant, setValue]);
+
   const toggleProcessing = (processingId: number) => {
     const key = String(processingId);
     const next = selectedProcessings.includes(key)
@@ -403,7 +418,7 @@ const OrderPrintItemCard = ({
         </label>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-6">
+      <div className={`grid grid-cols-1 gap-3 ${needsDpi || needsVariant ? 'xl:grid-cols-5' : 'xl:grid-cols-4'}`}>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-600">Ширина</span>
           <input className={fieldInputClass} {...register(`items.${index}.width`)} />
@@ -428,31 +443,35 @@ const OrderPrintItemCard = ({
           {itemErrors?.price ? <p className="mt-1 text-xs text-red-600">{itemErrors.price.message}</p> : null}
         </label>
 
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">DPI</span>
-          <select className={fieldSelectClass} {...register(`items.${index}.dpiType`)}>
-            <option value="">Выберите DPI</option>
-            {availableDpiOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {itemErrors?.dpiType ? <p className="mt-1 text-xs text-red-600">{itemErrors.dpiType.message}</p> : null}
-        </label>
+        {needsDpi ? (
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">DPI</span>
+            <select className={fieldSelectClass} {...register(`items.${index}.dpiType`)}>
+              <option value="">Выберите DPI</option>
+              {availableDpiOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {itemErrors?.dpiType ? <p className="mt-1 text-xs text-red-600">{itemErrors.dpiType.message}</p> : null}
+          </label>
+        ) : null}
 
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Вариант</span>
-          <select className={fieldSelectClass} {...register(`items.${index}.variantType`)}>
-            <option value="">Выберите вариант</option>
-            {availableVariantOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {itemErrors?.variantType ? <p className="mt-1 text-xs text-red-600">{itemErrors.variantType.message}</p> : null}
-        </label>
+        {needsVariant ? (
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-600">Вариант</span>
+            <select className={fieldSelectClass} {...register(`items.${index}.variantType`)}>
+              <option value="">Выберите вариант</option>
+              {availableVariantOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {itemErrors?.variantType ? <p className="mt-1 text-xs text-red-600">{itemErrors.variantType.message}</p> : null}
+          </label>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
