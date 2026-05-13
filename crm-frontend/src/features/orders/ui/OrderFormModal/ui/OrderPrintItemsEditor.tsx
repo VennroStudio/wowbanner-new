@@ -542,6 +542,7 @@ const OrderPrintItemCard = ({
                     placeholder="Примечание к позиции"
                     disabled={disabled}
                     className="min-h-[170px]"
+                    mode="text"
                   />
                 )}
               />

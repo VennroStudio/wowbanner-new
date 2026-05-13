@@ -79,6 +79,7 @@ export interface RichTextEditorProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  mode?: 'full' | 'text';
 }
 
 function ToolbarButton({
@@ -119,6 +120,7 @@ export function RichTextEditor({
   placeholder = '',
   disabled = false,
   className = '',
+  mode = 'full',
 }: RichTextEditorProps) {
   const [showPalette, setShowPalette] = useState(false);
   const editor = useEditor({
@@ -230,54 +232,58 @@ export function RichTextEditor({
         >
           <Italic size={14} />
         </ToolbarButton>
-        <ToolbarButton
-          title="Заголовок 1"
-          disabled={disabled}
-          active={editor.isActive('heading', { level: 1 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        >
-          <Heading1 size={14} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Заголовок 2"
-          disabled={disabled}
-          active={editor.isActive('heading', { level: 2 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        >
-          <Heading2 size={14} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Заголовок 3"
-          disabled={disabled}
-          active={editor.isActive('heading', { level: 3 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        >
-          <Heading3 size={14} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Маркированный список"
-          disabled={disabled}
-          active={editor.isActive('bulletList')}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          <List size={14} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Нумерованный список"
-          disabled={disabled}
-          active={editor.isActive('orderedList')}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered size={14} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Цитата"
-          disabled={disabled}
-          active={editor.isActive('blockquote')}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        >
-          <Quote size={14} />
-        </ToolbarButton>
+        {mode === 'full' ? (
+          <>
+            <ToolbarButton
+              title="Заголовок 1"
+              disabled={disabled}
+              active={editor.isActive('heading', { level: 1 })}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+            >
+              <Heading1 size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              title="Заголовок 2"
+              disabled={disabled}
+              active={editor.isActive('heading', { level: 2 })}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            >
+              <Heading2 size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              title="Заголовок 3"
+              disabled={disabled}
+              active={editor.isActive('heading', { level: 3 })}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            >
+              <Heading3 size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              title="Маркированный список"
+              disabled={disabled}
+              active={editor.isActive('bulletList')}
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+            >
+              <List size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              title="Нумерованный список"
+              disabled={disabled}
+              active={editor.isActive('orderedList')}
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            >
+              <ListOrdered size={14} />
+            </ToolbarButton>
+            <ToolbarButton
+              title="Цитата"
+              disabled={disabled}
+              active={editor.isActive('blockquote')}
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            >
+              <Quote size={14} />
+            </ToolbarButton>
+          </>
+        ) : null}
         <ToolbarButton
           title="Цвет текста"
           disabled={disabled}
@@ -294,25 +300,29 @@ export function RichTextEditor({
         >
           <Link2 size={14} />
         </ToolbarButton>
-        <ToolbarButton
-          title="Вставить таблицу 3×3"
-          disabled={disabled}
-          active={editor.isActive('table')}
-          onClick={() =>
-            editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
-          }
-        >
-          <Table2 size={14} />
-        </ToolbarButton>
-        {editor.can().deleteTable() && (
-          <ToolbarButton
-            title="Удалить таблицу"
-            disabled={disabled}
-            onClick={() => editor.chain().focus().deleteTable().run()}
-          >
-            <Trash2 size={14} />
-          </ToolbarButton>
-        )}
+        {mode === 'full' ? (
+          <>
+            <ToolbarButton
+              title="Вставить таблицу 3×3"
+              disabled={disabled}
+              active={editor.isActive('table')}
+              onClick={() =>
+                editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+              }
+            >
+              <Table2 size={14} />
+            </ToolbarButton>
+            {editor.can().deleteTable() && (
+              <ToolbarButton
+                title="Удалить таблицу"
+                disabled={disabled}
+                onClick={() => editor.chain().focus().deleteTable().run()}
+              >
+                <Trash2 size={14} />
+              </ToolbarButton>
+            )}
+          </>
+        ) : null}
         <ToolbarButton
           title="Отменить"
           disabled={disabled || !editor.can().undo()}
