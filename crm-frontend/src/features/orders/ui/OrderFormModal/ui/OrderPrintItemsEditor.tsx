@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   useWatch,
   type Control,
@@ -128,6 +128,7 @@ const OrderPrintItemCard = ({
   onRemove,
   disabled = false,
 }: OrderPrintItemCardProps) => {
+  const [collapsed, setCollapsed] = useState(false);
   const productIdPath = useMemo(() => `items.${index}.productId` as const, [index]);
   const materialIdPath = useMemo(() => `items.${index}.materialId` as const, [index]);
   const optionIdPath = useMemo(() => `items.${index}.optionId` as const, [index]);
@@ -354,163 +355,19 @@ const OrderPrintItemCard = ({
   return (
     <div key={fieldId} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-slate-700">Позиция #{index + 1}</p>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer"
-          disabled={disabled}
-        >
-          Удалить
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 xl:grid-cols-4">
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Продукция</span>
-          <select className={fieldSelectClass} {...register(`items.${index}.productId`)}>
-            <option value="">Выберите продукцию</option>
-            {productOptions.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
-          </select>
-          {itemErrors?.productId ? <p className="mt-1 text-xs text-red-600">{itemErrors.productId.message}</p> : null}
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Материал</span>
-          <select className={fieldSelectClass} {...register(`items.${index}.materialId`)}>
-            <option value="">Выберите материал</option>
-            {availableMaterials.map((material) => (
-              <option key={material.id} value={material.id}>
-                {material.name}
-              </option>
-            ))}
-          </select>
-          {itemErrors?.materialId ? <p className="mt-1 text-xs text-red-600">{itemErrors.materialId.message}</p> : null}
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Опция материала</span>
-          <select className={fieldSelectClass} {...register(`items.${index}.optionId`)}>
-            <option value="">Выберите опцию</option>
-            {availableOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-          {itemErrors?.optionId ? <p className="mt-1 text-xs text-red-600">{itemErrors.optionId.message}</p> : null}
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Исполнитель</span>
-          <select className={fieldSelectClass} {...register(`items.${index}.performerId`)}>
-            <option value="">Не выбран</option>
-            {performerOptions.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className={`grid grid-cols-1 gap-3 ${needsDpi || needsVariant ? 'xl:grid-cols-5' : 'xl:grid-cols-4'}`}>
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Ширина</span>
-          <input className={fieldInputClass} {...register(`items.${index}.width`)} />
-          {itemErrors?.width ? <p className="mt-1 text-xs text-red-600">{itemErrors.width.message}</p> : null}
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Высота</span>
-          <input className={fieldInputClass} {...register(`items.${index}.height`)} />
-          {itemErrors?.height ? <p className="mt-1 text-xs text-red-600">{itemErrors.height.message}</p> : null}
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Кол-во</span>
-          <input className={fieldInputClass} {...register(`items.${index}.quantity`)} />
-          {itemErrors?.quantity ? <p className="mt-1 text-xs text-red-600">{itemErrors.quantity.message}</p> : null}
-        </label>
-
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Цена</span>
-          <input className={fieldInputClass} {...register(`items.${index}.price`)} />
-          {itemErrors?.price ? <p className="mt-1 text-xs text-red-600">{itemErrors.price.message}</p> : null}
-        </label>
-
-        {needsDpi ? (
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-slate-600">DPI</span>
-            <select className={fieldSelectClass} {...register(`items.${index}.dpiType`)}>
-              <option value="">Выберите DPI</option>
-              {availableDpiOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            {itemErrors?.dpiType ? <p className="mt-1 text-xs text-red-600">{itemErrors.dpiType.message}</p> : null}
-          </label>
-        ) : null}
-
-        {needsVariant ? (
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-slate-600">Вариант</span>
-            <select className={fieldSelectClass} {...register(`items.${index}.variantType`)}>
-              <option value="">Выберите вариант</option>
-              {availableVariantOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            {itemErrors?.variantType ? <p className="mt-1 text-xs text-red-600">{itemErrors.variantType.message}</p> : null}
-          </label>
-        ) : null}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-        <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-600">Примечание</span>
-          <textarea rows={4} className={fieldTextareaClass} {...register(`items.${index}.note`)} />
-        </label>
-
-        <div className="space-y-3">
-          <div>
-            <span className="mb-2 block text-xs font-medium text-slate-600">Обработки</span>
-            <div className="flex flex-wrap gap-2">
-              {resolvedProcessingOptions.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-slate-500">
-                  Сначала выберите продукцию, материал и опцию материала.
-                </div>
-              ) : (
-                resolvedProcessingOptions.map((processing) => {
-                  const selected = selectedProcessings.includes(String(processing.id));
-                  return (
-                    <button
-                      key={processing.id}
-                      type="button"
-                      onClick={() => toggleProcessing(processing.id)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                        selected
-                          ? 'border-blue-600 bg-blue-600 text-white'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {processing.name}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-4 pt-1">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-slate-700">Позиция #{index + 1}</p>
+          <button
+            type="button"
+            onClick={() => setCollapsed((value) => !value)}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-white cursor-pointer"
+            disabled={disabled}
+          >
+            {collapsed ? 'Развернуть' : 'Свернуть'}
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-blue-600" {...register(`items.${index}.printed`)} />
               Отпечатано
@@ -520,8 +377,165 @@ const OrderPrintItemCard = ({
               Готово
             </label>
           </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer"
+            disabled={disabled}
+          >
+            Удалить
+          </button>
         </div>
       </div>
+
+      {!collapsed ? (
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="space-y-4">
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-600">Продукция</span>
+              <select className={fieldSelectClass} {...register(`items.${index}.productId`)}>
+                <option value="">Выберите продукцию</option>
+                {productOptions.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name}
+                  </option>
+                ))}
+              </select>
+              {itemErrors?.productId ? <p className="mt-1 text-xs text-red-600">{itemErrors.productId.message}</p> : null}
+            </label>
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-600">Материал</span>
+              <select className={fieldSelectClass} {...register(`items.${index}.materialId`)}>
+                <option value="">Выберите материал</option>
+                {availableMaterials.map((material) => (
+                  <option key={material.id} value={material.id}>
+                    {material.name}
+                  </option>
+                ))}
+              </select>
+              {itemErrors?.materialId ? <p className="mt-1 text-xs text-red-600">{itemErrors.materialId.message}</p> : null}
+            </label>
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-600">Опция материала</span>
+              <select className={fieldSelectClass} {...register(`items.${index}.optionId`)}>
+                <option value="">Выберите опцию</option>
+                {availableOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+              {itemErrors?.optionId ? <p className="mt-1 text-xs text-red-600">{itemErrors.optionId.message}</p> : null}
+            </label>
+
+            {needsDpi ? (
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-600">DPI</span>
+                <select className={fieldSelectClass} {...register(`items.${index}.dpiType`)}>
+                  <option value="">Выберите DPI</option>
+                  {availableDpiOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {itemErrors?.dpiType ? <p className="mt-1 text-xs text-red-600">{itemErrors.dpiType.message}</p> : null}
+              </label>
+            ) : null}
+
+            {needsVariant ? (
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-600">Вариант</span>
+                <select className={fieldSelectClass} {...register(`items.${index}.variantType`)}>
+                  <option value="">Выберите вариант</option>
+                  {availableVariantOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {itemErrors?.variantType ? <p className="mt-1 text-xs text-red-600">{itemErrors.variantType.message}</p> : null}
+              </label>
+            ) : null}
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-600">Исполнитель</span>
+              <select className={fieldSelectClass} {...register(`items.${index}.performerId`)}>
+                <option value="">Не выбран</option>
+                {performerOptions.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div>
+              <span className="mb-2 block text-xs font-medium text-slate-600">Обработки</span>
+              <div className="flex flex-wrap gap-2">
+                {resolvedProcessingOptions.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs text-slate-500">
+                    Сначала выберите продукцию, материал и опцию материала.
+                  </div>
+                ) : (
+                  resolvedProcessingOptions.map((processing) => {
+                    const selected = selectedProcessings.includes(String(processing.id));
+                    return (
+                      <button
+                        key={processing.id}
+                        type="button"
+                        onClick={() => toggleProcessing(processing.id)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                          selected
+                            ? 'border-blue-600 bg-blue-600 text-white'
+                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        {processing.name}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-600">Ширина</span>
+                <input className={fieldInputClass} {...register(`items.${index}.width`)} />
+                {itemErrors?.width ? <p className="mt-1 text-xs text-red-600">{itemErrors.width.message}</p> : null}
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-600">Высота</span>
+                <input className={fieldInputClass} {...register(`items.${index}.height`)} />
+                {itemErrors?.height ? <p className="mt-1 text-xs text-red-600">{itemErrors.height.message}</p> : null}
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-600">Кол-во</span>
+                <input className={fieldInputClass} {...register(`items.${index}.quantity`)} />
+                {itemErrors?.quantity ? <p className="mt-1 text-xs text-red-600">{itemErrors.quantity.message}</p> : null}
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-slate-600">Цена</span>
+                <input className={fieldInputClass} {...register(`items.${index}.price`)} />
+                {itemErrors?.price ? <p className="mt-1 text-xs text-red-600">{itemErrors.price.message}</p> : null}
+              </label>
+            </div>
+
+            <label className="block">
+              <span className="mb-1 block text-xs font-medium text-slate-600">Примечание</span>
+              <textarea rows={4} className={fieldTextareaClass} {...register(`items.${index}.note`)} />
+            </label>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -543,6 +557,7 @@ const OrderPrintGroup = ({
   variantOptions,
   disabled = false,
 }: OrderPrintGroupProps) => {
+  const [collapsed, setCollapsed] = useState(false);
   const { data: productOptions = [] } = useProductSelectQuery(Number(printId), {
     enabled: Number(printId) > 0,
   });
@@ -553,43 +568,54 @@ const OrderPrintGroup = ({
 
   return (
     <div className="rounded-2xl border border-slate-200 p-4 space-y-4">
-      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-semibold ${getPrintChipClass(groupIndex)}`}>
             {printName}
           </span>
+          <button
+            type="button"
+            onClick={() => setCollapsed((value) => !value)}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
+            disabled={disabled}
+          >
+            {collapsed ? 'Развернуть' : 'Свернуть'}
+          </button>
           <span className="text-sm text-slate-500">Позиции: {indices.length}</span>
         </div>
-
-        <button
-          type="button"
-          onClick={addPrintGroup}
-          className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
-          disabled={disabled}
-        >
-          + Добавить позицию
-        </button>
-      </div>
-
-      <div className="space-y-3">
-        {indices.map((index) => (
-          <OrderPrintItemCard
-            key={fields[index]?.fieldId ?? `${printId}-${index}`}
-            index={index}
-            fieldId={fields[index]?.fieldId ?? `${printId}-${index}`}
-            control={control}
-            register={register}
-            setValue={setValue}
-            errors={errors}
-            productOptions={productOptions}
-            performerOptions={performerOptions}
-            dpiOptions={dpiOptions}
-            variantOptions={variantOptions}
-            onRemove={() => remove(index)}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={addPrintGroup}
+            className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
             disabled={disabled}
-          />
-        ))}
+          >
+            + Добавить позицию
+          </button>
+        </div>
       </div>
+
+      {!collapsed ? (
+        <div className="space-y-3">
+          {indices.map((index) => (
+            <OrderPrintItemCard
+              key={fields[index]?.fieldId ?? `${printId}-${index}`}
+              index={index}
+              fieldId={fields[index]?.fieldId ?? `${printId}-${index}`}
+              control={control}
+              register={register}
+              setValue={setValue}
+              errors={errors}
+              productOptions={productOptions}
+              performerOptions={performerOptions}
+              dpiOptions={dpiOptions}
+              variantOptions={variantOptions}
+              onRemove={() => remove(index)}
+              disabled={disabled}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };
