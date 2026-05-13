@@ -27,6 +27,9 @@ final readonly class MaterialOptionUnifier implements UnifierInterface
         private MaterialProcessingFindByMaterialIdAndOptionIdFetcher $materialProcessingFetcher,
     ) {}
 
+    /**
+     * @throws Exception
+     */
     #[Override]
     public function unifyOne(?int $userId, ?object $item): array
     {
