@@ -10,6 +10,16 @@ export interface OrderEntitySummary {
   name: string;
 }
 
+export interface OrderClientSummary extends OrderEntitySummary {
+  email?: string | null;
+  docs?: OrderEnumRef | null;
+  phones?: Array<{
+    id: number;
+    type: OrderEnumRef;
+    phone: string;
+  }>;
+}
+
 export interface OrderDelivery {
   id: number;
   delivery_type: OrderEnumRef;
@@ -101,7 +111,7 @@ export interface Order {
   manager_id: number | null;
   designer_id: number | null;
   client_id: number;
-  client: OrderEntitySummary;
+  client: OrderClientSummary;
   manager: OrderEntitySummary | null;
   designer: OrderEntitySummary | null;
   status_type: OrderEnumRef;

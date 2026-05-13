@@ -6,6 +6,7 @@ namespace App\Http\Unifier\Order;
 
 use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
+use App\Http\Unifier\Client\ClientUnifier;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdFetcher;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdQuery;
 use App\Modules\Material\Query\Material\GetById\MaterialGetByIdFetcher;
@@ -51,6 +52,7 @@ final readonly class OrderUnifier implements UnifierInterface
 {
     public function __construct(
         private ClientGetByIdFetcher $clientFetcher,
+        private ClientUnifier $clientUnifier,
         private UserGetByIdFetcher $userFetcher,
         private PrintingGetByIdFetcher $printingFetcher,
         private MaterialGetByIdFetcher $materialFetcher,
@@ -124,10 +126,8 @@ final readonly class OrderUnifier implements UnifierInterface
         $data['delivery'] = $delivery !== null
             ? UnifierHelper::toArrayWithout($delivery, 'order_id')
             : null;
-        $data['client'] = [
-            'id' => $client->id,
-            'name' => $this->buildClientName($client),
-        ];
+        $data['client'] = $this->clientUnifier->unifyOne(null, $client);
+        $data['client']['name'] = $this->buildClientName($client);
         $data['manager'] = $manager !== null
             ? [
                 'id' => $manager->id,

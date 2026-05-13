@@ -86,6 +86,26 @@
         "manager_id": 8,
         "designer_id": 12,
         "client_id": 3,
+        "client": {
+          "id": 3,
+          "old_full_name": null,
+          "last_name": "Иванов",
+          "first_name": "Иван",
+          "middle_name": "Иванович",
+          "name": "Иванов Иван Иванович",
+          "email": "client@example.com",
+          "info": null,
+          "docs": { "id": 1, "label": "Паспорт" },
+          "type": { "id": 1, "label": "Физ. лицо" },
+          "phones": [
+            {
+              "id": 4,
+              "type": { "id": 1, "label": "Основной" },
+              "phone": "+7 999 111-22-33"
+            }
+          ],
+          "companies": []
+        },
         "status_type": { "id": 2, "label": "..." },
         "storage_type": { "id": 1, "label": "НД" },
         "general_note": "Срочный заказ",

@@ -228,9 +228,9 @@ export const OrderFormModal = ({
       ? {
           id: orderResponse.data.client_id,
           name: orderResponse.data.client?.name ?? `Клиент #${orderResponse.data.client_id}`,
-          email: null,
-          phone: null,
-          docs: null,
+          email: orderResponse.data.client?.email ?? null,
+          phone: orderResponse.data.client?.phones?.[0]?.phone ?? null,
+          docs: orderResponse.data.client?.docs?.label ?? null,
         }
       : null
   );

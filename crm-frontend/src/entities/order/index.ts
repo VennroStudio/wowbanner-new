@@ -2,6 +2,7 @@ export type {
   Order,
   OrderEnumRef,
   OrderEntitySummary,
+  OrderClientSummary,
   OrderDelivery,
   OrderFile,
   OrderItem,
