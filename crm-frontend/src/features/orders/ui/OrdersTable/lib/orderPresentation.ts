@@ -52,7 +52,7 @@ export const getRemainingLabel = (deadline: string) => {
     return { label: '—', overdue: false };
   }
 
-  let diff = deadlineDate.getTime() - now.getTime();
+  const diff = deadlineDate.getTime() - now.getTime();
 
   if (diff <= 0) {
     return { label: 'просрочен', overdue: true };

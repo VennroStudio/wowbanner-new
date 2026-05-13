@@ -13,6 +13,7 @@ import {
 import {
   useMaterialOptionQuery,
 } from '@/entities/material';
+import type { Order } from '@/entities/order';
 import type { PrintingSelectOption } from '@/entities/printing';
 import {
   useProductQuery,
@@ -52,6 +53,7 @@ interface OrderPrintItemsEditorProps {
   performerOptions: UserSelectOption[];
   dpiOptions: Array<{ id: number; label: string }>;
   variantOptions: Array<{ id: number; label: string }>;
+  order?: Order;
   disabled?: boolean;
 }
 
@@ -70,6 +72,7 @@ interface OrderPrintGroupProps {
   performerOptions: UserSelectOption[];
   dpiOptions: Array<{ id: number; label: string }>;
   variantOptions: Array<{ id: number; label: string }>;
+  order?: Order;
   disabled?: boolean;
 }
 
@@ -84,6 +87,7 @@ interface OrderPrintItemCardProps {
   performerOptions: UserSelectOption[];
   dpiOptions: Array<{ id: number; label: string }>;
   variantOptions: Array<{ id: number; label: string }>;
+  order?: Order;
   onRemove: () => void;
   disabled?: boolean;
 }
@@ -115,6 +119,13 @@ const buildOptionOptions = (
     }));
 };
 
+const mergeById = <TItem extends { id: number }>(base: TItem[], fallback: TItem[]) => {
+  const map = new Map<number, TItem>();
+  fallback.forEach((item) => map.set(item.id, item));
+  base.forEach((item) => map.set(item.id, item));
+  return Array.from(map.values());
+};
+
 const OrderPrintItemCard = ({
   index,
   fieldId,
@@ -126,10 +137,12 @@ const OrderPrintItemCard = ({
   performerOptions,
   dpiOptions,
   variantOptions,
+  order,
   onRemove,
   disabled = false,
 }: OrderPrintItemCardProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const itemIdPath = useMemo(() => `items.${index}.id` as const, [index]);
   const productIdPath = useMemo(() => `items.${index}.productId` as const, [index]);
   const materialIdPath = useMemo(() => `items.${index}.materialId` as const, [index]);
   const optionIdPath = useMemo(() => `items.${index}.optionId` as const, [index]);
@@ -137,6 +150,7 @@ const OrderPrintItemCard = ({
   const dpiPath = useMemo(() => `items.${index}.dpiType` as const, [index]);
   const variantPath = useMemo(() => `items.${index}.variantType` as const, [index]);
 
+  const currentItemIdRaw = useWatch({ control, name: itemIdPath }) ?? '';
   const currentProductIdRaw = useWatch({ control, name: productIdPath }) ?? '';
   const currentMaterialIdRaw = useWatch({ control, name: materialIdPath }) ?? '';
   const currentOptionIdRaw = useWatch({ control, name: optionIdPath }) ?? '';
@@ -151,8 +165,21 @@ const OrderPrintItemCard = ({
   const currentProductId = Number(currentProductIdRaw);
   const currentMaterialId = Number(currentMaterialIdRaw);
   const currentOptionId = Number(currentOptionIdRaw);
+  const sourceOrderItem = useMemo(
+    () => order?.items.find((item) => String(item.id) === currentItemIdRaw),
+    [currentItemIdRaw, order?.items],
+  );
+  const resolvedProductOptions = useMemo(
+    () => mergeById(
+      productOptions,
+      sourceOrderItem?.product_id
+        ? [{ id: sourceOrderItem.product_id, name: `Продукция #${sourceOrderItem.product_id}` }]
+        : [],
+    ),
+    [productOptions, sourceOrderItem],
+  );
 
-  const { data: selectedProductResponse } = useProductQuery(currentProductId, {
+  const { data: selectedProductResponse, isLoading: isLoadingSelectedProduct } = useProductQuery(currentProductId, {
     enabled: currentProductId > 0,
   });
 
@@ -161,15 +188,31 @@ const OrderPrintItemCard = ({
     [selectedProductResponse?.data?.materials],
   );
   const availableMaterials = useMemo(
-    () => buildMaterialOptions(productMaterials),
-    [productMaterials],
+    () => mergeById(
+      buildMaterialOptions(productMaterials),
+      sourceOrderItem?.material_id
+        ? [{
+            id: sourceOrderItem.material_id,
+            name: sourceOrderItem.material?.name ?? `Материал #${sourceOrderItem.material_id}`,
+          }]
+        : [],
+    ),
+    [productMaterials, sourceOrderItem],
   );
   const availableOptions = useMemo(
-    () => buildOptionOptions(productMaterials, currentMaterialId),
-    [currentMaterialId, productMaterials],
+    () => mergeById(
+      buildOptionOptions(productMaterials, currentMaterialId),
+      sourceOrderItem?.option_id
+        ? [{
+            id: sourceOrderItem.option_id,
+            name: sourceOrderItem.option?.name ?? `Опция #${sourceOrderItem.option_id}`,
+          }]
+        : [],
+    ),
+    [currentMaterialId, productMaterials, sourceOrderItem],
   );
 
-  const { data: selectedMaterialOption } = useMaterialOptionQuery(
+  const { data: selectedMaterialOption, isLoading: isLoadingSelectedMaterialOption } = useMaterialOptionQuery(
     currentMaterialId,
     currentOptionId,
     { enabled: currentMaterialId > 0 && currentOptionId > 0 },
@@ -220,6 +263,8 @@ const OrderPrintItemCard = ({
       return;
     }
 
+    if (isLoadingSelectedProduct) return;
+
     if (availableMaterials.length === 0) {
       if (currentMaterialIdRaw) {
         setValue(materialIdPath, '', { shouldDirty: true, shouldValidate: true });
@@ -242,6 +287,7 @@ const OrderPrintItemCard = ({
     currentMaterialIdRaw,
     currentOptionIdRaw,
     currentProductId,
+    isLoadingSelectedProduct,
     materialIdPath,
     optionIdPath,
     processingsPath,
@@ -259,6 +305,8 @@ const OrderPrintItemCard = ({
       }
       return;
     }
+
+    if (isLoadingSelectedProduct) return;
 
     if (availableOptions.length === 0) {
       if (currentOptionIdRaw) {
@@ -278,6 +326,7 @@ const OrderPrintItemCard = ({
     availableOptions,
     currentMaterialId,
     currentOptionIdRaw,
+    isLoadingSelectedProduct,
     optionIdPath,
     processingsPath,
     selectedProcessings.length,
@@ -285,6 +334,8 @@ const OrderPrintItemCard = ({
   ]);
 
   useEffect(() => {
+    if (isLoadingSelectedMaterialOption) return;
+
     if (resolvedProcessingOptions.length === 0) {
       if (selectedProcessings.length > 0) {
         setValue(processingsPath, [], { shouldDirty: true, shouldValidate: true });
@@ -298,9 +349,11 @@ const OrderPrintItemCard = ({
     if (next.length !== selectedProcessings.length) {
       setValue(processingsPath, next, { shouldDirty: true, shouldValidate: true });
     }
-  }, [processingsPath, resolvedProcessingOptions, selectedProcessings, setValue]);
+  }, [isLoadingSelectedMaterialOption, processingsPath, resolvedProcessingOptions, selectedProcessings, setValue]);
 
   useEffect(() => {
+    if (isLoadingSelectedMaterialOption) return;
+
     const hasCurrentDpi = availableDpiOptions.some((option) => String(option.id) === currentDpiRaw);
 
     if (availableDpiOptions.length === 0) {
@@ -313,9 +366,11 @@ const OrderPrintItemCard = ({
     if (!hasCurrentDpi) {
       setValue(dpiPath, String(availableDpiOptions[0].id), { shouldDirty: true, shouldValidate: true });
     }
-  }, [availableDpiOptions, currentDpiRaw, dpiPath, setValue]);
+  }, [availableDpiOptions, currentDpiRaw, dpiPath, isLoadingSelectedMaterialOption, setValue]);
 
   useEffect(() => {
+    if (isLoadingSelectedMaterialOption) return;
+
     const hasCurrentVariant = availableVariantOptions.some((option) => String(option.id) === currentVariantRaw);
 
     if (availableVariantOptions.length === 0) {
@@ -328,7 +383,7 @@ const OrderPrintItemCard = ({
     if (!hasCurrentVariant) {
       setValue(variantPath, String(availableVariantOptions[0].id), { shouldDirty: true, shouldValidate: true });
     }
-  }, [availableVariantOptions, currentVariantRaw, setValue, variantPath]);
+  }, [availableVariantOptions, currentVariantRaw, isLoadingSelectedMaterialOption, setValue, variantPath]);
 
   useEffect(() => {
     if (needsDpi && !currentVariantRaw && variantOptions[0]) {
@@ -355,6 +410,9 @@ const OrderPrintItemCard = ({
 
   return (
     <div key={fieldId} className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 space-y-4">
+      <input type="hidden" {...register(`items.${index}.id`)} />
+      <input type="hidden" {...register(`items.${index}.sourceItemId`)} />
+
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <p className="text-sm font-semibold text-slate-700">Позиция #{index + 1}</p>
@@ -396,7 +454,7 @@ const OrderPrintItemCard = ({
               <span className="mb-1 block text-xs font-medium text-slate-600">Продукция</span>
               <select className={fieldSelectClass} {...register(`items.${index}.productId`)}>
                 <option value="">Выберите продукцию</option>
-                {productOptions.map((product) => (
+                {resolvedProductOptions.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.name}
                   </option>
@@ -569,6 +627,7 @@ const OrderPrintGroup = ({
   performerOptions,
   dpiOptions,
   variantOptions,
+  order,
   disabled = false,
 }: OrderPrintGroupProps) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -624,6 +683,7 @@ const OrderPrintGroup = ({
               performerOptions={performerOptions}
               dpiOptions={dpiOptions}
               variantOptions={variantOptions}
+              order={order}
               onRemove={() => remove(index)}
               disabled={disabled}
             />
@@ -646,6 +706,7 @@ export const OrderPrintItemsEditor = ({
   performerOptions,
   dpiOptions,
   variantOptions,
+  order,
   disabled = false,
 }: OrderPrintItemsEditorProps) => {
   const watchedItems = useWatch({ control, name: 'items' });
@@ -727,6 +788,7 @@ export const OrderPrintItemsEditor = ({
                 performerOptions={performerOptions}
                 dpiOptions={dpiOptions}
                 variantOptions={variantOptions}
+                order={order}
                 disabled={disabled}
               />
             );

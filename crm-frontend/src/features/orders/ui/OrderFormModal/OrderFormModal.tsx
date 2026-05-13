@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateOrderCommand, useOrderDeliveryTypesQuery, useOrderSectionTypesQuery, useOrderServiceTypesQuery, useOrderStatusTypesQuery, useOrderStorageTypesQuery } from '@/entities/order';
+import { useCreateOrderCommand, useOrderDeliveryTypesQuery, useOrderQuery, useOrderSectionTypesQuery, useOrderServiceTypesQuery, useOrderStatusTypesQuery, useOrderStorageTypesQuery, useUpdateOrderCommand } from '@/entities/order';
 import { useMaterialDpiTypesQuery, useMaterialVariantTypesQuery } from '@/entities/material';
 import { usePrintingSelectQuery } from '@/entities/printing';
 import { useSessionStore } from '@/entities/session/model/useSessionStore';
@@ -9,15 +9,17 @@ import { useUserSelectQuery } from '@/entities/user';
 import { useModalFormState } from '@/shared/lib/useModalFormState';
 import { getApiErrorMessage } from '@/shared/utils/axiosError';
 import { fieldInputClass, fieldSelectClass, fieldTextareaClass, FormErrorBanner, ModalDialog } from '@/shared/ui';
-import { buildCreateOrderBody } from './lib/orderFormMappers';
+import { buildCreateOrderBody, buildUpdateOrderBody, mapOrderToFormValues } from './lib/orderFormMappers';
 import { getOrderFormDefaultValues, orderFormSchema, type OrderFormValues } from './lib/orderFormSchema';
 import { OrderClientSelectModal } from './ui/OrderClientSelectModal';
 import { OrderPrintItemsEditor } from './ui/OrderPrintItemsEditor';
 
 interface OrderFormModalProps {
   open: boolean;
+  mode: 'create' | 'edit';
+  orderId?: number;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (mode: 'create' | 'edit') => void;
 }
 
 const sectionChipClass = (selected: boolean) =>
@@ -52,13 +54,19 @@ const getExtendedDeadlineLabel = (deadlineAt: string, extension: string) => {
 
 export const OrderFormModal = ({
   open,
+  mode,
+  orderId,
   onClose,
   onSuccess,
 }: OrderFormModalProps) => {
   const createMutation = useCreateOrderCommand();
+  const updateMutation = useUpdateOrderCommand();
+  const { data: orderResponse, isLoading: isLoadingOrder } = useOrderQuery(orderId ?? 0, {
+    enabled: open && mode === 'edit' && orderId != null && orderId > 0,
+  });
   const currentUser = useSessionStore((state) => state.user);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<{
+  const [selectedClientOverride, setSelectedClientOverride] = useState<{
     id: number;
     name: string;
     email: string | null;
@@ -66,6 +74,7 @@ export const OrderFormModal = ({
     docs: string | null;
   } | null>(null);
   const [files, setFiles] = useState<File[]>([]);
+  const [removedFileIds, setRemovedFileIds] = useState<number[]>([]);
 
   const { data: userOptions = [], isLoading: isLoadingUsers } = useUserSelectQuery(undefined, { enabled: open });
   const { data: statusOptions = [], isLoading: isLoadingStatuses } = useOrderStatusTypesQuery();
@@ -131,11 +140,28 @@ export const OrderFormModal = ({
     onClose,
     onReset: () => {
       reset(getOrderFormDefaultValues());
-      setSelectedClient(null);
+      setSelectedClientOverride(null);
       setFiles([]);
+      setRemovedFileIds([]);
       setIsClientModalOpen(false);
     },
   });
+
+  useEffect(() => {
+    if (!open || mode !== 'create') return;
+
+    reset(getOrderFormDefaultValues());
+  }, [open, mode, reset]);
+
+  useEffect(() => {
+    if (!open || mode !== 'edit') return;
+    if (isDictsLoading) return;
+
+    const order = orderResponse?.data;
+    if (!order) return;
+
+    reset(mapOrderToFormValues(order));
+  }, [isDictsLoading, mode, open, orderResponse, reset]);
 
   const toggleSection = (sectionId: string) => {
     const current = selectedSections ?? [];
@@ -150,8 +176,15 @@ export const OrderFormModal = ({
     setSubmitError(null);
 
     try {
-      await createMutation.mutateAsync(buildCreateOrderBody(values, files));
-      onSuccess?.();
+      if (mode === 'create') {
+        await createMutation.mutateAsync(buildCreateOrderBody(values, files));
+      } else if (orderId != null) {
+        await updateMutation.mutateAsync({
+          id: orderId,
+          body: buildUpdateOrderBody(values, files, keepFileIds),
+        });
+      }
+      onSuccess?.(mode);
       handleClose();
     } catch (e) {
       setSubmitError(getApiErrorMessage(e));
@@ -167,6 +200,12 @@ export const OrderFormModal = ({
     setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index));
   };
 
+  const handleRemoveExistingFile = (fileId: number) => {
+    setRemovedFileIds((current) => (
+      current.includes(fileId) ? current : [...current, fileId]
+    ));
+  };
+
   const handleSelectClient = (client: {
     id: number;
     name: string;
@@ -174,23 +213,43 @@ export const OrderFormModal = ({
     phone: string | null;
     docs: string | null;
   }) => {
-    setSelectedClient(client);
+    setSelectedClientOverride(client);
     setValue('clientId', String(client.id), { shouldDirty: true, shouldValidate: true });
     setIsClientModalOpen(false);
   };
 
-  const isPending = createMutation.isPending;
+  const existingFiles = orderResponse?.data?.files ?? [];
+  const keepFileIds = existingFiles
+    .filter((file) => !removedFileIds.includes(file.id))
+    .map((file) => file.id);
+  const visibleExistingFiles = existingFiles.filter((file) => keepFileIds.includes(file.id));
+  const selectedClient = selectedClientOverride ?? (
+    mode === 'edit' && orderResponse?.data
+      ? {
+          id: orderResponse.data.client_id,
+          name: orderResponse.data.client?.name ?? `Клиент #${orderResponse.data.client_id}`,
+          email: null,
+          phone: null,
+          docs: null,
+        }
+      : null
+  );
+  const isPending = createMutation.isPending || updateMutation.isPending;
+  const showLoader = isDictsLoading || (mode === 'edit' && isLoadingOrder);
+  const title = mode === 'create' ? 'Новый заказ' : 'Редактирование заказа';
+  const submitLabel = mode === 'create' ? 'Создать' : 'Сохранить';
+  const pendingLabel = mode === 'create' ? 'Создание…' : 'Сохранение…';
 
   return (
     <>
       <ModalDialog
         open={open}
-        title="Новый заказ"
+        title={title}
         titleId="order-form-title"
         onClose={handleClose}
         size="7xl"
       >
-        {isDictsLoading ? (
+        {showLoader ? (
           <div className="p-12 text-center text-sm text-slate-500">Загрузка…</div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -325,6 +384,7 @@ export const OrderFormModal = ({
                 performerOptions={performerOptions}
                 dpiOptions={dpiOptions}
                 variantOptions={variantOptions}
+                order={orderResponse?.data}
                 disabled={isPending}
               />
 
@@ -402,8 +462,37 @@ export const OrderFormModal = ({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-500">Файлы пока не добавлены.</p>
+                      <p className="text-sm text-slate-500">Новые файлы пока не добавлены.</p>
                     )}
+
+                    {mode === 'edit' && visibleExistingFiles.length > 0 ? (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Текущие файлы</p>
+                        {visibleExistingFiles.map((file) => (
+                          <div
+                            key={file.id}
+                            className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2"
+                          >
+                            <a
+                              href={file.disk_path}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="min-w-0 truncate text-sm font-medium text-slate-700 hover:text-blue-600"
+                            >
+                              {file.original_name || file.file_name}
+                            </a>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveExistingFile(file.id)}
+                              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
+                            >
+                              Убрать
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="rounded-xl border border-slate-200 p-4 space-y-3">
@@ -419,6 +508,8 @@ export const OrderFormModal = ({
 
                     {hasDelivery ? (
                       <div className="space-y-3">
+                        <input type="hidden" {...register('deliveryId')} />
+
                         <label className="block">
                           <span className="mb-1 block text-xs font-medium text-slate-600">Тип доставки *</span>
                           <select className={fieldSelectClass} {...register('deliveryType')}>
@@ -452,7 +543,7 @@ export const OrderFormModal = ({
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Услуги</p>
                   <button
                     type="button"
-                    onClick={() => appendService({ serviceType: '', price: '', note: '' })}
+                    onClick={() => appendService({ id: '', serviceType: '', price: '', note: '' })}
                     className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 cursor-pointer"
                   >
                     Добавить услугу
@@ -466,6 +557,8 @@ export const OrderFormModal = ({
                     <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
                       {serviceFields.map((field, index) => (
                         <div key={field.fieldId} className="rounded-xl border border-slate-200 p-3">
+                          <input type="hidden" {...register(`services.${index}.id`)} />
+
                           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_180px]">
                             <label className="block">
                               <span className="mb-1 block text-xs font-medium text-slate-600">Услуга</span>
@@ -540,7 +633,7 @@ export const OrderFormModal = ({
                   disabled={isPending}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  {isPending ? 'Создание…' : 'Создать'}
+                  {isPending ? pendingLabel : submitLabel}
                 </button>
               </div>
             </div>

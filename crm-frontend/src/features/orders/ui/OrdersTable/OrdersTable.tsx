@@ -15,6 +15,8 @@ interface OrdersTableProps {
   perPage: number;
   visibleColumns: Record<OrderTableColumnKey, boolean>;
   onPageChange: (page: number) => void;
+  onEdit?: (order: Order) => void;
+  onDelete?: (order: Order) => void;
 }
 
 export const OrdersTable = ({
@@ -26,6 +28,8 @@ export const OrdersTable = ({
   perPage,
   visibleColumns,
   onPageChange,
+  onEdit,
+  onDelete,
 }: OrdersTableProps) => {
   const totalPages = total ? Math.ceil(total / perPage) : 1;
   const hasData = !isLoading && !isError && orders && orders.length > 0;
@@ -57,6 +61,8 @@ export const OrdersTable = ({
                   key={order.id}
                   order={order}
                   visibleColumns={visibleColumns}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
                 />
               ))
             )}

@@ -10,21 +10,20 @@ import { useClientDocsTypesQuery } from '@/entities/client';
 import { useUserSelectQuery } from '@/entities/user';
 import { AlertBanner } from '@/shared/ui';
 import { DeleteOrderModal, OrderFormModal, OrdersFilters, OrdersHeader, OrdersTable } from '@/features/orders';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useOrdersPage } from '../model/useOrdersPage';
 
 const toOptionalNumber = (value: string) => (value ? Number(value) : undefined);
 
 export const OrdersPage = () => {
   const perPage = 20;
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [createModalKey, setCreateModalKey] = useState(0);
   const {
     search,
     setSearch,
     debouncedSearch,
     page,
     setPage,
+    editId,
     filters,
     setFilter,
     resetFilters,
@@ -34,6 +33,10 @@ export const OrdersPage = () => {
     setDeleteEntity,
     notice,
     setNotice,
+    formOpen,
+    openCreate,
+    startEdit,
+    closeForm,
   } = useOrdersPage();
 
   const orderQueryParams = useMemo(() => ({
@@ -97,10 +100,7 @@ export const OrdersPage = () => {
       <OrdersHeader
         search={search}
         onSearchChange={setSearch}
-        onAdd={() => {
-          setCreateModalKey((current) => current + 1);
-          setIsCreateOpen(true);
-        }}
+        onAdd={openCreate}
       />
 
       <OrdersFilters
@@ -129,6 +129,8 @@ export const OrdersPage = () => {
         perPage={perPage}
         visibleColumns={visibleColumns}
         onPageChange={setPage}
+        onEdit={startEdit}
+        onDelete={setDeleteEntity}
       />
 
       <DeleteOrderModal
@@ -139,10 +141,11 @@ export const OrdersPage = () => {
       />
 
       <OrderFormModal
-        key={createModalKey}
-        open={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onSuccess={() => setNotice('Заказ создан')}
+        open={formOpen}
+        mode={editId != null ? 'edit' : 'create'}
+        orderId={editId ?? undefined}
+        onClose={closeForm}
+        onSuccess={(mode) => setNotice(mode === 'edit' ? 'Заказ сохранён' : 'Заказ создан')}
       />
     </div>
   );

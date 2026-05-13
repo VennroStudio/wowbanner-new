@@ -1,4 +1,5 @@
 import type { Order } from '@/entities/order';
+import { RowActionButtons } from '@/shared/ui';
 import type { OrderTableColumnKey } from '../../model/orderTableColumns';
 import {
   formatOrderDateTime,
@@ -12,9 +13,16 @@ import {
 interface OrderTableRowProps {
   order: Order;
   visibleColumns: Record<OrderTableColumnKey, boolean>;
+  onEdit?: (order: Order) => void;
+  onDelete?: (order: Order) => void;
 }
 
-export const OrderTableRow = ({ order, visibleColumns }: OrderTableRowProps) => {
+export const OrderTableRow = ({
+  order,
+  visibleColumns,
+  onEdit,
+  onDelete,
+}: OrderTableRowProps) => {
   const remaining = getRemainingLabel(order.deadline_at);
   const printDots = getPrintTypeDots(order);
   const materialLabels = getMaterialLabels(order);
@@ -164,6 +172,12 @@ export const OrderTableRow = ({ order, visibleColumns }: OrderTableRowProps) => 
       {visibleColumns.deadlineAt ? (
         <td className="px-4 py-4 align-top">
           <div className="text-sm font-medium text-slate-800">{formatOrderDateTime(order.deadline_at)}</div>
+        </td>
+      ) : null}
+
+      {visibleColumns.actions ? (
+        <td className="px-4 py-4 align-top">
+          <RowActionButtons onEdit={() => onEdit?.(order)} onDelete={() => onDelete?.(order)} />
         </td>
       ) : null}
     </tr>

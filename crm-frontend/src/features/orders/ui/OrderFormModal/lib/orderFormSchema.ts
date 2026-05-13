@@ -1,12 +1,15 @@
 import { z } from 'zod';
 
 const orderServiceFormSchema = z.object({
+  id: z.string(),
   serviceType: z.string().min(1, 'Выберите услугу'),
   price: z.string().trim().min(1, 'Укажите цену'),
   note: z.string(),
 });
 
 const orderItemFormSchema = z.object({
+  id: z.string(),
+  sourceItemId: z.string(),
   printId: z.string().min(1, 'Выберите тип печати'),
   productId: z.string().min(1, 'Выберите продукцию'),
   materialId: z.string().min(1, 'Выберите материал'),
@@ -37,6 +40,7 @@ export const orderFormSchema = z
     extension: z.string(),
     sections: z.array(z.string()),
     hasDelivery: z.boolean(),
+    deliveryId: z.string(),
     deliveryType: z.string(),
     deliveryAddress: z.string(),
     deliveryComment: z.string(),
@@ -85,6 +89,7 @@ export const getOrderFormDefaultValues = (): OrderFormValues => ({
   extension: '',
   sections: [],
   hasDelivery: false,
+  deliveryId: '',
   deliveryType: '',
   deliveryAddress: '',
   deliveryComment: '',
@@ -93,6 +98,8 @@ export const getOrderFormDefaultValues = (): OrderFormValues => ({
 });
 
 export const createOrderItemDefaultValue = (printId: number | string) => ({
+  id: '',
+  sourceItemId: '',
   printId: String(printId),
   productId: '',
   materialId: '',

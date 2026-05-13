@@ -12,7 +12,8 @@ export type OrderTableColumnKey =
   | 'materials'
   | 'services'
   | 'acceptedAt'
-  | 'deadlineAt';
+  | 'deadlineAt'
+  | 'actions';
 
 export interface OrderTableColumnDefinition {
   key: OrderTableColumnKey;
@@ -34,6 +35,7 @@ export const ORDER_TABLE_COLUMNS: OrderTableColumnDefinition[] = [
   { key: 'services', label: 'Услуги' },
   { key: 'acceptedAt', label: 'Дата постановки' },
   { key: 'deadlineAt', label: 'Дата сдачи' },
+  { key: 'actions', label: 'Действия' },
 ];
 
 export const DEFAULT_VISIBLE_ORDER_COLUMNS: Record<OrderTableColumnKey, boolean> = {
@@ -51,4 +53,5 @@ export const DEFAULT_VISIBLE_ORDER_COLUMNS: Record<OrderTableColumnKey, boolean>
   services: true,
   acceptedAt: true,
   deadlineAt: true,
+  actions: true,
 };

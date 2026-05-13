@@ -1,5 +1,5 @@
 import { TableStateRow } from '@/shared/ui';
 
 export const OrdersTableEmpty = () => (
-  <TableStateRow colSpan={14} title="Заказы пока не найдены." />
+  <TableStateRow colSpan={15} title="Заказы пока не найдены." />
 );
