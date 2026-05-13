@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCreateOrderCommand, useOrderDeliveryTypesQuery, useOrderQuery, useOrderSectionTypesQuery, useOrderServiceTypesQuery, useOrderStatusTypesQuery, useOrderStorageTypesQuery, useUpdateOrderCommand } from '@/entities/order';
+import { Download, Trash2, X } from 'lucide-react';
+import { orderApi, type OrderFile, useCreateOrderCommand, useDeleteOrderFileCommand, useOrderDeliveryTypesQuery, useOrderQuery, useOrderSectionTypesQuery, useOrderServiceTypesQuery, useOrderStatusTypesQuery, useOrderStorageTypesQuery, useUpdateOrderCommand } from '@/entities/order';
 import { useMaterialDpiTypesQuery, useMaterialVariantTypesQuery } from '@/entities/material';
 import { usePrintingSelectQuery } from '@/entities/printing';
 import { useSessionStore } from '@/entities/session/model/useSessionStore';
@@ -61,6 +62,7 @@ export const OrderFormModal = ({
 }: OrderFormModalProps) => {
   const createMutation = useCreateOrderCommand();
   const updateMutation = useUpdateOrderCommand();
+  const deleteOrderFileMutation = useDeleteOrderFileCommand();
   const { data: orderResponse, isLoading: isLoadingOrder } = useOrderQuery(orderId ?? 0, {
     enabled: open && mode === 'edit' && orderId != null && orderId > 0,
   });
@@ -75,6 +77,7 @@ export const OrderFormModal = ({
   } | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [removedFileIds, setRemovedFileIds] = useState<number[]>([]);
+  const [downloadingFileId, setDownloadingFileId] = useState<number | null>(null);
 
   const { data: userOptions = [], isLoading: isLoadingUsers } = useUserSelectQuery(undefined, { enabled: open });
   const { data: statusOptions = [], isLoading: isLoadingStatuses } = useOrderStatusTypesQuery();
@@ -204,6 +207,39 @@ export const OrderFormModal = ({
     setRemovedFileIds((current) => (
       current.includes(fileId) ? current : [...current, fileId]
     ));
+  };
+
+  const handleDownloadExistingFile = async (file: OrderFile) => {
+    setSubmitError(null);
+    setDownloadingFileId(file.id);
+
+    try {
+      const blob = await orderApi.downloadOrderFile(file.id);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.original_name || file.file_name;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setSubmitError(getApiErrorMessage(e));
+    } finally {
+      setDownloadingFileId(null);
+    }
+  };
+
+  const handleDeleteExistingFile = async (fileId: number) => {
+    if (orderId == null) return;
+    setSubmitError(null);
+
+    try {
+      await deleteOrderFileMutation.mutateAsync({ fileId, orderId });
+      handleRemoveExistingFile(fileId);
+    } catch (e) {
+      setSubmitError(getApiErrorMessage(e));
+    }
   };
 
   const handleSelectClient = (client: {
@@ -454,9 +490,11 @@ export const OrderFormModal = ({
                             <button
                               type="button"
                               onClick={() => handleRemoveFile(index)}
-                              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
+                              title="Убрать из списка"
+                              aria-label={`Убрать файл ${file.name} из списка`}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700 cursor-pointer"
                             >
-                              Убрать
+                              <X size={15} />
                             </button>
                           </div>
                         ))}
@@ -473,22 +511,33 @@ export const OrderFormModal = ({
                             key={file.id}
                             className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2"
                           >
-                            <a
-                              href={file.disk_path}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="min-w-0 truncate text-sm font-medium text-slate-700 hover:text-blue-600"
-                            >
+                            <div className="min-w-0 truncate text-sm font-medium text-slate-700">
                               {file.original_name || file.file_name}
-                            </a>
+                            </div>
 
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveExistingFile(file.id)}
-                              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 cursor-pointer"
-                            >
-                              Убрать
-                            </button>
+                            <div className="flex shrink-0 items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleDownloadExistingFile(file)}
+                                disabled={downloadingFileId === file.id}
+                                title="Скачать"
+                                aria-label={`Скачать файл ${file.original_name || file.file_name}`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-wait disabled:opacity-60 cursor-pointer"
+                              >
+                                <Download size={15} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteExistingFile(file.id)}
+                                disabled={deleteOrderFileMutation.isPending}
+                                title="Удалить"
+                                aria-label={`Удалить файл ${file.original_name || file.file_name}`}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-600 transition-colors hover:bg-red-100 disabled:cursor-wait disabled:opacity-60 cursor-pointer"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>

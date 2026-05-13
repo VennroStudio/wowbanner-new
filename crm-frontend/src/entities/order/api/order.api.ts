@@ -69,6 +69,18 @@ export const orderApi = {
     return data;
   },
 
+  downloadOrderFile: async (id: number | string) => {
+    const { data } = await apiClient.get<Blob>(API_ENDPOINTS.ORDERS.FILE_DOWNLOAD(id), {
+      responseType: 'blob',
+    });
+    return data;
+  },
+
+  deleteOrderFile: async (id: number | string) => {
+    const { data } = await apiClient.delete<ApiMutationResponse>(API_ENDPOINTS.ORDERS.FILE_DELETE(id));
+    return data;
+  },
+
   getStatusTypes: async (): Promise<OrderEnumRef[]> => {
     const { data } = await apiClient.get<ApiDataResponse<OrderEnumRef[]>>(API_ENDPOINTS.ORDERS.STATUS_TYPES);
     return data.data;

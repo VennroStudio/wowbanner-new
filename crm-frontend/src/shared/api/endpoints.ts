@@ -70,6 +70,8 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string | number) => `/orders/${id}`,
     UPDATE: (id: string | number) => `/orders/update/${id}`,
     DELETE: (id: string | number) => `/orders/delete/${id}`,
+    FILE_DOWNLOAD: (id: string | number) => `/orders/files/${id}/download`,
+    FILE_DELETE: (id: string | number) => `/orders/files/${id}`,
     STATUS_TYPES: '/orders/status-types',
     STORAGE_TYPES: '/orders/storage-types',
     DELIVERY_TYPES: '/orders/delivery-types',

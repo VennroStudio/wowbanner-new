@@ -32,6 +32,7 @@ export { useOrderQuery } from './model/useOrderQuery';
 export { useCreateOrderCommand } from './model/useCreateOrderCommand';
 export { useUpdateOrderCommand } from './model/useUpdateOrderCommand';
 export { useDeleteOrderCommand } from './model/useDeleteOrderCommand';
+export { useDeleteOrderFileCommand } from './model/useDeleteOrderFileCommand';
 export { useOrderStatusTypesQuery } from './model/useOrderStatusTypesQuery';
 export { useOrderStorageTypesQuery } from './model/useOrderStorageTypesQuery';
 export { useOrderDeliveryTypesQuery } from './model/useOrderDeliveryTypesQuery';
