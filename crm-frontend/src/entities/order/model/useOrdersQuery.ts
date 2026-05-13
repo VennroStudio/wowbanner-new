@@ -23,8 +23,27 @@ export const useOrdersQuery = (params?: GetOrdersParams) => {
     deleted: params?.deleted ?? false,
   };
 
+  const requestParams: GetOrdersParams = {
+    page: normalizedParams.page,
+    perPage: normalizedParams.perPage,
+    search: normalizedParams.search || undefined,
+    dateFrom: normalizedParams.dateFrom || undefined,
+    dateTo: normalizedParams.dateTo || undefined,
+    printIds: normalizedParams.printIds.length > 0 ? normalizedParams.printIds : undefined,
+    materialId: normalizedParams.materialId || undefined,
+    optionId: normalizedParams.optionId || undefined,
+    docs: normalizedParams.docs || undefined,
+    managerId: normalizedParams.managerId || undefined,
+    designerId: normalizedParams.designerId || undefined,
+    statusTypes: normalizedParams.statusTypes.length > 0 ? normalizedParams.statusTypes : undefined,
+    storageType: normalizedParams.storageType || undefined,
+    serviceType: normalizedParams.serviceType || undefined,
+    archived: normalizedParams.archived ? true : undefined,
+    deleted: normalizedParams.deleted ? true : undefined,
+  };
+
   return useQuery({
     queryKey: orderKeys.list(normalizedParams),
-    queryFn: () => orderApi.getOrders(params),
+    queryFn: () => orderApi.getOrders(requestParams),
   });
 };

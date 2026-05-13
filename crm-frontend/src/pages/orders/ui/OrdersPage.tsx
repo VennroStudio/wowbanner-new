@@ -10,7 +10,7 @@ import { useClientDocsTypesQuery } from '@/entities/client';
 import { useUserSelectQuery } from '@/entities/user';
 import { AlertBanner } from '@/shared/ui';
 import { DeleteOrderModal, OrderFormModal, OrdersFilters, OrdersHeader, OrdersTable } from '@/features/orders';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useOrdersPage } from '../model/useOrdersPage';
 
 const toOptionalNumber = (value: string) => (value ? Number(value) : undefined);
@@ -36,7 +36,7 @@ export const OrdersPage = () => {
     setNotice,
   } = useOrdersPage();
 
-  const { data, isLoading, isError } = useOrdersQuery({
+  const orderQueryParams = useMemo(() => ({
     search: debouncedSearch,
     page,
     perPage,
@@ -53,7 +53,26 @@ export const OrdersPage = () => {
     serviceType: toOptionalNumber(filters.serviceType),
     archived: filters.archived || undefined,
     deleted: filters.deleted || undefined,
-  });
+  }), [
+    debouncedSearch,
+    page,
+    perPage,
+    filters.dateFrom,
+    filters.dateTo,
+    filters.printIds,
+    filters.materialId,
+    filters.optionId,
+    filters.docs,
+    filters.managerId,
+    filters.designerId,
+    filters.statusTypes,
+    filters.storageType,
+    filters.serviceType,
+    filters.archived,
+    filters.deleted,
+  ]);
+
+  const { data, isLoading, isError } = useOrdersQuery(orderQueryParams);
 
   const printingSelect = usePrintingSelectQuery();
   const materialSelect = useMaterialSelectQuery();
