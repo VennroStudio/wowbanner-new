@@ -559,15 +559,14 @@ export const OrderPrintItemsEditor = ({
     <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Характеристики заказа</p>
-        <p className="mt-1 text-sm text-slate-500">Выберите тип печати, затем заполните позиции именно для него.</p>
       </div>
 
       <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Доступные типы печати</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Типы печати</p>
         <div className="flex flex-wrap gap-2">
           {availablePrints.length === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500">
-              Все доступные типы печати уже добавлены в заказ.
+              Все типы печати уже добавлены в заказ.
             </div>
           ) : (
             availablePrints.map((printOption, index) => (
