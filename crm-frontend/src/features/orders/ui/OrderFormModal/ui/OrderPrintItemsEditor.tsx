@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Controller,
   useWatch,
   type Control,
   type FieldArrayWithId,
@@ -20,7 +21,7 @@ import {
   type ProductSelectOption,
 } from '@/entities/product';
 import type { UserSelectOption } from '@/entities/user';
-import { fieldInputClass, fieldSelectClass, fieldTextareaClass } from '@/shared/ui';
+import { fieldInputClass, fieldSelectClass, RichTextEditor } from '@/shared/ui';
 import { createOrderItemDefaultValue, type OrderFormValues } from '../lib/orderFormSchema';
 
 const PRINT_COLOR_CLASSES = [
@@ -529,10 +530,22 @@ const OrderPrintItemCard = ({
               </label>
             </div>
 
-            <label className="block">
+            <div className="block">
               <span className="mb-1 block text-xs font-medium text-slate-600">Примечание</span>
-              <textarea rows={4} className={fieldTextareaClass} {...register(`items.${index}.note`)} />
-            </label>
+              <Controller
+                name={`items.${index}.note`}
+                control={control}
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    placeholder="Примечание к позиции"
+                    disabled={disabled}
+                    className="min-h-[170px]"
+                  />
+                )}
+              />
+            </div>
           </div>
         </div>
       ) : null}
