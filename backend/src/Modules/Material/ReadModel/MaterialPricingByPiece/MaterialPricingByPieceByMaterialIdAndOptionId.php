@@ -72,13 +72,13 @@ final readonly class MaterialPricingByPieceByMaterialIdAndOptionId implements Ma
             'id'           => $this->id,
             'material_id'  => $this->materialId,
             'option_id'    => $this->optionId,
-            'variant_type' => [
+            'variantType'  => [
                 'id'    => $this->variantType->value,
                 'label' => $this->variantType->getLabel(),
             ],
             'price'        => $this->price,
             'cost'         => $this->cost,
-            'print_hours'  => $this->printHours,
+            'printHours'   => $this->printHours,
         ];
     }
 }

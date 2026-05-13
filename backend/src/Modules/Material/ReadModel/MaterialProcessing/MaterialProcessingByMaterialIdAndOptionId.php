@@ -17,6 +17,7 @@ final readonly class MaterialProcessingByMaterialIdAndOptionId implements Materi
         public int $materialId,
         public int $optionId,
         public int $processingId,
+        public string $processingName,
     ) {}
 
     /**
@@ -24,7 +25,8 @@ final readonly class MaterialProcessingByMaterialIdAndOptionId implements Materi
      *     id: int,
      *     material_id: int,
      *     option_id: int,
-     *     processing_id: int
+     *     processing_id: int,
+     *     processing_name: string
      * } $row
      */
     public static function fromRow(array $row): self
@@ -34,6 +36,7 @@ final readonly class MaterialProcessingByMaterialIdAndOptionId implements Materi
             materialId: (int) $row['material_id'],
             optionId: (int) $row['option_id'],
             processingId: (int) $row['processing_id'],
+            processingName: (string) $row['processing_name'],
         );
     }
 
@@ -68,7 +71,8 @@ final readonly class MaterialProcessingByMaterialIdAndOptionId implements Materi
             'id'            => $this->id,
             'material_id'   => $this->materialId,
             'option_id'     => $this->optionId,
-            'processing_id' => $this->processingId,
+            'processingId'  => $this->processingId,
+            'processingName' => $this->processingName,
         ];
     }
 }

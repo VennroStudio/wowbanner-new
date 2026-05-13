@@ -15,8 +15,8 @@ interface MaterialOptionModelInterface
      *     id: int,
      *     name: string,
      *     material_id: int,
-     *     pricing_type: array{id: int, label: string},
-     *     is_cut: bool
+     *     pricingType: array{id: int, label: string},
+     *     isCut: bool
      * }
      */
     public function toArray(): array;

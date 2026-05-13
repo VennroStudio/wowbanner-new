@@ -19,7 +19,8 @@ interface MaterialProcessingModelInterface
      *     id: int,
      *     material_id: int,
      *     option_id: int,
-     *     processing_id: int
+     *     processingId: int,
+     *     processingName: string
      * }
      */
     public function toArray(): array;

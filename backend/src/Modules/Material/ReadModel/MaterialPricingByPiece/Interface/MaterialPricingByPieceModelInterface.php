@@ -17,10 +17,10 @@ interface MaterialPricingByPieceModelInterface
      *     id: int,
      *     material_id: int,
      *     option_id: int,
-     *     variant_type: array{id: int, label: string},
+     *     variantType: array{id: int, label: string},
      *     price: string,
      *     cost: string,
-     *     print_hours: string
+     *     printHours: string
      * }
      */
     public function toArray(): array;

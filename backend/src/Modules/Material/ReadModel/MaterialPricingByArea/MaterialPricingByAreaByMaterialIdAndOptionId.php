@@ -76,14 +76,14 @@ final readonly class MaterialPricingByAreaByMaterialIdAndOptionId implements Mat
             'id'              => $this->id,
             'material_id'     => $this->materialId,
             'option_id'       => $this->optionId,
-            'dpi_type'        => ['id' => $this->dpiType->value, 'label' => $this->dpiType->getLabel()],
-            'area_range_type' => [
+            'dpiType'         => ['id' => $this->dpiType->value, 'label' => $this->dpiType->getLabel()],
+            'areaRangeType'   => [
                 'id'    => $this->areaRangeType->value,
                 'label' => $this->areaRangeType->getLabel(),
             ],
             'price'           => $this->price,
             'cost'            => $this->cost,
-            'print_hours'     => $this->printHours,
+            'printHours'      => $this->printHours,
         ];
     }
 }

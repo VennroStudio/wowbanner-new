@@ -23,7 +23,8 @@ export const API_ENDPOINTS = {
     CREATE: '/materials/create',
     BY_ID: (id: string | number) => `/materials/${id}`,
     OPTION_SELECT: (id: string | number) => `/materials/${id}/options/select`,
-    PROCESSING_SELECT: '/materials/processings/select',
+    OPTION_DETAIL: (materialId: string | number, optionId: string | number) =>
+      `/materials/${materialId}/option/${optionId}`,
     UPDATE: (id: string | number) => `/materials/update/${id}`,
     DELETE: (id: string | number) => `/materials/delete/${id}`,
     OPTION_PRICING_TYPES: '/materials/option-pricing-types',

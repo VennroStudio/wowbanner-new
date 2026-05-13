@@ -10,7 +10,7 @@ import {
   type UseFormSetValue,
 } from 'react-hook-form';
 import {
-  useMaterialProcessingSelectQuery,
+  useMaterialOptionQuery,
 } from '@/entities/material';
 import type { PrintingSelectOption } from '@/entities/printing';
 import {
@@ -132,10 +132,14 @@ const OrderPrintItemCard = ({
   const materialIdPath = useMemo(() => `items.${index}.materialId` as const, [index]);
   const optionIdPath = useMemo(() => `items.${index}.optionId` as const, [index]);
   const processingsPath = useMemo(() => `items.${index}.processings` as const, [index]);
+  const dpiPath = useMemo(() => `items.${index}.dpiType` as const, [index]);
+  const variantPath = useMemo(() => `items.${index}.variantType` as const, [index]);
 
   const currentProductIdRaw = useWatch({ control, name: productIdPath }) ?? '';
   const currentMaterialIdRaw = useWatch({ control, name: materialIdPath }) ?? '';
   const currentOptionIdRaw = useWatch({ control, name: optionIdPath }) ?? '';
+  const currentDpiRaw = useWatch({ control, name: dpiPath }) ?? '';
+  const currentVariantRaw = useWatch({ control, name: variantPath }) ?? '';
   const selectedProcessingsWatch = useWatch({ control, name: processingsPath });
   const selectedProcessings = useMemo(
     () => selectedProcessingsWatch ?? [],
@@ -163,11 +167,39 @@ const OrderPrintItemCard = ({
     [currentMaterialId, productMaterials],
   );
 
-  const { data: resolvedProcessingOptions = [] } = useMaterialProcessingSelectQuery(
+  const { data: selectedMaterialOption } = useMaterialOptionQuery(
     currentMaterialId,
     currentOptionId,
     { enabled: currentMaterialId > 0 && currentOptionId > 0 },
   );
+
+  const resolvedProcessingOptions = useMemo(
+    () => (selectedMaterialOption?.processings ?? []).map((processing) => ({
+      id: processing.processingId,
+      name: processing.processingName ?? `Обработка #${processing.processingId}`,
+    })),
+    [selectedMaterialOption?.processings],
+  );
+
+  const availableDpiOptions = useMemo(() => {
+    if (!selectedMaterialOption || selectedMaterialOption.pricingType.id !== 1) {
+      return [];
+    }
+
+    const allowedIds = new Set(selectedMaterialOption.pricingByArea.map((row) => row.dpiType.id));
+
+    return dpiOptions.filter((option) => allowedIds.has(option.id));
+  }, [dpiOptions, selectedMaterialOption]);
+
+  const availableVariantOptions = useMemo(() => {
+    if (!selectedMaterialOption || selectedMaterialOption.pricingType.id !== 2) {
+      return [];
+    }
+
+    const allowedIds = new Set(selectedMaterialOption.pricingByPiece.map((row) => row.variantType.id));
+
+    return variantOptions.filter((option) => allowedIds.has(option.id));
+  }, [selectedMaterialOption, variantOptions]);
 
   useEffect(() => {
     if (!currentProductId) {
@@ -262,6 +294,36 @@ const OrderPrintItemCard = ({
       setValue(processingsPath, next, { shouldDirty: true, shouldValidate: true });
     }
   }, [processingsPath, resolvedProcessingOptions, selectedProcessings, setValue]);
+
+  useEffect(() => {
+    const hasCurrentDpi = availableDpiOptions.some((option) => String(option.id) === currentDpiRaw);
+
+    if (availableDpiOptions.length === 0) {
+      if (currentDpiRaw) {
+        setValue(dpiPath, '', { shouldDirty: true, shouldValidate: true });
+      }
+      return;
+    }
+
+    if (!hasCurrentDpi) {
+      setValue(dpiPath, String(availableDpiOptions[0].id), { shouldDirty: true, shouldValidate: true });
+    }
+  }, [availableDpiOptions, currentDpiRaw, dpiPath, setValue]);
+
+  useEffect(() => {
+    const hasCurrentVariant = availableVariantOptions.some((option) => String(option.id) === currentVariantRaw);
+
+    if (availableVariantOptions.length === 0) {
+      if (currentVariantRaw) {
+        setValue(variantPath, '', { shouldDirty: true, shouldValidate: true });
+      }
+      return;
+    }
+
+    if (!hasCurrentVariant) {
+      setValue(variantPath, String(availableVariantOptions[0].id), { shouldDirty: true, shouldValidate: true });
+    }
+  }, [availableVariantOptions, currentVariantRaw, setValue, variantPath]);
 
   const toggleProcessing = (processingId: number) => {
     const key = String(processingId);
@@ -370,7 +432,7 @@ const OrderPrintItemCard = ({
           <span className="mb-1 block text-xs font-medium text-slate-600">DPI</span>
           <select className={fieldSelectClass} {...register(`items.${index}.dpiType`)}>
             <option value="">Выберите DPI</option>
-            {dpiOptions.map((option) => (
+            {availableDpiOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.label}
               </option>
@@ -383,7 +445,7 @@ const OrderPrintItemCard = ({
           <span className="mb-1 block text-xs font-medium text-slate-600">Вариант</span>
           <select className={fieldSelectClass} {...register(`items.${index}.variantType`)}>
             <option value="">Выберите вариант</option>
-            {variantOptions.map((option) => (
+            {availableVariantOptions.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.label}
               </option>

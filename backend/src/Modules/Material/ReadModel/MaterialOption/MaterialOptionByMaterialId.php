@@ -60,11 +60,11 @@ final readonly class MaterialOptionByMaterialId implements MaterialOptionModelIn
             'id'           => $this->id,
             'name'         => $this->name,
             'material_id'  => $this->materialId,
-            'pricing_type' => [
+            'pricingType' => [
                 'id'    => $this->pricingType->value,
                 'label' => $this->pricingType->getLabel(),
             ],
-            'is_cut'       => $this->isCut,
+            'isCut'       => $this->isCut,
         ];
     }
 }

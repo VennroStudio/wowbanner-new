@@ -9,7 +9,7 @@ use App\Modules\Material\Entity\MaterialOption\Fields\Enums\MaterialOptionPricin
 use App\Modules\Material\ReadModel\MaterialOption\Interface\MaterialOptionModelInterface;
 use Override;
 
-final readonly class MaterialOptionById implements MaterialOptionModelInterface
+final readonly class MaterialOptionByMaterialIdAndOptionId implements MaterialOptionModelInterface
 {
     use FromRowsTrait;
 
@@ -57,14 +57,14 @@ final readonly class MaterialOptionById implements MaterialOptionModelInterface
     public function toArray(): array
     {
         return [
-            'id'           => $this->id,
-            'name'         => $this->name,
-            'material_id'  => $this->materialId,
+            'id' => $this->id,
+            'name' => $this->name,
+            'material_id' => $this->materialId,
             'pricingType' => [
-                'id'    => $this->pricingType->value,
+                'id' => $this->pricingType->value,
                 'label' => $this->pricingType->getLabel(),
             ],
-            'isCut'       => $this->isCut,
+            'isCut' => $this->isCut,
         ];
     }
 }

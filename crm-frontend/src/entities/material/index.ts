@@ -23,7 +23,7 @@ export { useMaterialsQuery } from './model/useMaterialsQuery';
 export { useMaterialQuery } from './model/useMaterialQuery';
 export { useMaterialSelectQuery } from './model/useMaterialSelectQuery';
 export { useMaterialOptionSelectQuery } from './model/useMaterialOptionSelectQuery';
-export { useMaterialProcessingSelectQuery } from './model/useMaterialProcessingSelectQuery';
+export { useMaterialOptionQuery } from './model/useMaterialOptionQuery';
 export { useMaterialOptionPricingTypesQuery } from './model/useMaterialOptionPricingTypesQuery';
 export { useMaterialAreaRangeTypesQuery } from './model/useMaterialAreaRangeTypesQuery';
 export { useMaterialDpiTypesQuery } from './model/useMaterialDpiTypesQuery';

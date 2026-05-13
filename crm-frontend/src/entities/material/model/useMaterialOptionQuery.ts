@@ -6,14 +6,14 @@ const STALE_MS = 1000 * 60 * 60;
 
 type Options = { enabled?: boolean };
 
-export const useMaterialProcessingSelectQuery = (
+export const useMaterialOptionQuery = (
   materialId: number | string,
   optionId: number | string,
   options?: Options,
 ) => {
   return useQuery({
-    queryKey: materialKeys.processingSelect(materialId, optionId),
-    queryFn: () => materialApi.getMaterialProcessingSelectOptions(materialId, optionId),
+    queryKey: materialKeys.optionDetail(materialId, optionId),
+    queryFn: () => materialApi.getMaterialOption(materialId, optionId),
     staleTime: STALE_MS,
     enabled: (options?.enabled ?? true) && Number(materialId) > 0 && Number(optionId) > 0,
   });

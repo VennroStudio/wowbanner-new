@@ -34,13 +34,14 @@ final readonly class MaterialProcessingFindByMaterialIdAndOptionIdFetcher
         }
 
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'material_id', 'option_id', 'processing_id')
-            ->from(self::TABLE)
-            ->where('material_id = :materialId')
-            ->andWhere('option_id = :optionId')
+            ->select('mp.id', 'mp.material_id', 'mp.option_id', 'mp.processing_id', 'p.name AS processing_name')
+            ->from(self::TABLE, 'mp')
+            ->leftJoin('mp', 'processings', 'p', 'p.id = mp.processing_id')
+            ->where('mp.material_id = :materialId')
+            ->andWhere('mp.option_id = :optionId')
             ->setParameter('materialId', $query->materialId)
             ->setParameter('optionId', $query->optionId)
-            ->orderBy('id', 'ASC')
+            ->orderBy('mp.id', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();
 

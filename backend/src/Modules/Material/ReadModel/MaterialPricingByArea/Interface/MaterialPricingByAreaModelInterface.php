@@ -17,11 +17,11 @@ interface MaterialPricingByAreaModelInterface
      *     id: int,
      *     material_id: int,
      *     option_id: int,
-     *     dpi_type: array{id: int, label: string},
-     *     area_range_type: array{id: int, label: string},
+     *     dpiType: array{id: int, label: string},
+     *     areaRangeType: array{id: int, label: string},
      *     price: string,
      *     cost: string,
-     *     print_hours: string
+     *     printHours: string
      * }
      */
     public function toArray(): array;

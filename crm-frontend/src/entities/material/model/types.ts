@@ -29,6 +29,7 @@ export interface MaterialImage {
 export interface MaterialOptionProcessing {
   id: number;
   processingId: number;
+  processingName?: string;
 }
 
 export interface MaterialPricingByAreaRow {

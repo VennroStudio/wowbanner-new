@@ -22,7 +22,7 @@ use App\Http\Action\v1\Material\GetMaterialByIdAction;
 use App\Http\Action\v1\Material\GetMaterialDpiTypesAction;
 use App\Http\Action\v1\Material\GetMaterialOptionSelectAction;
 use App\Http\Action\v1\Material\GetMaterialOptionPricingTypesAction;
-use App\Http\Action\v1\Material\GetMaterialProcessingSelectAction;
+use App\Http\Action\v1\Material\GetMaterialOptionAction;
 use App\Http\Action\v1\Material\GetMaterialPricingCutTypesAction;
 use App\Http\Action\v1\Material\GetMaterialSelectAction;
 use App\Http\Action\v1\Material\GetMaterialsAction;
@@ -114,8 +114,8 @@ return static function (App $app): void {
             $group->get('/dpi-types', GetMaterialDpiTypesAction::class)->add(Authenticate::class);
             $group->get('/variant-types', GetMaterialVariantTypesAction::class)->add(Authenticate::class);
             $group->get('/pricing-cut-types', GetMaterialPricingCutTypesAction::class)->add(Authenticate::class);
-            $group->get('/processings/select', GetMaterialProcessingSelectAction::class)->add(Authenticate::class);
             $group->get('/{id}/options/select', GetMaterialOptionSelectAction::class)->add(Authenticate::class);
+            $group->get('/{materialId}/option/{optionId}', GetMaterialOptionAction::class)->add(Authenticate::class);
             $group->post('/create', CreateMaterialAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UpdateMaterialAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeleteMaterialAction::class)->add(Authenticate::class);

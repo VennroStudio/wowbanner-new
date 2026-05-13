@@ -6,8 +6,8 @@ import type {
   Material,
   MaterialCreateUpdateOption,
   MaterialEnumRef,
+  MaterialOption,
   MaterialOptionSelectOption,
-  MaterialProcessingSelectOption,
   MaterialSelectOption,
   PaginatedResponse,
 } from '../model/types';
@@ -57,18 +57,12 @@ export const materialApi = {
     return data.data;
   },
 
-  getMaterialProcessingSelectOptions: async (
+  getMaterialOption: async (
     materialId: number | string,
     optionId: number | string,
-  ): Promise<MaterialProcessingSelectOption[]> => {
-    const { data } = await apiClient.get<ApiDataResponse<MaterialProcessingSelectOption[]>>(
-      API_ENDPOINTS.MATERIALS.PROCESSING_SELECT,
-      {
-        params: {
-          materialId,
-          optionId,
-        },
-      },
+  ): Promise<MaterialOption> => {
+    const { data } = await apiClient.get<ApiDataResponse<MaterialOption>>(
+      API_ENDPOINTS.MATERIALS.OPTION_DETAIL(materialId, optionId),
     );
 
     return data.data;
