@@ -13,6 +13,7 @@ final readonly class OrderFileItem implements RequestFileItemInterface
 {
     public function __construct(
         public ?int $id,
+        public RequestFile $file,
         #[Assert\NotBlank(message: 'validation.order_file_tmp_file_path_required')]
         public string $tmpFilePath,
         #[Assert\NotBlank(message: 'validation.order_file_original_name_required')]
@@ -30,6 +31,7 @@ final readonly class OrderFileItem implements RequestFileItemInterface
 
         return new self(
             id: null,
+            file: $file,
             tmpFilePath: $file->getPath(),
             originalName: $originalName,
         );

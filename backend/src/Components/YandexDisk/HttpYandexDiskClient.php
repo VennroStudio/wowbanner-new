@@ -23,6 +23,8 @@ final readonly class HttpYandexDiskClient implements YandexDiskClient
     public function upload(string $tmpFilePath, string $folder, string $fileName): string
     {
         $diskPath  = $folder . '/' . $fileName;
+        $this->ensureDirectoryExists($folder, 'upload_link_failed');
+
         $uploadUrl = $this->getHref('/upload', ['path' => $diskPath, 'overwrite' => 'true'], 'upload_link_failed');
 
         $fp = fopen($tmpFilePath, 'r');
@@ -40,7 +42,9 @@ final readonly class HttpYandexDiskClient implements YandexDiskClient
                 'http_errors' => false,
             ]);
         } finally {
-            fclose($fp);
+            if (is_resource($fp)) {
+                fclose($fp);
+            }
         }
 
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
@@ -90,6 +94,39 @@ final readonly class HttpYandexDiskClient implements YandexDiskClient
         }
 
         return (string)$decoded['href'];
+    }
+
+    private function ensureDirectoryExists(string $folder, string $errorKey): void
+    {
+        $parts = array_values(array_filter(explode('/', $folder), static fn(string $part): bool => $part !== ''));
+        $path = '';
+
+        foreach ($parts as $part) {
+            $path = $path === '' ? $part : $path . '/' . $part;
+
+            try {
+                $response = $this->client->request('PUT', self::API_BASE, [
+                    'query'       => ['path' => $path],
+                    'http_errors' => false,
+                    'headers'     => $this->authHeaders(),
+                ]);
+            } catch (Throwable) {
+                throw new DomainExceptionModule(
+                    module: 'yandex_disk',
+                    message: 'error.yandex_disk.' . $errorKey,
+                    code: 1,
+                );
+            }
+
+            $statusCode = $response->getStatusCode();
+            if ($statusCode !== 201 && $statusCode !== 409) {
+                throw new DomainExceptionModule(
+                    module: 'yandex_disk',
+                    message: 'error.yandex_disk.' . $errorKey,
+                    code: 1,
+                );
+            }
+        }
     }
 
     private function request(string $method, string $uri, array $query, string $errorKey): ResponseInterface
