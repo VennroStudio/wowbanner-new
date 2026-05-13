@@ -328,12 +328,6 @@ export const OrderFormModal = ({
                 disabled={isPending}
               />
 
-              <div className="border-t border-dashed border-slate-300 pt-5">
-                <div className="rounded-xl bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Нижняя часть заказа
-                </div>
-              </div>
-
               <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4">
                 <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
                   <div className="rounded-xl border border-slate-200 p-4 space-y-3">
