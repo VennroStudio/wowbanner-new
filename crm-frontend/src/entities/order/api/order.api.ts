@@ -48,8 +48,19 @@ export const orderApi = {
   },
 
   updateOrder: async (id: number | string, body: UpdateOrderBody) => {
-    const formData = toFormData(body);
-    const { data } = await apiClient.patch<ApiMutationResponse>(API_ENDPOINTS.ORDERS.UPDATE(id), formData);
+    const hasUploadFiles = body.files?.some((file) => file instanceof File) ?? false;
+
+    if (hasUploadFiles) {
+      const formData = toFormData(body);
+      const { data } = await apiClient.post<ApiMutationResponse>(API_ENDPOINTS.ORDERS.UPDATE(id), formData);
+      return data;
+    }
+
+    const { data } = await apiClient.patch<ApiMutationResponse>(API_ENDPOINTS.ORDERS.UPDATE(id), {
+      ...body,
+      files: undefined,
+      fileOriginalNames: undefined,
+    });
     return data;
   },
 

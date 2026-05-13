@@ -170,6 +170,7 @@ return static function (App $app): void {
             $group->get('/section-types', GetOrderSectionTypesAction::class)->add(Authenticate::class);
             $group->get('/service-types', GetOrderServiceTypesAction::class)->add(Authenticate::class);
             $group->post('/create', CreateOrderAction::class)->add(Authenticate::class);
+            $group->post('/update/{id}', UpdateOrderAction::class)->add(Authenticate::class);
             $group->patch('/update/{id}', UpdateOrderAction::class)->add(Authenticate::class);
             $group->delete('/delete/{id}', DeleteOrderAction::class)->add(Authenticate::class);
             $group->get('/{id}', GetOrderByIdAction::class)->add(Authenticate::class);

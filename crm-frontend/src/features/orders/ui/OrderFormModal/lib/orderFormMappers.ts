@@ -61,6 +61,7 @@ const buildOrderBodyBase = (
       })),
     })),
     sections: values.sections.map((sectionType) => ({
+      id: values.sectionIdsByType[sectionType] ? Number(values.sectionIdsByType[sectionType]) : undefined,
       sectionType: Number(sectionType),
     })),
     services: values.services.map((service) => ({
@@ -99,6 +100,9 @@ export const mapOrderToFormValues = (order: Order): OrderFormValues => ({
   generalNote: order.general_note ?? '',
   extension: order.extension ?? '',
   sections: order.sections.map((section) => String(section.section_type.id)),
+  sectionIdsByType: Object.fromEntries(
+    order.sections.map((section) => [String(section.section_type.id), String(section.id)]),
+  ),
   hasDelivery: order.delivery != null,
   deliveryId: toStringId(order.delivery?.id),
   deliveryType: toStringId(order.delivery?.delivery_type.id),

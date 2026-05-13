@@ -353,6 +353,7 @@ const OrderPrintItemCard = ({
 
   useEffect(() => {
     if (isLoadingSelectedMaterialOption) return;
+    if (!needsDpi) return;
 
     const hasCurrentDpi = availableDpiOptions.some((option) => String(option.id) === currentDpiRaw);
 
@@ -366,10 +367,11 @@ const OrderPrintItemCard = ({
     if (!hasCurrentDpi) {
       setValue(dpiPath, String(availableDpiOptions[0].id), { shouldDirty: true, shouldValidate: true });
     }
-  }, [availableDpiOptions, currentDpiRaw, dpiPath, isLoadingSelectedMaterialOption, setValue]);
+  }, [availableDpiOptions, currentDpiRaw, dpiPath, isLoadingSelectedMaterialOption, needsDpi, setValue]);
 
   useEffect(() => {
     if (isLoadingSelectedMaterialOption) return;
+    if (!needsVariant) return;
 
     const hasCurrentVariant = availableVariantOptions.some((option) => String(option.id) === currentVariantRaw);
 
@@ -383,19 +385,7 @@ const OrderPrintItemCard = ({
     if (!hasCurrentVariant) {
       setValue(variantPath, String(availableVariantOptions[0].id), { shouldDirty: true, shouldValidate: true });
     }
-  }, [availableVariantOptions, currentVariantRaw, isLoadingSelectedMaterialOption, setValue, variantPath]);
-
-  useEffect(() => {
-    if (needsDpi && !currentVariantRaw && variantOptions[0]) {
-      setValue(variantPath, String(variantOptions[0].id), { shouldDirty: true, shouldValidate: true });
-    }
-  }, [currentVariantRaw, needsDpi, setValue, variantOptions, variantPath]);
-
-  useEffect(() => {
-    if (needsVariant && !currentDpiRaw && dpiOptions[0]) {
-      setValue(dpiPath, String(dpiOptions[0].id), { shouldDirty: true, shouldValidate: true });
-    }
-  }, [currentDpiRaw, dpiOptions, dpiPath, needsVariant, setValue]);
+  }, [availableVariantOptions, currentVariantRaw, isLoadingSelectedMaterialOption, needsVariant, setValue, variantPath]);
 
   const toggleProcessing = (processingId: number) => {
     const key = String(processingId);

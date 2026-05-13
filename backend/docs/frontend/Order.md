@@ -330,10 +330,14 @@
 
 **Запрос:**
 
-- Метод: `PATCH`
+- Метод без новых файлов: `PATCH`
+- Метод с новыми `files[]`: `POST`
 - URL: `/v1/orders/update/{id}`
 - Заголовок: `Authorization: Bearer <access_token>`
-- `Content-Type: multipart/form-data`
+- `Content-Type: application/json` — для сохранения без новых файлов
+- `Content-Type: multipart/form-data` — для сохранения с новыми файлами
+
+**Важно:** для multipart-обновления используется `POST /update/{id}` на тот же action, потому что PHP/Slim корректно разбирает `multipart/form-data` из `POST`, а `PATCH multipart/form-data` может приходить в action с пустым parsed body.
 
 **Общие правила синхронизации:**
 
