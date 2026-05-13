@@ -8,6 +8,10 @@ use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdFetcher;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdQuery;
+use App\Modules\Material\Query\Material\GetById\MaterialGetByIdFetcher;
+use App\Modules\Material\Query\Material\GetById\MaterialGetByIdQuery;
+use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdFetcher;
+use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdQuery;
 use App\Modules\Order\Query\OrderDelivery\FindByOrderId\OrderDeliveryFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderDelivery\FindByOrderId\OrderDeliveryFindByOrderIdQuery;
 use App\Modules\Order\Query\OrderFile\FindByOrderId\OrderFileFindByOrderIdFetcher;
@@ -36,6 +40,8 @@ use App\Modules\Order\ReadModel\OrderNotification\OrderNotificationByOrderId;
 use App\Modules\Order\ReadModel\OrderPayment\OrderPaymentByOrderId;
 use App\Modules\Order\ReadModel\OrderSection\OrderSectionByOrderId;
 use App\Modules\Order\ReadModel\OrderService\OrderServiceByOrderId;
+use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdFetcher;
+use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdQuery;
 use App\Modules\User\Query\User\GetById\UserGetByIdFetcher;
 use App\Modules\User\Query\User\GetById\UserGetByIdQuery;
 use Doctrine\DBAL\Exception;
@@ -46,6 +52,9 @@ final readonly class OrderUnifier implements UnifierInterface
     public function __construct(
         private ClientGetByIdFetcher $clientFetcher,
         private UserGetByIdFetcher $userFetcher,
+        private PrintingGetByIdFetcher $printingFetcher,
+        private MaterialGetByIdFetcher $materialFetcher,
+        private MaterialOptionGetByIdFetcher $materialOptionFetcher,
         private OrderDeliveryFindByOrderIdFetcher $deliveryFetcher,
         private OrderFileFindByOrderIdFetcher $fileFetcher,
         private OrderItemFindByOrderIdFetcher $itemFetcher,
@@ -153,6 +162,9 @@ final readonly class OrderUnifier implements UnifierInterface
         return array_map(function (OrderItemByOrderId $item): array {
             $data = UnifierHelper::toArrayWithout($item, 'order_id');
             $processings = $this->itemProcessingFetcher->fetch(new OrderItemProcessingFindByItemIdQuery($item->id));
+            $printing = $this->printingFetcher->fetch(new PrintingGetByIdQuery($item->printId));
+            $material = $this->materialFetcher->fetch(new MaterialGetByIdQuery($item->materialId));
+            $option = $this->materialOptionFetcher->fetch(new MaterialOptionGetByIdQuery($item->optionId));
 
             $data['processings'] = array_map(
                 static fn(OrderItemProcessingByOrderId $processing): array => UnifierHelper::toArrayWithout(
@@ -161,6 +173,9 @@ final readonly class OrderUnifier implements UnifierInterface
                 ),
                 $processings,
             );
+            $data['print'] = UnifierHelper::toArrayWithout($printing);
+            $data['material'] = UnifierHelper::toArrayWithout($material, 'description');
+            $data['option'] = UnifierHelper::toArrayWithout($option, 'material_id', 'pricingType', 'isCut');
 
             return $data;
         }, $items);
@@ -184,10 +199,14 @@ final readonly class OrderUnifier implements UnifierInterface
      */
     private function mapMillings(array $items): array
     {
-        return array_map(
-            static fn(OrderItemMillingByOrderId $item): array => UnifierHelper::toArrayWithout($item, 'order_id'),
-            $items,
-        );
+        return array_map(function (OrderItemMillingByOrderId $item): array {
+            $data = UnifierHelper::toArrayWithout($item, 'order_id');
+            $printing = $this->printingFetcher->fetch(new PrintingGetByIdQuery($item->printId));
+
+            $data['print'] = UnifierHelper::toArrayWithout($printing);
+
+            return $data;
+        }, $items);
     }
 
     /**

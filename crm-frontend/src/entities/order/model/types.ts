@@ -34,9 +34,12 @@ export interface OrderItem {
   id: number;
   source_item_id: number | null;
   print_id: number;
+  print?: OrderEntitySummary;
   product_id: number;
   material_id: number;
+  material?: OrderEntitySummary;
   option_id: number;
+  option?: OrderEntitySummary;
   dpi_type: OrderEnumRef;
   variant_type: OrderEnumRef;
   width: string;
@@ -54,6 +57,7 @@ export interface OrderItemMilling {
   id: number;
   source_item_id: number | null;
   print_id: number;
+  print?: OrderEntitySummary;
   material: string;
   performer_id: number | null;
   note: string | null;

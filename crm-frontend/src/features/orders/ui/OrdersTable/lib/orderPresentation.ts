@@ -58,14 +58,10 @@ export const getRemainingLabel = (deadline: string) => {
     return { label: 'просрочен', overdue: true };
   }
 
-  const minutes = Math.floor(diff / (1000 * 60));
-  const days = Math.floor(minutes / (60 * 24));
-  diff -= days * 24 * 60 * 1000;
-
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  diff -= hours * 60 * 60 * 1000;
-
-  const remainMinutes = Math.floor(diff / (1000 * 60));
+  const totalMinutes = Math.floor(diff / (1000 * 60));
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const remainMinutes = totalMinutes % 60;
 
   const parts: string[] = [];
 
@@ -89,19 +85,29 @@ export const getRemainingLabel = (deadline: string) => {
 
 export const getPrintTypeDots = (order: Order) => {
   const map = new Map<number, { id: number; label: string; short: string; colorClass: string }>();
-  const pushItem = (id: number) => {
+  const toShort = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return '—';
+    }
+
+    const firstToken = trimmed.split(/\s+/)[0] ?? trimmed;
+    return firstToken.slice(0, 2).toUpperCase();
+  };
+
+  const pushItem = (id: number, name?: string) => {
     if (map.has(id)) return;
     const colorClass = PRINT_TYPE_COLORS[map.size % PRINT_TYPE_COLORS.length];
     map.set(id, {
       id,
-      label: `Печать #${id}`,
-      short: String(id),
+      label: name || `Печать #${id}`,
+      short: toShort(name || String(id)),
       colorClass,
     });
   };
 
-  order.items.forEach((item) => pushItem(item.print_id));
-  order.millings.forEach((item) => pushItem(item.print_id));
+  order.items.forEach((item) => pushItem(item.print_id, item.print?.name));
+  order.millings.forEach((item) => pushItem(item.print_id, item.print?.name));
 
   return Array.from(map.values());
 };
@@ -110,7 +116,9 @@ export const getMaterialLabels = (order: Order) => {
   const labels = new Set<string>();
 
   order.items.forEach((item: OrderItem) => {
-    labels.add(`Материал #${item.material_id} / Опция #${item.option_id}`);
+    const materialName = item.material?.name ?? `Материал #${item.material_id}`;
+    const optionName = item.option?.name ?? `Опция #${item.option_id}`;
+    labels.add(`${materialName} / ${optionName}`);
   });
 
   order.millings.forEach((item: OrderItemMilling) => {
