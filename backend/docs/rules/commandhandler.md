@@ -130,7 +130,7 @@ public function __construct(
 ```php
 public function handle(Update{Entity}Command $command): void
 {
-    $this->permissionService->check(
+    $this->permissionService->checkRole(
         currentUserRole: UserRole::from($command->currentUserRole),
         action: {Module}Permission::UPDATE,
     );
@@ -163,7 +163,7 @@ final readonly class Create{Entity}Handler
 
     public function handle(Create{Entity}Command $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: {Module}Permission::CREATE,
         );
@@ -202,7 +202,7 @@ final readonly class Update{Entity}Handler
 
     public function handle(Update{Entity}Command $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: {Module}Permission::UPDATE,
         );
@@ -243,7 +243,7 @@ final readonly class Delete{Entity}Handler
 
     public function handle(Delete{Entity}Command $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: {Module}Permission::DELETE,
         );

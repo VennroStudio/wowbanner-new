@@ -22,6 +22,7 @@
 - Защищённый маршрут: `RequestIdentity::get($request)`
 - Имена полей JSON совпадают с именами свойств Command/Query (camelCase)
 - Enum-справочники для frontend отдаются отдельными `GET` Action через `EnumModel`
+- Permission map для frontend отдаётся отдельными `GET` Action через `UiPermissionService`
 
 ---
 
@@ -204,6 +205,21 @@ public function handle(ServerRequestInterface $request): ResponseInterface
 
     return new JsonDataResponse(
         EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role),
+    );
+}
+```
+
+### GET — UI permission map
+
+Permission-класс и правила доступа описаны отдельно в [Permission](permission.md). В Action показывается только отдача map.
+
+```php
+public function handle(ServerRequestInterface $request): ResponseInterface
+{
+    $identity = RequestIdentity::get($request);
+
+    return new JsonDataResponse(
+        $this->uiPermissionService->permissionsForRole($identity->role)
     );
 }
 ```

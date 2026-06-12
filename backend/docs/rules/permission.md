@@ -1,8 +1,10 @@
 # Permission
 
 **Расположение:**
-- `src/Modules/{Module}/Permission/{Module}Permission.php`
-- `src/Modules/{Module}/Service/{Module}PermissionService.php`
+- Backend enum: `src/Modules/{Module}/Permission/{Module}Permission.php`
+- Backend service: `src/Modules/{Module}/Service/{Module}PermissionService.php`
+- UI enum: `src/Modules/{Module}/Permission/{Module}UiPermission.php`
+- UI service: `src/Modules/{Module}/Service/{Module}UiPermissionService.php`
 
 ---
 
@@ -10,16 +12,23 @@
 
 Permission собирается только из тех блоков, которые нужны конкретному модулю.
 
-- Permission enum
-- PermissionService
-- Проверка по роли
-- Проверка владельца
-- Проверка владельца или роли
+- Backend Permission enum
+- Backend PermissionService
+- UI Permission enum
+- UI PermissionService
+- PermissionModel component
 - Использование в Handler
+- Использование в Action
+
+Backend permission и UI permission не смешиваются.
+
+Backend permission нужен для защиты write-сценариев в Handler.
+
+UI permission нужен только для frontend map: какие элементы интерфейса показывать пользователю.
 
 ---
 
-## Permission enum
+## Backend Permission enum
 
 ```php
 <?php
@@ -38,7 +47,9 @@ enum {Module}Permission: string
 
 ---
 
-## PermissionService
+## Backend PermissionService
+
+Backend service остается guard-сервисом: проверяет доступ и выбрасывает `AccessDeniedException`.
 
 ```php
 <?php
@@ -56,11 +67,52 @@ final readonly class {Module}PermissionService
     /**
      * @throws AccessDeniedException
      */
-    public function check(UserRole $currentUserRole, {Module}Permission $action): void
+    public function checkRole(UserRole $currentUserRole, {Module}Permission $action): void
     {
         if (!\in_array($currentUserRole, $this->getAllowedRolesForAction($action), true)) {
             throw new AccessDeniedException();
         }
+    }
+
+    /**
+     * @throws AccessDeniedException
+     */
+    public function checkOwner(int $currentUserId, int $ownerId, {Module}Permission $action): void
+    {
+        if ($currentUserId !== $ownerId) {
+            throw new AccessDeniedException();
+        }
+
+        if (!\in_array($action, $this->getAllowedActionsForOwner(), true)) {
+            throw new AccessDeniedException();
+        }
+    }
+
+    /**
+     * @throws AccessDeniedException
+     */
+    public function checkOwnerOrRole(
+        int $currentUserId,
+        int $ownerId,
+        UserRole $currentUserRole,
+        {Module}Permission $action,
+    ): void {
+        if ($currentUserId === $ownerId) {
+            $this->checkOwner($currentUserId, $ownerId, $action);
+            return;
+        }
+
+        $this->checkRole($currentUserRole, $action);
+    }
+
+    /**
+     * @return list<{Module}Permission>
+     */
+    private function getAllowedActionsForOwner(): array
+    {
+        return [
+            {Module}Permission::UPDATE,
+        ];
     }
 
     /**
@@ -81,60 +133,136 @@ final readonly class {Module}PermissionService
 }
 ```
 
+Если в модуле не нужны owner-проверки, `checkOwner()`, `checkOwnerOrRole()` и `getAllowedActionsForOwner()` не добавляются.
+
 ---
 
-## Проверка владельца
-
-Добавляется только если владелец может выполнять действия над своим ресурсом.
+## UI Permission enum
 
 ```php
-/**
- * @throws AccessDeniedException
- */
-public function checkOwner(int $currentUserId, int $ownerId, {Module}Permission $action): void
-{
-    if ($currentUserId !== $ownerId) {
-        throw new AccessDeniedException();
-    }
+<?php
 
-    if (!\in_array($action, $this->getAllowedActionsForOwner(), true)) {
-        throw new AccessDeniedException();
-    }
-}
+declare(strict_types=1);
 
-/**
- * @return list<{Module}Permission>
- */
-private function getAllowedActionsForOwner(): array
+namespace App\Modules\{Module}\Permission;
+
+enum {Module}UiPermission: string
 {
-    return [
-        {Module}Permission::UPDATE,
-    ];
+    case CREATE_BUTTON = '{module}.create_button';
+    case UPDATE_BUTTON = '{module}.update_button';
+    case DELETE_BUTTON = '{module}.delete_button';
 }
 ```
 
 ---
 
-## Проверка владельца или роли
+## UI PermissionService
 
-Добавляется только если действие доступно владельцу или привилегированной роли.
+UI service отдает frontend map. В нем нет `check()` и backend guard-логики.
 
 ```php
-/**
- * @throws AccessDeniedException
- */
-public function checkOwnerOrRole(
-    int $currentUserId,
-    int $ownerId,
-    UserRole $currentUserRole,
-    {Module}Permission $action,
-): void {
-    if ($currentUserId === $ownerId) {
-        $this->checkOwner($currentUserId, $ownerId, $action);
-        return;
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Service;
+
+use App\Components\Permission\PermissionModel;
+use App\Modules\{Module}\Permission\{Module}UiPermission;
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
+
+final readonly class {Module}UiPermissionService
+{
+    /**
+     * @return array<string, bool>
+     */
+    public function permissionsForRole(UserRole $currentUserRole): array
+    {
+        return PermissionModel::fromEnumClass(
+            {Module}UiPermission::class,
+            fn ({Module}UiPermission $action): bool => \in_array(
+                $currentUserRole,
+                $this->getAllowedRolesForAction($action),
+                true
+            )
+        );
     }
 
-    $this->check($currentUserRole, $action);
+    /**
+     * @return list<UserRole>
+     */
+    private function getAllowedRolesForAction({Module}UiPermission $action): array
+    {
+        $adminRoles = [
+            UserRole::ADMIN,
+        ];
+
+        return match ($action) {
+            {Module}UiPermission::CREATE_BUTTON,
+            {Module}UiPermission::UPDATE_BUTTON,
+            {Module}UiPermission::DELETE_BUTTON => $adminRoles,
+        };
+    }
+}
+```
+
+---
+
+## PermissionModel component
+
+Компонент нужен только для сборки frontend map из UI enum. Он не содержит бизнес-логики и не знает про роли.
+
+**Расположение:** `src/Components/Permission/PermissionModel.php`
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Components\Permission;
+
+use BackedEnum;
+
+final readonly class PermissionModel
+{
+    /**
+     * @template T of BackedEnum
+     * @param class-string<T> $permissionClass
+     * @param callable(T): bool $resolver
+     * @return array<string, bool>
+     */
+    public static function fromEnumClass(string $permissionClass, callable $resolver): array
+    {
+        $permissions = [];
+
+        foreach ($permissionClass::cases() as $permission) {
+            $permissions[(string) $permission->value] = $resolver($permission);
+        }
+
+        return $permissions;
+    }
+}
+```
+
+Ответ API:
+
+```json
+{
+  "{module}.create_button": true,
+  "{module}.update_button": true,
+  "{module}.delete_button": false
+}
+```
+
+Frontend:
+
+```ts
+if (permissions['{module}.create_button']) {
+  showCreateButton()
+}
+
+if (permissions['{module}.delete_button']) {
+  showDeleteButton()
 }
 ```
 
@@ -142,10 +270,12 @@ public function checkOwnerOrRole(
 
 ## Использование в Handler
 
+Handler использует только backend permission.
+
 `currentUserRole` в Command приходит как `int`. В Handler приводится через `UserRole::from()`.
 
 ```php
-$this->permissionService->check(
+$this->permissionService->checkRole(
     currentUserRole: UserRole::from($command->currentUserRole),
     action: {Module}Permission::UPDATE,
 );
@@ -165,5 +295,19 @@ $this->permissionService->checkOwnerOrRole(
     ownerId: $entity->ownerId,
     currentUserRole: UserRole::from($command->currentUserRole),
     action: {Module}Permission::DELETE,
+);
+```
+
+---
+
+## Использование в Action
+
+Permission endpoint описывается в [Action](action.md). В Permission показывается только отдача UI map.
+
+```php
+$identity = RequestIdentity::get($request);
+
+return new JsonDataResponse(
+    $this->uiPermissionService->permissionsForRole($identity->role)
 );
 ```
