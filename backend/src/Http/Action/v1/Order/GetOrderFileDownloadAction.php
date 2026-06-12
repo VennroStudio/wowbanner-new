@@ -6,9 +6,9 @@ namespace App\Http\Action\v1\Order;
 
 use App\Components\Exception\DomainExceptionModule;
 use App\Components\Router\Route;
-use GuzzleHttp\Client;
+use App\Components\YandexDisk\YandexDiskClient;
 use App\Modules\Order\Entity\OrderFile\OrderFileRepository;
-use App\Modules\Order\Service\OrderFileStorageService;
+use GuzzleHttp\Client;
 use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -21,7 +21,7 @@ final readonly class GetOrderFileDownloadAction implements RequestHandlerInterfa
 {
     public function __construct(
         private OrderFileRepository $repository,
-        private OrderFileStorageService $storageService,
+        private YandexDiskClient $yandexDiskClient,
         private Client $client,
     ) {}
 
@@ -29,7 +29,7 @@ final readonly class GetOrderFileDownloadAction implements RequestHandlerInterfa
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $orderFile = $this->repository->getById(Route::getArgumentToInt($request, 'id'));
-        $href = $this->storageService->download($orderFile->diskPath);
+        $href = $this->yandexDiskClient->download($orderFile->diskPath);
         $downloadResponse = $this->client->request('GET', $href, ['http_errors' => false]);
 
         if ($downloadResponse->getStatusCode() !== 200) {
