@@ -72,7 +72,7 @@ final class {Entity}FindAllQuery
 - Одна запись: `?ReadModel` (nullable) или `DomainExceptionModule` если запись обязательна
 - Список: `ModelCountItemsResult<ReadModel>` — COUNT через клонирование QueryBuilder
 - Enum в условии — передавать как `$query->type->value`
-- Кеш — через `Cacher`; инвалидация в соответствующем Handler'е
+- Кеш описывается отдельно в [Cache](cache.md)
 - **Поиск по подстроке (MySQL/MariaDB):** не использовать **`ILIKE`** (это PostgreSQL). Для регистронезависимого совпадения: **`LOWER(колонка) LIKE LOWER(:search)`** и параметр `'%' . $query->search . '%'`.
 
 ### Одна запись (nullable)

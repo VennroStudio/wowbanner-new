@@ -6,35 +6,43 @@
 
 ---
 
+## Состав Command / Handler
+
+Command / Handler собирается только из тех блоков, которые нужны конкретному write-сценарию.
+
+- Command
+- Handler
+- Проверка прав
+- Работа с Entity через Repository
+- Вызов Service / Syncer
+- Вызов Handler'ов связанных сущностей
+- Инвалидация query-кеша через `Cacher` или `QueryCacheInvalidator`
+- `flush()`
+- Возврат результата
+
+---
+
 ## Command
 
-- `final readonly class`, свойства `public` в конструкторе
-- Валидация через `#[Assert\...]`, ключи сообщений — `'validation.field_rule'` (ссылаются на переводы)
-- Технические поля (`userId`, `currentUserId`, `currentUserRole`) — базовые Assert без кастомного message
-- Если команда требует авторизации, те же технические поля добавляются ко **всем** write-командам (включая create), не только к update/delete
-- Лимиты — константы в классе
-- Внутренние команды (вызов из Handler'а) — без Assert
+### HTTP-команда
 
-### Пример: HTTP-команда с валидацией
+Используется для данных из Action. Валидация описывается через `Assert`.
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Modules\{Module}\Command\{Entity}\{Action};
+namespace App\Modules\{Module}\Command\{Entity}\Update;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-final readonly class {Action}{Entity}Command
+final readonly class Update{Entity}Command
 {
     private const int NAME_MIN_LENGTH = 2;
-    private const int NAME_MAX_LENGTH = 60;
-    private const int EMAIL_MAX_LENGTH = 255;
-    private const string NAME_PATTERN = "/^\p{L}[\p{L}\s'\-]*$/u";
+    private const int NAME_MAX_LENGTH = 120;
 
     public function __construct(
-        // Технические поля (подставляются из идентичности в Action, не из тела запроса):
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
         public int $currentUserId,
@@ -42,7 +50,10 @@ final readonly class {Action}{Entity}Command
         #[Assert\NotBlank]
         public int $currentUserRole,
 
-        // Пользовательские поля:
+        #[Assert\NotBlank]
+        #[Assert\GreaterThan(0)]
+        public int $id,
+
         #[Assert\NotBlank(message: 'validation.name_required')]
         #[Assert\Length(
             min: self::NAME_MIN_LENGTH,
@@ -50,30 +61,24 @@ final readonly class {Action}{Entity}Command
             minMessage: 'validation.name_too_short',
             maxMessage: 'validation.name_too_long',
         )]
-        #[Assert\Regex(pattern: self::NAME_PATTERN, message: 'validation.name_invalid')]
         public string $name,
 
-        #[Assert\NotBlank(message: 'validation.email_required')]
-        #[Assert\Email(message: 'validation.email_invalid')]
-        #[Assert\Length(max: self::EMAIL_MAX_LENGTH, maxMessage: 'validation.email_too_long')]
-        public string $email,
-
-        // Опциональное поле с дефолтом:
-        public string $locale = 'en',
+        public ?string $description = null,
     ) {}
 }
 ```
 
-### Пример: внутренняя команда (без Assert)
+### Внутренняя команда
+
+Используется при вызове одного Handler'а из другого Handler'а или Service. `Assert` не нужен.
 
 ```php
-final readonly class Create{Entity}Command
+final readonly class Create{ChildEntity}Command
 {
     public function __construct(
-        public int $ownerId,
-        public {Entity}Type $type,
-        public string $hash,
-        public DateTimeImmutable $expiresAt,
+        public int $entityId,
+        public string $name,
+        public int $sort,
     ) {}
 }
 ```
@@ -82,82 +87,178 @@ final readonly class Create{Entity}Command
 
 ## Handler
 
-- `final readonly class`, один публичный метод `handle()`
-- Возврат: `void` или DTO (например, `TokenPairResult`)
-- Декомпозиция в приватные методы — `handle()` читается как сценарий верхнего уровня
-- Зависимости через конструктор: Repository, Fetcher, Service, Flusher, другие Handler'ы
-- `flush()` — после всех изменений через Repository. Если Handler только вызывает другой Handler, который сам делает flush — свой Flusher не нужен
-- Проверка прав — через `PermissionService->check()`: для **create** — в начале `handle()`; для **update/delete** — по образцу User: сначала `getById`, затем `check`, затем изменения
-- Инвалидация кеша — после изменения сущности, перед `flush()`
-
-### Принцип: каждая Entity — свои Handler'ы
-
-Если в сценарии нужна операция над другой сущностью — вызывать **её Handler**, не работать с чужим Repository напрямую.
-
-Исключение: массовые операции над связанной сущностью в рамках одного сценария (например, отзыв всех токенов при удалении аккаунта) допустимо выполнять через Repository этой сущности с общим `flush()`.
-
----
-
-### Пример: Handler без своей записи
-
-Читает через Fetcher, делает проверки, вызывает другой Handler. Flusher не нужен.
+### Заголовок
 
 ```php
-final readonly class {Action}Handler
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Command\{Entity}\Update;
+
+use App\Components\Cacher\Cacher;
+use App\Components\Flusher\FlusherInterface;
+use App\Modules\{Module}\Entity\{Entity}\{Entity}Repository;
+use App\Modules\{Module}\Permission\{Module}Permission;
+use App\Modules\{Module}\Service\{Module}PermissionService;
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
+
+final readonly class Update{Entity}Handler
 {
-    public function __construct(
-        private {Entity}FindBy{Field}Fetcher $fetcher,
-        private Create{RelatedEntity}Handler $create{RelatedEntity}Handler,
-        private SomeService $someService,
-    ) {}
+}
+```
 
-    public function handle({Action}Command $command): TokenPairResult
-    {
-        $entity = $this->authenticate($command);
-        $this->validateStatus($entity);
-        return $this->issueResult($entity);
-    }
+### Зависимости
 
-    private function authenticate({Action}Command $command): {Entity}By{Field}
-    {
-        $entity = $this->fetcher->fetchNotDeleted(new {Entity}FindBy{Field}Query($command->field));
+```php
+public function __construct(
+    private {Entity}Repository $repository,
+    private {Module}PermissionService $permissionService,
+    private Cacher $cacher,
+    private FlusherInterface $flusher,
+) {}
+```
 
-        if ($entity === null || !$this->someService->verify($command->secret, $entity->secretHash)) {
-            throw new DomainExceptionModule(module: '{module}', message: 'error.invalid_credentials', code: 1);
-        }
+Правила `PermissionService` описаны отдельно в [Permission](permission.md). В Handler показывается только использование.
 
-        return $entity;
-    }
+Правила query-кеша описаны отдельно в [Cache](cache.md). В Handler показывается только использование `Cacher` или invalidator.
 
-    private function validateStatus({Entity}By{Field} $entity): void
-    {
-        if ($entity->status === {Entity}Status::BANNED) {
-            throw new DomainExceptionModule(module: '{module}', message: 'error.account_banned', code: 2);
-        }
-    }
+Если проверка только по роли, ее можно делать до загрузки Entity. Если проверка зависит от владельца или состояния Entity, сначала загружается Entity, потом выполняется проверка прав.
+
+### handle()
+
+```php
+public function handle(Update{Entity}Command $command): void
+{
+    $this->permissionService->check(
+        currentUserRole: UserRole::from($command->currentUserRole),
+        action: {Module}Permission::UPDATE,
+    );
+
+    $entity = $this->repository->getById($command->id);
+
+    $entity->edit(
+        name: $command->name,
+        description: $command->description,
+    );
+
+    $this->cacher->delete('{entity}_by_id_' . $command->id);
+
+    $this->flusher->flush();
 }
 ```
 
 ---
 
-### Пример: Handler с записью и Flusher
+## Create Handler
 
 ```php
 final readonly class Create{Entity}Handler
 {
     public function __construct(
         private {Entity}Repository $repository,
+        private {Module}PermissionService $permissionService,
         private FlusherInterface $flusher,
     ) {}
 
     public function handle(Create{Entity}Command $command): void
     {
-        $entity = {Entity}::create(
-            type: $command->type,
-            hash: $command->hash,
-            expiresAt: $command->expiresAt,
+        $this->permissionService->check(
+            currentUserRole: UserRole::from($command->currentUserRole),
+            action: {Module}Permission::CREATE,
         );
+
+        $entity = {Entity}::create(
+            name: $command->name,
+            description: $command->description,
+        );
+
         $this->repository->add($entity);
+        $this->flusher->flush();
+    }
+}
+```
+
+Если после `create()` нужен ID для связанных сущностей, сначала выполняется `flush()`, потом вызывается Syncer / Handler связанных сущностей.
+
+Если создание затрагивает закешированный список или связанный query-cache контекст, инвалидация выполняется после получения ID.
+
+В сложной структуре допустимо несколько `flush()`: сначала для получения ID основной сущности, затем после создания связанных сущностей, затем после зависимых связей второго уровня.
+
+---
+
+## Update Handler
+
+```php
+final readonly class Update{Entity}Handler
+{
+    public function __construct(
+        private {Entity}Repository $repository,
+        private {Module}PermissionService $permissionService,
+        private {Entity}StructureSyncerService $structureSyncer,
+        private {Module}QueryCacheInvalidator $queryCacheInvalidator,
+        private FlusherInterface $flusher,
+    ) {}
+
+    public function handle(Update{Entity}Command $command): void
+    {
+        $this->permissionService->check(
+            currentUserRole: UserRole::from($command->currentUserRole),
+            action: {Module}Permission::UPDATE,
+        );
+
+        $entity = $this->repository->getById($command->id);
+
+        $entity->edit(
+            name: $command->name,
+            description: $command->description,
+        );
+
+        $this->structureSyncer->sync($command->id, $command->children);
+
+        $this->queryCacheInvalidator->invalidateById($command->id);
+
+        $this->flusher->flush();
+    }
+}
+```
+
+Правила Service / Syncer описаны отдельно в [Service](service.md). В Handler показывается только использование.
+
+---
+
+## Delete Handler
+
+```php
+final readonly class Delete{Entity}Handler
+{
+    public function __construct(
+        private {Entity}Repository $repository,
+        private Delete{ChildEntity}Handler $deleteChildEntityHandler,
+        private {ChildEntity}Repository $childRepository,
+        private {Module}PermissionService $permissionService,
+        private Cacher $cacher,
+        private FlusherInterface $flusher,
+    ) {}
+
+    public function handle(Delete{Entity}Command $command): void
+    {
+        $this->permissionService->check(
+            currentUserRole: UserRole::from($command->currentUserRole),
+            action: {Module}Permission::DELETE,
+        );
+
+        $entity = $this->repository->getById($command->id);
+
+        foreach ($this->childRepository->findByEntityId($command->id) as $child) {
+            $this->deleteChildEntityHandler->handle(
+                new Delete{ChildEntity}Command(id: (int) $child->id)
+            );
+        }
+
+        $this->repository->remove($entity);
+        $this->cacher->delete('{entity}_by_id_' . $command->id);
+
         $this->flusher->flush();
     }
 }
@@ -165,42 +266,152 @@ final readonly class Create{Entity}Handler
 
 ---
 
-### Пример: Handler с правами, кешем и вызовом других Handler'ов
+## Handler связанных сущностей
+
+Если связанная таблица является частью сценария основной сущности, у нее все равно должны быть свои Entity / Repository / Command / Handler.
+
+Пример: `{Entity}` и `{Entity}Image`, `{Entity}` и `{Entity}Option`, `{Entity}` и `{Entity}Price`.
+
+Внутренние Handler'ы связанных сущностей могут быть без `PermissionService` и без `FlusherInterface`, если они вызываются из родительского Handler'а или SyncerService. В этом случае `flush()` выполняет верхний сценарий.
 
 ```php
-final readonly class Update{Entity}Handler
+final readonly class Create{ChildEntity}Handler
+{
+    public function __construct(
+        private {ChildEntity}Repository $repository,
+    ) {}
+
+    public function handle(Create{ChildEntity}Command $command): {ChildEntity}
+    {
+        $child = {ChildEntity}::create(
+            entityId: $command->entityId,
+            name: $command->name,
+        );
+
+        $this->repository->add($child);
+
+        return $child;
+    }
+}
+```
+
+```php
+final readonly class Create{Entity}Handler
 {
     public function __construct(
         private {Entity}Repository $repository,
+        private {Entity}StructureSyncerService $structureSyncer,
         private FlusherInterface $flusher,
-        private {Entity}PermissionService $permissionService,
-        private Cacher $cacher,
-        private Create{RelatedEntity}Handler $create{RelatedEntity}Handler,
     ) {}
 
-    public function handle(Update{Entity}Command $command): void
+    public function handle(Create{Entity}Command $command): void
     {
-        $this->permissionService->check(
-            currentUserId: $command->currentUserId,
-            currentUserRole: {Entity}Role::from($command->currentUserRole),
-            entityId: $command->entityId,
-            action: {Entity}Permission::UPDATE,
-        );
+        $entity = {Entity}::create(name: $command->name);
 
-        $entity = $this->repository->getById($command->entityId);
+        $this->repository->add($entity);
+        $this->flusher->flush();
 
-        $this->assertBusinessRule($command);
-
-        $entity->edit(...);
-
-        $this->cacher->delete('{entity}_' . $command->entityId);
-
+        $this->structureSyncer->sync((int) $entity->id, $command->children);
         $this->flusher->flush();
     }
+}
+```
 
-    private function assertBusinessRule(Update{Entity}Command $command): void
+Handler основной сущности не должен вручную менять состояние связанной Entity, если для этого есть отдельный Handler.
+
+---
+
+## Handler без записи
+
+Handler может читать данные, выполнять проверки, вызывать другие Handler'ы и возвращать DTO.
+
+Такой Handler может быть без Repository и без Flusher, если сам не меняет состояние Entity.
+
+```php
+final readonly class LoginHandler
+{
+    public function __construct(
+        private {Entity}FindByEmailFetcher $fetcher,
+        private Create{Entity}TokenHandler $createTokenHandler,
+        private PasswordHasherService $passwordHasher,
+    ) {}
+
+    public function handle(LoginCommand $command): TokenPairResult
     {
-        // ...
+        $entity = $this->fetcher->fetch(new {Entity}FindByEmailQuery($command->email));
+
+        if (!$this->passwordHasher->verify($command->password, $entity->passwordHash)) {
+            throw new DomainExceptionModule(
+                module: '{module}',
+                message: 'error.invalid_credentials',
+                code: 1
+            );
+        }
+
+        return $this->createTokenHandler->handle(
+            new Create{Entity}TokenCommand(entityId: $entity->id)
+        );
     }
+}
+```
+
+Mailer / external Handler тоже может быть без Repository и без Flusher.
+
+```php
+final readonly class Send{Entity}NotificationHandler
+{
+    public function __construct(
+        private MailerInterface $mailer,
+        private Environment $twig,
+    ) {}
+
+    public function handle(Send{Entity}NotificationCommand $command): void
+    {
+        $email = new Email()
+            ->to($command->email)
+            ->html($this->twig->render('{template}.html.twig', [
+                'name' => $command->name,
+            ]));
+
+        $this->mailer->send($email);
+    }
+}
+```
+
+---
+
+## Возврат результата
+
+По умолчанию Handler возвращает `void`.
+
+DTO, значение или созданная Entity возвращается только если результат нужен Action, другому Handler'у или SyncerService.
+
+```php
+public function handle(Upload{Entity}ImageCommand $command): string
+{
+    // ...
+
+    return $imageUrl;
+}
+```
+
+```php
+public function handle(LoginCommand $command): TokenPairResult
+{
+    // ...
+
+    return new TokenPairResult(
+        accessToken: $accessToken,
+        refreshToken: $refreshToken,
+    );
+}
+```
+
+```php
+public function handle(Create{ChildEntity}Command $command): {ChildEntity}
+{
+    // ...
+
+    return $child;
 }
 ```

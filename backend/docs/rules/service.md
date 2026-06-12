@@ -1,33 +1,41 @@
-# Service / Permission — Сервисы и права доступа
-
----
-
-## Service
+# Service
 
 **Расположение:** `src/Modules/{Module}/Service/{Name}Service.php`
 
-- `final readonly class`, одна зона ответственности
-- Зависимости и параметры алгоритма — через конструктор
-- Без изменяемого состояния между вызовами
+---
 
-Сервис — вспомогательная утилита, которая выносит повторяющуюся или специфичную логику из Handler'а. Может быть чем угодно: хешер, генератор, калькулятор, враппер над внешним API и т.д. Ниже — примеры типичных паттернов.
+## Состав Service
+
+Service собирается только из тех блоков, которые нужны конкретному сценарию.
+
+- Обычный Service
+- SyncerService для связанных сущностей
+- Storage / File Service
+- Вызов Handler'ов подсущностей
+- Приватные методы алгоритма
+
+PermissionService описывается отдельно в [Permission](permission.md).
+
+QueryCacheInvalidator описывается отдельно в [Cache](cache.md).
+
+---
+
+## Обычный Service
+
+Используется для повторяемой логики, внешнего клиента, хеширования, генерации, расчета или технической операции.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Service;
+
 final readonly class {Name}HasherService
 {
-    public function __construct(
-        private int $memoryCost = PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
-        private int $timeCost   = PASSWORD_ARGON2_DEFAULT_TIME_COST,
-        private int $threads    = PASSWORD_ARGON2_DEFAULT_THREADS,
-    ) {}
-
     public function hash(string $value): string
     {
-        return password_hash($value, PASSWORD_ARGON2I, [
-            'memory_cost' => $this->memoryCost,
-            'time_cost'   => $this->timeCost,
-            'threads'     => $this->threads,
-        ]);
+        return password_hash($value, PASSWORD_ARGON2I);
     }
 
     public function verify(string $value, string $hash): bool
@@ -37,161 +45,138 @@ final readonly class {Name}HasherService
 }
 ```
 
+---
+
+## SyncerService
+
+Используется, когда основная сущность имеет связанные таблицы, которые нужно синхронизировать как часть одного сценария.
+
+Пример: `{Entity}` и `{Entity}Image`, `{Entity}` и `{Entity}Option`, `{Entity}` и `{Entity}Price`.
+
 ```php
-final readonly class {Name}TokenHasherService
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Service;
+
+use App\Modules\{Module}\Command\{ChildEntity}\Create\Create{ChildEntity}Command;
+use App\Modules\{Module}\Command\{ChildEntity}\Create\Create{ChildEntity}Handler;
+use App\Modules\{Module}\Command\{ChildEntity}\Delete\Delete{ChildEntity}Command;
+use App\Modules\{Module}\Command\{ChildEntity}\Delete\Delete{ChildEntity}Handler;
+use App\Modules\{Module}\Command\{ChildEntity}\Update\Update{ChildEntity}Command;
+use App\Modules\{Module}\Command\{ChildEntity}\Update\Update{ChildEntity}Handler;
+use App\Modules\{Module}\Entity\{ChildEntity}\{ChildEntity}Repository;
+
+final readonly class {Entity}StructureSyncerService
 {
-    /** @throws RandomException */
-    public function generate(): string
-    {
-        return bin2hex(random_bytes(32));
-    }
+    public function __construct(
+        private {ChildEntity}Repository $childRepository,
+        private Create{ChildEntity}Handler $createHandler,
+        private Update{ChildEntity}Handler $updateHandler,
+        private Delete{ChildEntity}Handler $deleteHandler,
+    ) {}
 
-    public function hash(string $token): string
+    /**
+     * @param list<{ChildEntity}Payload> $children
+     */
+    public function sync(int $entityId, array $children): void
     {
-        return hash('sha256', $token);
-    }
+        $existing = $this->childRepository->findByEntityId($entityId);
+        $incomingIds = [];
 
-    public function verify(string $token, string $hash): bool
-    {
-        return hash_equals($this->hash($token), $hash);
+        foreach ($children as $child) {
+            if ($child->id === null) {
+                $this->createHandler->handle(
+                    new Create{ChildEntity}Command(
+                        entityId: $entityId,
+                        name: $child->name,
+                        sort: $child->sort,
+                    )
+                );
+
+                continue;
+            }
+
+            $incomingIds[] = $child->id;
+
+            $this->updateHandler->handle(
+                new Update{ChildEntity}Command(
+                    id: $child->id,
+                    name: $child->name,
+                    sort: $child->sort,
+                )
+            );
+        }
+
+        foreach ($existing as $entity) {
+            if (!\in_array((int) $entity->id, $incomingIds, true)) {
+                $this->deleteHandler->handle(
+                    new Delete{ChildEntity}Command(id: (int) $entity->id)
+                );
+            }
+        }
     }
 }
 ```
+
+SyncerService координирует сценарий, но состояние Entity меняется через методы самой Entity внутри соответствующих Handler'ов.
 
 ---
 
-## Permission
+## Storage / File Service
 
-Вводится если операции доступны не всем — только владельцу ресурса или определённым ролям.
-
-**Расположение:**
-- `src/Modules/{Module}/Permission/{Module}Permission.php`
-- `src/Modules/{Module}/Service/{Module}PermissionService.php`
-
-### Permission enum
-
-`string`-backed, значения вида `'{module}.{action}'`:
+Используется для работы с файлами, путями, внешним хранилищем и заменой старого файла новым.
 
 ```php
-enum {Module}Permission: string
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Service;
+
+use App\Components\Storage\StorageInterface;
+use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Directory;
+use Psr\Http\Message\UploadedFileInterface;
+
+final readonly class {Entity}FileStorageService
 {
-    case CREATE = '{module}.create';
-    case UPDATE = '{module}.update';
-    case DELETE = '{module}.delete';
-}
-```
+    public function __construct(
+        private StorageInterface $storage,
+    ) {}
 
-### PermissionService
-
-Добавляй только те методы, которые реально нужны для сущности:
-
-- `checkOwner` — владелец может выполнять действия над своим ресурсом, но не все. Требует `getAllowedActionsForOwner()`.
-- `checkRole` — действие доступно только по роли, владельца у ресурса нет либо владение не даёт права. Требует `getAllowedRolesForAction()`.
-- `checkOwnerOrRole` — действие доступно владельцу ИЛИ привилегированной роли. Делегирует в `checkOwner` и `checkRole`, оба метода должны присутствовать.
-
-`getAllowedActionsForOwner()` — добавляется только если есть `checkOwner`.
-`getAllowedRolesForAction()` — добавляется только если есть `checkRole`.
-
-```php
-final readonly class {Module}PermissionService
-{
-    /** 
-     * Владелец может выполнять только разрешённые действия над своим ресурсом.
-     * @throws AccessDeniedException 
-     */
-    public function checkOwner(int $currentUserId, int $userId, {Module}Permission $action): void
+    public function upload(int $entityId, UploadedFileInterface $file): string
     {
-        if ($currentUserId !== $userId) {
-            throw new AccessDeniedException();
-        }
-
-        if (!\in_array($action, $this->getAllowedActionsForOwner(), true)) {
-            throw new AccessDeniedException();
-        }
+        return $this->storage->upload(
+            file: $file,
+            directory: {Entity}Directory::FILES->getPath($entityId),
+        );
     }
 
-    /** 
-     * Проверка только по роли — владелец не даёт доступа.
-     * @throws AccessDeniedException 
-     */
-    public function checkRole({Module}Role $currentUserRole, {Module}Permission $action): void
+    public function replace(?string $oldPath, string $newPath): void
     {
-        if (!\in_array($currentUserRole, $this->getAllowedRolesForAction($action), true)) {
-            throw new AccessDeniedException();
+        if ($oldPath !== null) {
+            $this->storage->delete($oldPath);
         }
-    }
-
-    /** 
-     * Владелец (с учётом разрешённых действий) ИЛИ привилегированная роль.
-     * @throws AccessDeniedException 
-     */
-    public function checkOwnerOrRole(int $currentUserId, int $userId, {Module}Role $currentUserRole, {Module}Permission $action): void
-    {
-        if ($currentUserId === $userId) {
-            $this->checkOwner($currentUserId, $userId, $action);
-            return;
-        }
-
-        $this->checkRole($currentUserRole, $action);
-    }
-
-    /** 
-     * Действия, которые владелец может выполнять над своим ресурсом.
-     * @return list<{Module}Permission> 
-     */
-    private function getAllowedActionsForOwner(): array
-    {
-        return [
-            {Module}Permission::UPDATE,
-        ];
-    }
-
-    /** 
-     * Роли, которым разрешено действие.
-     * @return list<{Module}Role> 
-     */
-    private function getAllowedRolesForAction({Module}Permission $action): array
-    {
-        $adminRoles = [
-            {Module}Role::ADMIN,
-        ];
-
-        return match ($action) {
-            {Module}Permission::CREATE,
-            {Module}Permission::UPDATE,
-            {Module}Permission::DELETE => $adminRoles,
-        };
     }
 }
 ```
 
-### Использование в Handler
+Enum-директории описаны отдельно в [Enum](enum.md).
 
-`currentUserRole` в Command — `int` (приходит из HTTP). В Handler приводится через `{Module}Role::from()`:
+---
+
+## Использование в Handler
 
 ```php
-// Только владелец (с проверкой разрешённого действия)
-$this->permissionService->checkOwner(
-    currentUserId: $command->currentUserId,
-    userId: $command->userId,
-    action: {Module}Permission::UPDATE,
-);
+public function __construct(
+    private {Entity}StructureSyncerService $structureSyncer,
+) {}
 
-// Только роль
-$this->permissionService->checkRole(
-    currentUserRole: {Module}Role::from($command->currentUserRole),
-    action: {Module}Permission::CREATE,
-);
+public function handle(Update{Entity}Command $command): void
+{
+    // ...
 
-// Владелец ИЛИ роль
-$this->permissionService->checkOwnerOrRole(
-    currentUserId: $command->currentUserId,
-    userId: $command->userId,
-    currentUserRole: {Module}Role::from($command->currentUserRole),
-    action: {Module}Permission::DELETE,
-);
+    $this->structureSyncer->sync($command->id, $command->children);
+}
 ```
-
-### Передача идентичности в Action
-
-`currentUserId` и `currentUserRole` **не приходят из тела запроса** — подставляются в Action из идентичности авторизованного пользователя. Примеры — см. [action.md](action.md).

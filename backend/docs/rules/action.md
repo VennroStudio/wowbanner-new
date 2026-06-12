@@ -181,10 +181,12 @@ public function handle(ServerRequestInterface $request): ResponseInterface
 
 Если endpoint отдаёт статический список enum-значений `{ id, label }`, Action не использует Fetcher/Unifier и отвечает напрямую через `EnumModel`.
 
+Enum-класс описан отдельно в [Enum](enum.md). В Action показывается только отдача справочника.
+
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
-    return new JsonDataResponse(EnumModel::fromEnumClass(SomeEnum::class));
+    return new JsonDataResponse(EnumModel::fromEnumClass({EnumName}::class));
 }
 ```
 
@@ -201,7 +203,7 @@ public function handle(ServerRequestInterface $request): ResponseInterface
     $identity = RequestIdentity::get($request);
 
     return new JsonDataResponse(
-        EnumModel::fromEnumClassForRole(SomeEnum::class, $identity->role),
+        EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role),
     );
 }
 ```

@@ -13,6 +13,7 @@ Enum собирается только из тех блоков, которые 
 - Cases
 - `EnumInterface` и `getLabel()`
 - `RoleAwareEnumInterface` и `casesForRole()`
+- Использование в Entity
 - `getPath()` для enum-директорий
 
 ---
@@ -80,6 +81,8 @@ public static function casesForRole(UserRole $role): array
 
 ### Использование в Entity
 
+Правила Entity описаны отдельно в [Entity](entity.md). В Enum показывается только подключение enum-поля.
+
 ```php
 #[ORM\Column(type: Types::INTEGER, enumType: {EnumName}::class)]
 private(set) {EnumName} $status;
@@ -87,17 +90,7 @@ private(set) {EnumName} $status;
 
 ### Использование в Action
 
-```php
-return new JsonDataResponse(EnumModel::fromEnumClass({EnumName}::class));
-```
-
-```php
-$identity = RequestIdentity::get($request);
-
-return new JsonDataResponse(
-    EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role),
-);
-```
+Enum-справочник для frontend описывается отдельно в [Action](action.md). В Action используется `EnumModel::fromEnumClass({EnumName}::class)` или `EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role)`.
 
 ### Полный пример enum-справочника
 
