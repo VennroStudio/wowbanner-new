@@ -1,27 +1,27 @@
 # Enum
 
-Правила для enum-полей сущностей, API-справочников и внутренних доменных состояний.
-
 **Расположение:** `src/Modules/{Module}/Entity/{Entity}/Fields/Enums/{EnumName}.php`
 
 ---
 
-## Правила
+## Состав Enum
 
-- Enum, который хранится в БД, должен быть `int`-backed.
-- Doctrine-колонка для enum в БД: `#[ORM\Column(type: Types::INTEGER, enumType: SomeEnum::class)]`.
-- Enum, который отдается во frontend как справочник `{ id, label }`, должен реализовывать `App\Components\Enum\EnumInterface`.
-- API-справочники отдаются через `EnumModel::fromEnumClass(...)`.
-- Если набор значений зависит от роли пользователя, enum дополнительно реализует `App\Components\Enum\RoleAwareEnumInterface`.
-- Логика доступных значений по роли хранится в enum через `casesForRole(UserRole $role)`, а не в Action.
-- Enum только для внутренней доменной логики может быть `string`-backed и не обязан реализовывать `EnumInterface`.
-- Все зависимости импортируются через `use`.
+Enum собирается только из тех блоков, которые нужны конкретному сценарию.
+
+- Namespace и imports
+- Backing type (`int`, `string` или unit enum без значения)
+- Cases
+- `EnumInterface` и `getLabel()`
+- `RoleAwareEnumInterface` и `casesForRole()`
+- `getPath()` для enum-директорий
 
 ---
 
-## Enum для колонки БД
+## Enum-справочник
 
-Используется для полей сущности, которые сохраняются в таблицу.
+Используется для enum-полей Entity, API-справочников и значений с человекочитаемым названием.
+
+### Заголовок
 
 ```php
 <?php
@@ -34,67 +34,72 @@ use App\Components\Enum\EnumInterface;
 
 enum {EnumName}: int implements EnumInterface
 {
-    case ACTIVE = 1;
-    case INACTIVE = 2;
-
-    public function getLabel(): string
-    {
-        return match ($this) {
-            self::ACTIVE   => 'Активен',
-            self::INACTIVE => 'Неактивен',
-        };
-    }
 }
 ```
 
-Пример поля в Entity:
+### Cases
+
+```php
+case ACTIVE = 1;
+case INACTIVE = 2;
+case ARCHIVED = 3;
+```
+
+### getLabel()
+
+```php
+public function getLabel(): string
+{
+    return match ($this) {
+        self::ACTIVE => 'Активен',
+        self::INACTIVE => 'Неактивен',
+        self::ARCHIVED => 'В архиве',
+    };
+}
+```
+
+### Ограничение по роли
+
+Используется только если набор значений зависит от роли пользователя.
+
+```php
+use App\Components\Enum\RoleAwareEnumInterface;
+use App\Modules\User\Entity\User\Fields\Enums\UserRole;
+
+/**
+ * @return list<self>
+ */
+public static function casesForRole(UserRole $role): array
+{
+    return match ($role) {
+        UserRole::ADMIN => self::cases(),
+        default => [self::ACTIVE, self::INACTIVE],
+    };
+}
+```
+
+### Использование в Entity
 
 ```php
 #[ORM\Column(type: Types::INTEGER, enumType: {EnumName}::class)]
 private(set) {EnumName} $status;
 ```
 
----
-
-## Enum для API-справочника
-
-Если frontend должен получить список значений в формате `{ id, label }`, Action возвращает данные через `EnumModel`.
+### Использование в Action
 
 ```php
 return new JsonDataResponse(EnumModel::fromEnumClass({EnumName}::class));
 ```
 
-Сам enum:
-
 ```php
-<?php
+$identity = RequestIdentity::get($request);
 
-declare(strict_types=1);
-
-namespace App\Modules\{Module}\Entity\{Entity}\Fields\Enums;
-
-use App\Components\Enum\EnumInterface;
-
-enum {EnumName}: int implements EnumInterface
-{
-    case ONE = 1;
-    case TWO = 2;
-
-    public function getLabel(): string
-    {
-        return match ($this) {
-            self::ONE => 'Первый',
-            self::TWO => 'Второй',
-        };
-    }
-}
+return new JsonDataResponse(
+    EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role),
+);
 ```
 
----
-
-## Enum-справочник с учетом роли
-
-Если набор значений зависит от роли текущего пользователя, фильтрация выполняется внутри enum.
+### Полный пример enum-справочника
 
 ```php
 <?php
@@ -109,14 +114,16 @@ use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 
 enum {EnumName}: int implements EnumInterface, RoleAwareEnumInterface
 {
-    case ONE = 1;
-    case TWO = 2;
+    case ACTIVE = 1;
+    case INACTIVE = 2;
+    case ARCHIVED = 3;
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::ONE => 'Первый',
-            self::TWO => 'Второй',
+            self::ACTIVE => 'Активен',
+            self::INACTIVE => 'Неактивен',
+            self::ARCHIVED => 'В архиве',
         };
     }
 
@@ -127,34 +134,61 @@ enum {EnumName}: int implements EnumInterface, RoleAwareEnumInterface
     {
         return match ($role) {
             UserRole::ADMIN => self::cases(),
-            default => [self::ONE],
+            default => [self::ACTIVE, self::INACTIVE],
         };
     }
 }
 ```
 
-Action для такого справочника:
-
-```php
-$identity = RequestIdentity::get($request);
-
-return new JsonDataResponse(
-    EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role),
-);
-```
-
 ---
 
-## Enum только для доменной логики
+## Enum-директория
 
-Если enum не хранится в БД и не отдается как API-справочник, можно использовать `string`-backed enum без `getLabel()`.
+Используется для централизованного хранения путей загрузки файлов.
+
+### Простая директория
 
 ```php
-enum {EnumName}: string
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Entity\{Entity}\Fields\Enums;
+
+enum {Entity}Directory: string
 {
-    case ACTIVE = 'active';
-    case EXPIRED = 'expired';
-    case USED = 'used';
-    case REVOKED = 'revoked';
+    case IMAGE = '{entity}/';
 }
+```
+
+### Директория с динамическим путем
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Entity\{Entity}\Fields\Enums;
+
+enum {Entity}Directory
+{
+    case FILES;
+
+    public function getPath(int $entityId): string
+    {
+        return match ($this) {
+            self::FILES => "{entity}/{$entityId}/files",
+        };
+    }
+}
+```
+
+### Использование
+
+```php
+$path = {Entity}Directory::IMAGE->value;
+```
+
+```php
+$path = {Entity}Directory::FILES->getPath($entityId);
 ```
