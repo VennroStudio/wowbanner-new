@@ -22,6 +22,20 @@ final readonly class MaterialPricingCutByMaterialIdAndOptionId implements Materi
     ) {}
 
     /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'          => 'id',
+            'material_id' => 'material_id',
+            'option_id'   => 'option_id',
+            'cut_type'    => 'type',
+            'price'       => 'price',
+        ];
+    }
+
+    /**
      * @param array{
      *     id: int,
      *     material_id: int,

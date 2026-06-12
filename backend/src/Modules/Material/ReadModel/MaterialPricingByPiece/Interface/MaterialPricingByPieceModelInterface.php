@@ -4,24 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\ReadModel\MaterialPricingByPiece\Interface;
 
-interface MaterialPricingByPieceModelInterface
-{
-    public function getId(): int;
+use App\Components\ReadModel\ReadModelInterface;
 
+interface MaterialPricingByPieceModelInterface extends ReadModelInterface
+{
     public function getMaterialId(): int;
 
     public function getOptionId(): int;
-
-    /**
-     * @return array{
-     *     id: int,
-     *     material_id: int,
-     *     option_id: int,
-     *     variantType: array{id: int, label: string},
-     *     price: string,
-     *     cost: string,
-     *     printHours: string
-     * }
-     */
-    public function toArray(): array;
 }

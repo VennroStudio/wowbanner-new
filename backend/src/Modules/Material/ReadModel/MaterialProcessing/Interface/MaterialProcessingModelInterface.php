@@ -4,24 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\ReadModel\MaterialProcessing\Interface;
 
-interface MaterialProcessingModelInterface
-{
-    public function getId(): int;
+use App\Components\ReadModel\ReadModelInterface;
 
+interface MaterialProcessingModelInterface extends ReadModelInterface
+{
     public function getMaterialId(): int;
 
     public function getOptionId(): int;
 
     public function getProcessingId(): int;
-
-    /**
-     * @return array{
-     *     id: int,
-     *     material_id: int,
-     *     option_id: int,
-     *     processingId: int,
-     *     processingName: string
-     * }
-     */
-    public function toArray(): array;
 }

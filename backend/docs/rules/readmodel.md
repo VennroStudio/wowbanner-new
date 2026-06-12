@@ -1,36 +1,34 @@
-# ReadModel — DTO для чтения
+# ReadModel
 
-ReadModel — проекция данных из БД для Fetcher'а.
+ReadModel — DTO для чтения из БД. Fetcher возвращает ReadModel, Action/Unifier превращают его в HTTP-ответ.
 
 **Расположение:**
-
-- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}By{Field}.php`
-- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}FindAll.php`
-- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}GetBySelect.php`
 - `src/Modules/{Module}/ReadModel/{Entity}/Interface/{Entity}ModelInterface.php`
+- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}Details.php`
+- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}IdName.php`
+- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}Summary.php`
 
 ---
 
-## Состав ReadModel
+## Имена
 
-ReadModel собирается только из тех блоков, которые нужны конкретной проекции.
+ReadModel называется по форме данных, а не по Fetcher'у.
 
-- Интерфейс модели
-- `final readonly class`
-- Публичные readonly-свойства через конструктор
-- `fromRow()`
-- `FromRowsTrait`
-- Геттеры интерфейса
-- `toArray()`
+- `{Entity}Details` — полная форма текущего API-ответа
+- `{Entity}IdName` — `id`, `name`
+- `{Entity}Preview` — короткая карточка
+- `{Entity}Summary` — компактная вложенная форма
+- `{Entity}ListItem` — строка списка
+- `{Entity}For{Context}` — только если форма уникальна для одного контекста
+
+Не создавать разные ReadModel с одинаковыми полями только из-за разных query-сценариев.
 
 ---
 
 ## Интерфейс
 
-Интерфейс задает общий контракт для ReadModel одной сущности.
-Минимально нужны `getId()` и `toArray()`.
-
-Если ReadModel используется во внутренней логике, интерфейс можно расширить геттерами нужных полей.
+Интерфейс сущности наследует общий контракт `ReadModelInterface`.
+Дополнительные getter'ы добавляются только если ReadModel используется во внутренней логике.
 
 ```php
 <?php
@@ -39,17 +37,19 @@ declare(strict_types=1);
 
 namespace App\Modules\{Module}\ReadModel\{Entity}\Interface;
 
-interface {Entity}ModelInterface
-{
-    public function getId(): int;
+use App\Components\ReadModel\ReadModelInterface;
 
-    public function toArray(): array;
+interface {Entity}ModelInterface extends ReadModelInterface
+{
+    public function getParentId(): int;
 }
 ```
 
+Если дополнительных getter'ов нет, интерфейс остается пустым.
+
 ---
 
-## Класс ReadModel
+## Класс
 
 ```php
 <?php
@@ -59,36 +59,44 @@ declare(strict_types=1);
 namespace App\Modules\{Module}\ReadModel\{Entity};
 
 use App\Components\ReadModel\FromRowsTrait;
-use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Status;
 use App\Modules\{Module}\ReadModel\{Entity}\Interface\{Entity}ModelInterface;
 use Override;
 
-final readonly class {Entity}ById implements {Entity}ModelInterface
+final readonly class {Entity}Details implements {Entity}ModelInterface
 {
     use FromRowsTrait;
 
     public function __construct(
         public int $id,
         public string $name,
-        public {Entity}Status $status,
-        public string $createdAt,
+        public string $description,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id' => 'id',
+            'name' => 'name',
+            'description' => 'description',
+        ];
+    }
 
     /**
      * @param array{
      *     id: int,
      *     name: string,
-     *     status: int,
-     *     created_at: string
+     *     description: string
      * } $row
      */
     public static function fromRow(array $row): self
     {
         return new self(
             id: (int) $row['id'],
-            name: $row['name'],
-            status: {Entity}Status::from((int) $row['status']),
-            createdAt: $row['created_at'],
+            name: (string) $row['name'],
+            description: (string) $row['description'],
         );
     }
 
@@ -104,11 +112,7 @@ final readonly class {Entity}ById implements {Entity}ModelInterface
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'status' => [
-                'id' => $this->status->value,
-                'label' => $this->status->getLabel(),
-            ],
-            'created_at' => $this->createdAt,
+            'description' => $this->description,
         ];
     }
 }
@@ -116,27 +120,46 @@ final readonly class {Entity}ById implements {Entity}ModelInterface
 
 ---
 
+## fields()
+
+`fields()` описывает `SELECT` для `ReadModelFields`.
+Ключ — alias результата, значение — колонка или выражение.
+
+```php
+public static function fields(): array
+{
+    return [
+        'id' => 'id',
+        'entity_id' => 'entity_id',
+        'related_name' => 'r.name',
+    ];
+}
+```
+
+Если Fetcher передает alias основной таблицы, простые колонки получат его автоматически.
+Поля с `.` или выражениями не меняются.
+
+---
+
 ## fromRow()
 
-`fromRow()` преобразует строку БД в ReadModel.
-
-Для `$row` указывается PHPDoc array shape.
-Поля БД приходят в `snake_case`, поля объекта обычно в `camelCase`.
+`fromRow()` приводит типы и маппит строку БД в объект.
+Для `$row` всегда указывается PHPDoc array shape.
 
 ```php
 /**
  * @param array{
  *     id: int,
- *     owner_id: int,
- *     created_at: string
+ *     type: int,
+ *     is_active: int|string|bool
  * } $row
  */
 public static function fromRow(array $row): self
 {
     return new self(
         id: (int) $row['id'],
-        ownerId: (int) $row['owner_id'],
-        createdAt: $row['created_at'],
+        type: {Entity}Type::from((int) $row['type']),
+        isActive: (bool) (int) $row['is_active'],
     );
 }
 ```
@@ -145,96 +168,34 @@ public static function fromRow(array $row): self
 
 ## toArray()
 
-`toArray()` готовит данные для API.
+`toArray()` готовит API-ответ.
 
-Ключи ответа всегда пишутся в `snake_case`.
-Enum-поля отдаются как объект `{ id, label }`.
+- ключи ответа — `snake_case`
+- enum — объект `{ id, label }`
+- технические поля для связи можно оставить свойствами/getter'ами, но не отдавать в `toArray()`
 
 ```php
-#[Override]
 public function toArray(): array
 {
     return [
         'id' => $this->id,
-        'is_cut' => $this->isCut,
-        'status_type' => [
-            'id' => $this->statusType->value,
-            'label' => $this->statusType->getLabel(),
-        ],
         'pricing_type' => [
             'id' => $this->pricingType->value,
             'label' => $this->pricingType->getLabel(),
         ],
-        'created_at' => $this->createdAt,
+        'is_cut' => $this->isCut,
     ];
 }
 ```
 
 ---
 
-## Внутренняя ReadModel
+## Компоненты
 
-Если ReadModel используется не для API-ответа, а внутри backend-логики, интерфейс может иметь дополнительные геттеры.
+- `ReadModelInterface` — общий контракт: `fields()`, `fromRow()`, `fromRows()`, `getId()`, `toArray()`
+- `FromRowsTrait` — стандартная реализация `fromRows()`
+- `ReadModelFields` — формирует `SELECT column AS alias`
+- `ReadModelArray` — превращает список ReadModel в список массивов в Action
+- `ModelCountItemsResult` — `items + count` для пагинации
 
-```php
-interface {Entity}TokenModelInterface
-{
-    public function getId(): int;
-
-    public function getUserId(): int;
-
-    public function getExpiresAt(): string;
-
-    public function toArray(): array;
-}
-```
-
----
-
-## Компоненты ReadModel
-
-Общие компоненты лежат в `src/Components/ReadModel/`.
-Они нужны, чтобы не дублировать одинаковую логику в каждом модуле.
-
-### FromRowsTrait
-
-Используется в ReadModel, когда Fetcher вызывает `{Entity}ReadModel::fromRows($rows)`.
-В проекте trait подключается почти во всех ReadModel для единообразия.
-Если ReadModel точно используется только для одной записи и `fromRows()` не нужен, trait можно не подключать.
-
-```php
-use App\Components\ReadModel\FromRowsTrait;
-
-final readonly class {Entity}FindAll implements {Entity}ModelInterface
-{
-    use FromRowsTrait;
-}
-```
-
-### ReadModelArray
-
-Используется в Action, когда нужно преобразовать список ReadModel в массивы через `toArray()`.
-
-```php
-use App\Components\ReadModel\ReadModelArray;
-
-return new JsonDataResponse(
-    ReadModelArray::fromItems(
-        $this->fetcher->fetch(new {Entity}GetBySelectQuery())
-    )
-);
-```
-
-### ModelCountItemsResult
-
-Используется в Fetcher'ах списков с пагинацией.
-Хранит `items` и общее `count`.
-
-```php
-use App\Components\ReadModel\ModelCountItemsResult;
-
-return new ModelCountItemsResult(
-    items: {Entity}FindAll::fromRows($rows),
-    count: $total,
-);
-```
+`*Item` с `Assert` или `fromRequest()` — это input DTO, а не ReadModel для чтения. Для новых read DTO не использовать `Item` как имя формы.

@@ -4,16 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\ReadModel\Material\Interface;
 
-interface MaterialModelInterface
-{
-    public function getId(): int;
+use App\Components\ReadModel\ReadModelInterface;
 
-    /**
-     * @return array{
-     *     id: int,
-     *     name: string,
-     *     description: string
-     * }
-     */
-    public function toArray(): array;
+interface MaterialModelInterface extends ReadModelInterface
+{
 }

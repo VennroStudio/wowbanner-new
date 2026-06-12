@@ -40,4 +40,11 @@ interface Cacher
     public function increase(string $key, int $value): void;
 
     public function decrease(string $key, int $value): void;
+
+    public function sAdd(string $key, string $value): void;
+
+    /**
+     * @return list<string>
+     */
+    public function sMembers(string $key): array;
 }

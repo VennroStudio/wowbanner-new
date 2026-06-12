@@ -181,6 +181,32 @@ class RedisCacher implements Cacher
         $this->redis?->decrBy($key, $value);
     }
 
+    #[Override]
+    public function sAdd(string $key, string $value): void
+    {
+        if (!$this->isConnected()) {
+            $this->connect();
+        }
+
+        $this->redis?->sAdd($key, $value);
+    }
+
+    #[Override]
+    public function sMembers(string $key): array
+    {
+        if (!$this->isConnected()) {
+            $this->connect();
+        }
+
+        $result = $this->redis?->sMembers($key);
+
+        if (!\is_array($result)) {
+            return [];
+        }
+
+        return array_values(array_filter($result, static fn(mixed $value): bool => \is_string($value)));
+    }
+
     private function connect(): void
     {
         $this->redis = new Redis();

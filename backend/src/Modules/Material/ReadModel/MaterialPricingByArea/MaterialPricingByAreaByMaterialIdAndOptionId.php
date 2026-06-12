@@ -26,6 +26,23 @@ final readonly class MaterialPricingByAreaByMaterialIdAndOptionId implements Mat
     ) {}
 
     /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'              => 'id',
+            'material_id'     => 'material_id',
+            'option_id'       => 'option_id',
+            'dpi_type'        => 'dpi_type',
+            'area_range_type' => 'area_range_type',
+            'price'           => 'price',
+            'cost'            => 'cost',
+            'print_hours'     => 'print_hours',
+        ];
+    }
+
+    /**
      * @param array{
      *     id: int,
      *     material_id: int,
@@ -76,14 +93,14 @@ final readonly class MaterialPricingByAreaByMaterialIdAndOptionId implements Mat
             'id'              => $this->id,
             'material_id'     => $this->materialId,
             'option_id'       => $this->optionId,
-            'dpiType'         => ['id' => $this->dpiType->value, 'label' => $this->dpiType->getLabel()],
-            'areaRangeType'   => [
+            'dpi_type'        => ['id' => $this->dpiType->value, 'label' => $this->dpiType->getLabel()],
+            'area_range_type' => [
                 'id'    => $this->areaRangeType->value,
                 'label' => $this->areaRangeType->getLabel(),
             ],
             'price'           => $this->price,
             'cost'            => $this->cost,
-            'printHours'      => $this->printHours,
+            'print_hours'     => $this->printHours,
         ];
     }
 }

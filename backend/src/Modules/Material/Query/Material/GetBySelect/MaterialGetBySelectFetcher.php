@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Query\Material\GetBySelect;
 
-use App\Modules\Material\ReadModel\Material\MaterialGetBySelect;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Material\ReadModel\Material\Interface\MaterialModelInterface;
+use App\Modules\Material\ReadModel\Material\MaterialIdName;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,18 +19,20 @@ final readonly class MaterialGetBySelectFetcher
     ) {}
 
     /**
-     * @return list<MaterialGetBySelect>
+     * @template T of MaterialModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(MaterialGetBySelectQuery $query): array
+    public function fetch(MaterialGetBySelectQuery $query, string $modelClass = MaterialIdName::class): array
     {
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'name')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->orderBy('name', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();
 
-        return MaterialGetBySelect::fromRows($rows);
+        return $modelClass::fromRows($rows);
     }
 }

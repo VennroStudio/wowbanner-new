@@ -8,7 +8,7 @@ use App\Components\ReadModel\FromRowsTrait;
 use App\Modules\Material\ReadModel\Material\Interface\MaterialModelInterface;
 use Override;
 
-final readonly class MaterialFindAll implements MaterialModelInterface
+final readonly class MaterialDetails implements MaterialModelInterface
 {
     use FromRowsTrait;
 
@@ -17,6 +17,18 @@ final readonly class MaterialFindAll implements MaterialModelInterface
         public string $name,
         public string $description,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'          => 'id',
+            'name'        => 'name',
+            'description' => 'description',
+        ];
+    }
 
     /**
      * @param array{

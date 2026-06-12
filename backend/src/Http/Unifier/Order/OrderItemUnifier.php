@@ -11,6 +11,8 @@ use App\Modules\Material\Query\Material\GetById\MaterialGetByIdFetcher;
 use App\Modules\Material\Query\Material\GetById\MaterialGetByIdQuery;
 use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdFetcher;
 use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdQuery;
+use App\Modules\Material\ReadModel\Material\MaterialIdName;
+use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionIdName;
 use App\Modules\Order\Query\OrderItemProcessing\FindByItemId\OrderItemProcessingFindByItemIdFetcher;
 use App\Modules\Order\Query\OrderItemProcessing\FindByItemId\OrderItemProcessingFindByItemIdQuery;
 use App\Modules\Order\ReadModel\OrderItem\Interface\OrderItemModelInterface;
@@ -67,13 +69,19 @@ final readonly class OrderItemUnifier implements UnifierInterface
         $data = UnifierHelper::toArrayWithout($item, 'order_id');
         $processings = $this->itemProcessingFetcher->fetch(new OrderItemProcessingFindByItemIdQuery($item->id));
         $printing = $this->printingFetcher->fetch(new PrintingGetByIdQuery($item->printId));
-        $material = $this->materialFetcher->fetch(new MaterialGetByIdQuery($item->materialId));
-        $option = $this->materialOptionFetcher->fetch(new MaterialOptionGetByIdQuery($item->optionId));
+        $material = $this->materialFetcher->fetch(
+            new MaterialGetByIdQuery($item->materialId),
+            MaterialIdName::class,
+        );
+        $option = $this->materialOptionFetcher->fetch(
+            new MaterialOptionGetByIdQuery($item->optionId),
+            MaterialOptionIdName::class,
+        );
 
         $data['processings'] = $this->itemProcessingUnifier->unify(null, $processings);
         $data['print'] = $this->printingUnifier->unifyOne(null, $printing);
-        $data['material'] = UnifierHelper::toArrayWithout($material, 'description');
-        $data['option'] = UnifierHelper::toArrayWithout($option, 'material_id', 'pricingType', 'isCut');
+        $data['material'] = $material->toArray();
+        $data['option'] = $option->toArray();
 
         return $data;
     }

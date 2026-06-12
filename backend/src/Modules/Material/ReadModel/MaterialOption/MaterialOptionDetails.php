@@ -9,7 +9,7 @@ use App\Modules\Material\Entity\MaterialOption\Fields\Enums\MaterialOptionPricin
 use App\Modules\Material\ReadModel\MaterialOption\Interface\MaterialOptionModelInterface;
 use Override;
 
-final readonly class MaterialOptionById implements MaterialOptionModelInterface
+final readonly class MaterialOptionDetails implements MaterialOptionModelInterface
 {
     use FromRowsTrait;
 
@@ -20,6 +20,20 @@ final readonly class MaterialOptionById implements MaterialOptionModelInterface
         public MaterialOptionPricingType $pricingType,
         public bool $isCut,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'           => 'id',
+            'name'         => 'name',
+            'material_id'  => 'material_id',
+            'pricing_type' => 'pricing_type',
+            'is_cut'       => 'is_cut',
+        ];
+    }
 
     /**
      * @param array{
@@ -60,11 +74,11 @@ final readonly class MaterialOptionById implements MaterialOptionModelInterface
             'id'           => $this->id,
             'name'         => $this->name,
             'material_id'  => $this->materialId,
-            'pricingType' => [
+            'pricing_type' => [
                 'id'    => $this->pricingType->value,
                 'label' => $this->pricingType->getLabel(),
             ],
-            'isCut'       => $this->isCut,
+            'is_cut'       => $this->isCut,
         ];
     }
 }

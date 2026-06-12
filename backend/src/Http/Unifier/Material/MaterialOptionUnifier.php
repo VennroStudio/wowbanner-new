@@ -70,19 +70,19 @@ final readonly class MaterialOptionUnifier implements UnifierInterface
         $materialId = $item->getMaterialId();
         $optionId = $item->getId();
 
-        $data['pricingByArea'] = array_map(
+        $data['pricing_by_area'] = array_map(
             static fn(object $price): array => UnifierHelper::toArrayWithout($price, 'material_id', 'option_id'),
             $this->materialPricingByAreaFetcher->fetch(
                 new MaterialPricingByAreaFindByMaterialIdAndOptionIdQuery($materialId, $optionId),
             ),
         );
-        $data['pricingByPiece'] = array_map(
+        $data['pricing_by_piece'] = array_map(
             static fn(object $price): array => UnifierHelper::toArrayWithout($price, 'material_id', 'option_id'),
             $this->materialPricingByPieceFetcher->fetch(
                 new MaterialPricingByPieceFindByMaterialIdAndOptionIdQuery($materialId, $optionId),
             ),
         );
-        $data['pricingByCut'] = array_map(
+        $data['pricing_by_cut'] = array_map(
             static fn(object $price): array => UnifierHelper::toArrayWithout($price, 'material_id', 'option_id'),
             $this->materialPricingCutFetcher->fetch(
                 new MaterialPricingCutFindByMaterialIdAndOptionIdQuery($materialId, $optionId),

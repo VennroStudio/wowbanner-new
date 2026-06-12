@@ -20,6 +20,19 @@ final readonly class MaterialImageByMaterial implements MaterialImageModelInterf
     ) {}
 
     /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'          => 'id',
+            'material_id' => 'material_id',
+            'path'        => 'path',
+            'alt'         => 'alt',
+        ];
+    }
+
+    /**
      * @param array{
      *     id: int,
      *     material_id: int,

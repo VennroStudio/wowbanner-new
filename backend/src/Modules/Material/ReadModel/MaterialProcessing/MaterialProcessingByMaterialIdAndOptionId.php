@@ -21,6 +21,20 @@ final readonly class MaterialProcessingByMaterialIdAndOptionId implements Materi
     ) {}
 
     /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'              => 'id',
+            'material_id'     => 'material_id',
+            'option_id'       => 'option_id',
+            'processing_id'   => 'processing_id',
+            'processing_name' => 'p.name',
+        ];
+    }
+
+    /**
      * @param array{
      *     id: int,
      *     material_id: int,
@@ -71,8 +85,8 @@ final readonly class MaterialProcessingByMaterialIdAndOptionId implements Materi
             'id'            => $this->id,
             'material_id'   => $this->materialId,
             'option_id'     => $this->optionId,
-            'processingId'  => $this->processingId,
-            'processingName' => $this->processingName,
+            'processing_id'   => $this->processingId,
+            'processing_name' => $this->processingName,
         ];
     }
 }

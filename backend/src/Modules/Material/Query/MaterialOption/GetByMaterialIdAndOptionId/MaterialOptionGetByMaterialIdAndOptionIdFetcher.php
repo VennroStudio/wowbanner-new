@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Query\MaterialOption\GetByMaterialIdAndOptionId;
 
-use App\Components\Cacher\Cacher;
 use App\Components\Exception\DomainExceptionModule;
-use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionByMaterialIdAndOptionId;
+use App\Components\Fetcher\FetcherCache;
+use App\Components\Fetcher\FetcherCacheKey;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Material\ReadModel\MaterialOption\Interface\MaterialOptionModelInterface;
+use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -14,27 +17,35 @@ final readonly class MaterialOptionGetByMaterialIdAndOptionIdFetcher
 {
     private const string TABLE = 'material_options';
     private const int CACHE_TTL = 900;
+    public const string CACHE_TAG = 'material_option.by_material_id_and_option_id';
 
     public function __construct(
         private Connection $connection,
-        private Cacher $cacher,
+        private FetcherCache $fetcherCache,
     ) {}
 
     /**
+     * @template T of MaterialOptionModelInterface
+     * @param class-string<T> $modelClass
+     * @return T
      * @throws Exception
      */
-    public function fetch(MaterialOptionGetByMaterialIdAndOptionIdQuery $query): MaterialOptionByMaterialIdAndOptionId
+    public function fetch(
+        MaterialOptionGetByMaterialIdAndOptionIdQuery $query,
+        string $modelClass = MaterialOptionDetails::class,
+    ): MaterialOptionModelInterface
     {
-        $key = 'material_option_by_material_id_' . $query->materialId . '_option_id_' . $query->optionId;
+        $tag = FetcherCacheKey::tag(self::CACHE_TAG, [$query->materialId, $query->optionId]);
+        $key = FetcherCacheKey::key($tag, $modelClass);
 
-        /** @var MaterialOptionByMaterialIdAndOptionId|null $cached */
-        $cached = $this->cacher->get($key);
+        /** @var T|null $cached */
+        $cached = $this->fetcherCache->get($key);
         if ($cached !== null) {
             return $cached;
         }
 
         $row = $this->connection->createQueryBuilder()
-            ->select('id', 'name', 'material_id', 'pricing_type', 'is_cut')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('id = :optionId')
             ->andWhere('material_id = :materialId')
@@ -52,16 +63,8 @@ final readonly class MaterialOptionGetByMaterialIdAndOptionIdFetcher
             );
         }
 
-        /** @var array{
-         *     id: int,
-         *     name: string,
-         *     material_id: int,
-         *     pricing_type: int,
-         *     is_cut: int|string|bool
-         * } $row
-         */
-        $result = MaterialOptionByMaterialIdAndOptionId::fromRow($row);
-        $this->cacher->set($key, $result, self::CACHE_TTL);
+        $result = $modelClass::fromRow($row);
+        $this->fetcherCache->set($key, $result, self::CACHE_TTL, [$tag]);
 
         return $result;
     }

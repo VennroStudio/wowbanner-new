@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Query\MaterialProcessing\FindByMaterialIdAndOptionId;
 
-use App\Components\Cacher\Cacher;
+use App\Components\Fetcher\FetcherCache;
+use App\Components\Fetcher\FetcherCacheKey;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Material\ReadModel\MaterialProcessing\Interface\MaterialProcessingModelInterface;
 use App\Modules\Material\ReadModel\MaterialProcessing\MaterialProcessingByMaterialIdAndOptionId;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -13,28 +16,35 @@ final readonly class MaterialProcessingFindByMaterialIdAndOptionIdFetcher
 {
     private const string TABLE = 'material_processings';
     private const int CACHE_TTL = 900;
+    public const string CACHE_TAG = 'material_processing.by_material_id_and_option_id';
 
     public function __construct(
         private Connection $connection,
-        private Cacher $cacher,
+        private FetcherCache $fetcherCache,
     ) {}
 
     /**
-     * @return list<MaterialProcessingByMaterialIdAndOptionId>
+     * @template T of MaterialProcessingModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(MaterialProcessingFindByMaterialIdAndOptionIdQuery $query): array
+    public function fetch(
+        MaterialProcessingFindByMaterialIdAndOptionIdQuery $query,
+        string $modelClass = MaterialProcessingByMaterialIdAndOptionId::class,
+    ): array
     {
-        $key = 'material_processing_by_material_id_' . $query->materialId . '_option_id_' . $query->optionId;
+        $tag = FetcherCacheKey::tag(self::CACHE_TAG, [$query->materialId, $query->optionId]);
+        $key = FetcherCacheKey::key($tag, $modelClass);
 
-        /** @var list<MaterialProcessingByMaterialIdAndOptionId>|null $cached */
-        $cached = $this->cacher->get($key);
+        /** @var list<T>|null $cached */
+        $cached = $this->fetcherCache->get($key);
         if ($cached !== null) {
             return $cached;
         }
 
         $rows = $this->connection->createQueryBuilder()
-            ->select('mp.id', 'mp.material_id', 'mp.option_id', 'mp.processing_id', 'p.name AS processing_name')
+            ->select(...ReadModelFields::select($modelClass::fields(), 'mp'))
             ->from(self::TABLE, 'mp')
             ->leftJoin('mp', 'processings', 'p', 'p.id = mp.processing_id')
             ->where('mp.material_id = :materialId')
@@ -45,8 +55,8 @@ final readonly class MaterialProcessingFindByMaterialIdAndOptionIdFetcher
             ->executeQuery()
             ->fetchAllAssociative();
 
-        $result = MaterialProcessingByMaterialIdAndOptionId::fromRows($rows);
-        $this->cacher->set($key, $result, self::CACHE_TTL);
+        $result = $modelClass::fromRows($rows);
+        $this->fetcherCache->set($key, $result, self::CACHE_TTL, [$tag]);
 
         return $result;
     }

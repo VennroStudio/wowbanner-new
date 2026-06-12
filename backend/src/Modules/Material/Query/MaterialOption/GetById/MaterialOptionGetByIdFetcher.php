@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Query\MaterialOption\GetById;
 
-use App\Components\Cacher\Cacher;
 use App\Components\Exception\DomainExceptionModule;
-use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionById;
+use App\Components\Fetcher\FetcherCache;
+use App\Components\Fetcher\FetcherCacheKey;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Material\ReadModel\MaterialOption\Interface\MaterialOptionModelInterface;
+use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -14,28 +17,36 @@ final readonly class MaterialOptionGetByIdFetcher
 {
     private const string TABLE = 'material_options';
     private const int CACHE_TTL = 900;
+    public const string CACHE_TAG = 'material_option.by_id';
 
     public function __construct(
         private Connection $connection,
-        private Cacher $cacher,
+        private FetcherCache $fetcherCache,
     ) {}
 
     /**
+     * @template T of MaterialOptionModelInterface
+     * @param class-string<T> $modelClass
+     * @return T
      * @throws Exception
      */
-    public function fetch(MaterialOptionGetByIdQuery $query): MaterialOptionById
+    public function fetch(
+        MaterialOptionGetByIdQuery $query,
+        string $modelClass = MaterialOptionDetails::class,
+    ): MaterialOptionModelInterface
     {
-        $key = 'material_option_by_id_' . $query->id;
+        $tag = FetcherCacheKey::tag(self::CACHE_TAG, [$query->id]);
+        $key = FetcherCacheKey::key($tag, $modelClass);
 
-        /** @var MaterialOptionById|null $cached */
-        $cached = $this->cacher->get($key);
+        /** @var T|null $cached */
+        $cached = $this->fetcherCache->get($key);
 
         if ($cached !== null) {
             return $cached;
         }
 
         $row = $this->connection->createQueryBuilder()
-            ->select('id', 'name', 'material_id', 'pricing_type', 'is_cut')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('id = :id')
             ->setParameter('id', $query->id)
@@ -51,16 +62,8 @@ final readonly class MaterialOptionGetByIdFetcher
             );
         }
 
-        /** @var array{
-         *     id: int,
-         *     name: string,
-         *     material_id: int,
-         *     pricing_type: int,
-         *     is_cut: int|string|bool
-         * } $row
-         */
-        $result = MaterialOptionById::fromRow($row);
-        $this->cacher->set($key, $result, self::CACHE_TTL);
+        $result = $modelClass::fromRow($row);
+        $this->fetcherCache->set($key, $result, self::CACHE_TTL, [$tag]);
 
         return $result;
     }

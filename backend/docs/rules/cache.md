@@ -1,204 +1,116 @@
 # Cache
 
+Кеш используется в Fetcher'ах, где чтение часто повторяется и результат можно безопасно переиспользовать.
+
 **Расположение:**
-- Query / Fetcher: `src/Modules/{Module}/Query/{Entity}/{Action}/`
-- Invalidator, если нужен: `src/Modules/{Module}/Service/{Module}QueryCacheInvalidator.php`
+- кеш в Fetcher: `src/Modules/{Module}/Query/{Entity}/{Action}/`
+- invalidator: `src/Modules/{Module}/Service/{Module}QueryCacheInvalidator.php`
 
 ---
 
-## Состав Cache
+## Правило
 
-Кеш собирается только из тех блоков, которые нужны конкретному query-сценарию.
+Новый кеш Fetcher'ов строится через `App\Components\Fetcher`.
 
-- `Cacher`
-- `CACHE_TTL`
-- Cache key
-- Чтение из кеша
-- Запись в кеш
-- Разовое удаление ключа в Handler
-- QueryCacheInvalidator
-- Использование invalidator в Handler
+- `FetcherCache` читает, пишет и инвалидирует
+- `FetcherCacheKey::tag()` строит tag данных
+- `FetcherCacheKey::key()` строит key конкретной ReadModel
+- для нового Fetcher-cache Handler вызывает `QueryCacheInvalidator`
+- Handler не знает, какие DTO были закешированы под tag
 
 ---
 
-## Кеширование в Fetcher
-
-Кеширование API-чтения выполняется в Query / Fetcher.
+## Fetcher
 
 ```php
-<?php
+use App\Components\Fetcher\FetcherCache;
+use App\Components\Fetcher\FetcherCacheKey;
 
-declare(strict_types=1);
+private const int CACHE_TTL = 900;
+public const string CACHE_TAG = '{entity}.by_id';
 
-namespace App\Modules\{Module}\Query\{Entity}\GetById;
+public function __construct(
+    private Connection $connection,
+    private FetcherCache $fetcherCache,
+) {}
+```
 
-use App\Components\Cacher\Cacher;
-use App\Components\Exception\DomainExceptionModule;
-use App\Modules\{Module}\ReadModel\{Entity}\{Entity}ById;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
+```php
+$tag = FetcherCacheKey::tag(self::CACHE_TAG, [$query->id]);
+$key = FetcherCacheKey::key($tag, $modelClass);
 
-final readonly class {Entity}GetByIdFetcher
-{
-    private const int CACHE_TTL = 900;
+/** @var T|null $cached */
+$cached = $this->fetcherCache->get($key);
 
-    public function __construct(
-        private Connection $connection,
-        private Cacher $cacher,
-    ) {}
-
-    /**
-     * @throws Exception
-     */
-    public function fetch({Entity}GetByIdQuery $query): {Entity}ById
-    {
-        $key = '{entity}_by_id_' . $query->id;
-
-        /** @var {Entity}ById|null $cached */
-        $cached = $this->cacher->get($key);
-
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $row = $this->connection->createQueryBuilder()
-            ->select('id', 'name')
-            ->from('{table_name}')
-            ->where('id = :id')
-            ->setParameter('id', $query->id)
-            ->setMaxResults(1)
-            ->executeQuery()
-            ->fetchAssociative();
-
-        if ($row === false) {
-            throw new DomainExceptionModule(
-                module: '{module}',
-                message: 'error.{entity}_not_found',
-                code: 1
-            );
-        }
-
-        $result = {Entity}ById::fromRow($row);
-        $this->cacher->set($key, $result, self::CACHE_TTL);
-
-        return $result;
-    }
+if ($cached !== null) {
+    return $cached;
 }
+
+$result = $modelClass::fromRow($row);
+$this->fetcherCache->set($key, $result, self::CACHE_TTL, [$tag]);
+
+return $result;
+```
+
+Tag описывает данные:
+
+```php
+material.by_id.10
+```
+
+Key описывает конкретную форму ответа:
+
+```php
+material.by_id.10.MaterialDetails
+material.by_id.10.MaterialIdName
 ```
 
 ---
 
-## Cache key
+## Invalidator
 
-Cache key должен повторять смысл Fetcher'а.
-
-```php
-$key = '{entity}_by_id_' . $query->id;
-```
+Invalidator удаляет tag, а не конкретный key.
+Все keys, записанные под этим tag, удаляются автоматически.
 
 ```php
-$key = '{entity}_by_parent_id_' . $query->parentId;
-```
-
-```php
-$key = '{entity}_by_parent_id_' . $query->parentId . '_child_id_' . $query->childId;
-```
-
----
-
-## QueryCacheInvalidator
-
-Используется, когда один write-сценарий затрагивает несколько query-cache ключей или связанный контекст.
-
-Если нужно удалить один очевидный ключ текущей сущности, можно использовать `Cacher` прямо в Handler.
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Modules\{Module}\Service;
-
-use App\Components\Cacher\Cacher;
+use App\Components\Fetcher\FetcherCache;
+use App\Components\Fetcher\FetcherCacheKey;
+use App\Modules\{Module}\Query\{Entity}\GetById\{Entity}GetByIdFetcher;
 
 final readonly class {Module}QueryCacheInvalidator
 {
     public function __construct(
-        private Cacher $cacher,
+        private FetcherCache $fetcherCache,
     ) {}
 
     public function invalidateById(int $id): void
     {
-        $this->cacher->delete('{entity}_by_id_' . $id);
+        $this->fetcherCache->invalidateTag(
+            FetcherCacheKey::tag({Entity}GetByIdFetcher::CACHE_TAG, [$id])
+        );
     }
+}
+```
 
-    public function invalidateByParentId(int $parentId): void
-    {
-        $this->cacher->delete('{entity}_by_parent_id_' . $parentId);
-    }
+Если write-сценарий затрагивает связанные данные, invalidator удаляет несколько tag'ов.
 
-    public function invalidateParentAndChildContext(int $parentId, int $childId): void
-    {
-        $suffix = $parentId . '_child_id_' . $childId;
+```php
+public function invalidateContext(int $parentId, int $childId): void
+{
+    $parts = [$parentId, $childId];
 
-        $this->cacher->delete('{entity}_options_by_parent_id_' . $suffix);
-        $this->cacher->delete('{entity}_prices_by_parent_id_' . $suffix);
-        $this->cacher->delete('{entity}_processings_by_parent_id_' . $suffix);
-    }
+    $this->fetcherCache->invalidateTag(
+        FetcherCacheKey::tag({Entity}PriceFetcher::CACHE_TAG, $parts)
+    );
+    $this->fetcherCache->invalidateTag(
+        FetcherCacheKey::tag({Entity}ProcessingFetcher::CACHE_TAG, $parts)
+    );
 }
 ```
 
 ---
 
-## Разовое удаление ключа в Handler
+## Legacy
 
-Подходит для простого кеша одной read-модели: `getById`, identity, token, одиночный справочник.
-
-```php
-use App\Components\Cacher\Cacher;
-
-final readonly class Update{Entity}Handler
-{
-    public function __construct(
-        private Cacher $cacher,
-    ) {}
-
-    public function handle(Update{Entity}Command $command): void
-    {
-        // ...
-
-        $this->cacher->delete('{entity}_by_id_' . $command->id);
-    }
-}
-```
-
----
-
-## Использование QueryCacheInvalidator в Handler
-
-Подходит для связанного кеша: дочерние сущности, списки по parent id, контекст `parentId + childId`, несколько read-моделей, повторяющаяся инвалидация в разных Handler'ах.
-
-```php
-public function __construct(
-    private {Module}QueryCacheInvalidator $queryCacheInvalidator,
-) {}
-
-public function handle(Update{Entity}Command $command): void
-{
-    // ...
-
-    $this->queryCacheInvalidator->invalidateById($command->id);
-}
-```
-
-```php
-$this->queryCacheInvalidator->invalidateByParentId($parentId);
-$this->queryCacheInvalidator->invalidateParentAndChildContext($parentId, $childId);
-```
-
-Можно комбинировать оба подхода: удалить основной ключ напрямую и вызвать invalidator для связанных query-cache ключей.
-
-```php
-$this->cacher->delete('{entity}_by_id_' . $entityId);
-$this->queryCacheInvalidator->invalidateByParentId($entityId);
-```
+Прямое удаление через `Cacher::delete()` допустимо только для старого кеша с одним прямым ключом.
+Для нового Fetcher-cache используется только tag-инвалидация.

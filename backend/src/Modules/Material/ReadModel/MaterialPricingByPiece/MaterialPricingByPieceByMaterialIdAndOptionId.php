@@ -24,6 +24,22 @@ final readonly class MaterialPricingByPieceByMaterialIdAndOptionId implements Ma
     ) {}
 
     /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'           => 'id',
+            'material_id'  => 'material_id',
+            'option_id'    => 'option_id',
+            'variant_type' => 'variant_type',
+            'price'        => 'price',
+            'cost'         => 'cost',
+            'print_hours'  => 'print_hours',
+        ];
+    }
+
+    /**
      * @param array{
      *     id: int,
      *     material_id: int,
@@ -72,13 +88,13 @@ final readonly class MaterialPricingByPieceByMaterialIdAndOptionId implements Ma
             'id'           => $this->id,
             'material_id'  => $this->materialId,
             'option_id'    => $this->optionId,
-            'variantType'  => [
+            'variant_type' => [
                 'id'    => $this->variantType->value,
                 'label' => $this->variantType->getLabel(),
             ],
             'price'        => $this->price,
             'cost'         => $this->cost,
-            'printHours'   => $this->printHours,
+            'print_hours'  => $this->printHours,
         ];
     }
 }
