@@ -1,42 +1,90 @@
 # Fetcher / Query — Запрос на чтение
 
-Fetcher — **единственный способ чтения данных**. Чтение через Repository запрещено.
-
 **Расположение:** `src/Modules/{Module}/Query/{Entity}/{Action}/`
+
 - `{Entity}{Action}Query.php`
 - `{Entity}{Action}Fetcher.php`
+
+Fetcher читает данные через DBAL `Connection`.
+Repository для чтения не используется.
+
+---
+
+## Get и Find
+
+### Get
+
+`Get` используется, когда запись обязательна.
+
+- нашел запись — возвращает ReadModel;
+- не нашел запись — бросает `DomainExceptionModule`;
+- метод обычно называется `fetch()`;
+- пример: `GetById`.
+
+### Find
+
+`Find` используется, когда отсутствие результата является нормальной ситуацией.
+
+- нашел запись — возвращает ReadModel;
+- не нашел запись — возвращает `null`;
+- метод может называться `fetch()`;
+- если нужны варианты с удаленными записями, используются `fetchAny()` и `fetchNotDeleted()`;
+- пример: `FindByEmail`.
+
+Для списков `Find` возвращает список или `ModelCountItemsResult`.
+Пустой список — нормальный результат.
+
+---
+
+## Состав
+
+Fetcher / Query собирается только из тех блоков, которые нужны конкретному запросу.
+
+- Query
+- Fetcher
+- Фильтры
+- Пагинация
+- JOIN для фильтрации
+- Кеширование
+
+Кеширование описывается отдельно в [Cache](cache.md).
 
 ---
 
 ## Query
 
-- Простой запрос (по ID или полю) — `final readonly class`
-- Список — `final class` (не readonly: свойства мутабельны при денормализации), с пагинацией и `getOffset()`
-- Валидация списка — через `#[Assert\...]`
+### Простой Query
 
-### Простой запрос
+Используется для запроса по ID, email, hash или другому конкретному полю.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Query\{Entity}\GetById;
+
 final readonly class {Entity}GetByIdQuery
 {
     public function __construct(
         public int $id,
     ) {}
 }
-
-// Несколько параметров:
-final readonly class {Entity}FindBy{Field}Query
-{
-    public function __construct(
-        public string $hash,
-        public {Entity}Type $type,
-    ) {}
-}
 ```
 
-### Запрос списка с пагинацией
+### Query списка
+
+Списки не `readonly`, потому что свойства заполняются через денормализацию.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Query\{Entity}\FindAll;
+
+use Symfony\Component\Validator\Constraints as Assert;
+
 final class {Entity}FindAllQuery
 {
     #[Assert\Positive]
@@ -47,12 +95,6 @@ final class {Entity}FindAllQuery
     public int $perPage = 20;
 
     public ?string $search = null;
-
-    #[Assert\Date]
-    public ?string $dateFrom = null;
-
-    #[Assert\Date]
-    public ?string $dateTo = null;
 
     public function getOffset(): int
     {
@@ -65,217 +107,323 @@ final class {Entity}FindAllQuery
 
 ## Fetcher
 
-- `final readonly class`
-- Зависимость — `Connection` (DBAL, не EntityManager)
-- Константа `TABLE` — имя таблицы
-- Имена методов по семантике: `fetch()`, `fetchAny()`, `fetchNotDeleted()`
-- Одна запись: `?ReadModel` (nullable) или `DomainExceptionModule` если запись обязательна
-- Список: `ModelCountItemsResult<ReadModel>` — COUNT через клонирование QueryBuilder
-- Enum в условии — передавать как `$query->type->value`
-- Кеш описывается отдельно в [Cache](cache.md)
-- **Поиск по подстроке (MySQL/MariaDB):** не использовать **`ILIKE`** (это PostgreSQL). Для регистронезависимого совпадения: **`LOWER(колонка) LIKE LOWER(:search)`** и параметр `'%' . $query->search . '%'`.
-
-### Одна запись (nullable)
+### Заголовок класса
 
 ```php
-final readonly class {Entity}FindBy{Field}Fetcher
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Query\{Entity}\{Action};
+
+use Doctrine\DBAL\Connection;
+
+final readonly class {Entity}{Action}Fetcher
 {
     private const string TABLE = '{table_name}';
 
     public function __construct(
         private Connection $connection,
     ) {}
-
-    /** @throws Exception */
-    public function fetchAny({Entity}FindBy{Field}Query $query): ?{Entity}By{Field}
-    {
-        $row = $this->connection->createQueryBuilder()
-            ->select('id', 'field_one', 'field_two')
-            ->from(self::TABLE)
-            ->where('field = :field')
-            ->setParameter('field', $query->field)
-            ->setMaxResults(1)
-            ->fetchAssociative();
-
-        return $row !== false ? {Entity}By{Field}::fromRow($row) : null;
-    }
-
-    /** @throws Exception */
-    public function fetchNotDeleted({Entity}FindBy{Field}Query $query): ?{Entity}By{Field}
-    {
-        $row = $this->connection->createQueryBuilder()
-            ->select('id', 'field_one', 'field_two')
-            ->from(self::TABLE)
-            ->where('field = :field')
-            ->andWhere('deleted_at IS NULL')
-            ->setParameter('field', $query->field)
-            ->setMaxResults(1)
-            ->fetchAssociative();
-
-        return $row !== false ? {Entity}By{Field}::fromRow($row) : null;
-    }
-}
-```
-
-### Одна запись (обязательная, с кешем)
-
-```php
-final readonly class {Entity}GetByIdFetcher
-{
-    private const string TABLE = '{table_name}';
-    private const int CACHE_TTL = 900;
-
-    public function __construct(
-        private Connection $connection,
-        private Cacher $cacher,
-    ) {}
-
-    /** @throws Exception */
-    public function fetch({Entity}GetByIdQuery $query): {Entity}ById
-    {
-        $key = '{entity}_' . $query->id;
-
-        /** @var {Entity}ById|null $cached */
-        $cached = $this->cacher->get($key);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $row = $this->connection->createQueryBuilder()
-            ->select('id', 'field_one', 'field_two', 'deleted_at')
-            ->from(self::TABLE)
-            ->where('id = :id')
-            ->andWhere('deleted_at IS NULL')
-            ->setParameter('id', $query->id)
-            ->setMaxResults(1)
-            ->executeQuery()
-            ->fetchAssociative();
-
-        if ($row === false) {
-            throw new DomainExceptionModule(
-                module: '{module}',
-                message: 'error.{entity}_not_found',
-                code: 1
-            );
-        }
-
-        $result = {Entity}ById::fromRow($row);
-        $this->cacher->set($key, $result, self::CACHE_TTL);
-
-        return $result;
-    }
-}
-```
-
-### Список с пагинацией
-
-```php
-final readonly class {Entity}FindAllFetcher
-{
-    private const string TABLE = '{table_name}';
-
-    public function __construct(
-        private Connection $connection,
-    ) {}
-
-    /**
-     * @return ModelCountItemsResult<{Entity}FindAll>
-     * @throws Exception
-     */
-    public function fetch({Entity}FindAllQuery $query): ModelCountItemsResult
-    {
-        $qb = $this->connection->createQueryBuilder()
-            ->from(self::TABLE)
-            ->andWhere('deleted_at IS NULL');
-
-        if ($query->search !== null && $query->search !== '') {
-            $qb->andWhere('LOWER(name) LIKE LOWER(:search)')
-                ->setParameter('search', '%' . $query->search . '%');
-        }
-
-        if ($query->dateFrom !== null) {
-            $qb->andWhere('created_at >= :dateFrom')
-                ->setParameter('dateFrom', $query->dateFrom . ' 00:00:00');
-        }
-
-        if ($query->dateTo !== null) {
-            $qb->andWhere('created_at <= :dateTo')
-                ->setParameter('dateTo', $query->dateTo . ' 23:59:59');
-        }
-
-        $total = (int) (clone $qb)->select('COUNT(id)')->executeQuery()->fetchOne();
-
-        $rows = $qb
-            ->select('id', 'field_one', 'field_two', 'created_at')
-            ->orderBy('created_at', 'DESC')
-            ->setFirstResult($query->getOffset())
-            ->setMaxResults($query->perPage)
-            ->executeQuery()
-            ->fetchAllAssociative();
-
-        /** @var list<{Entity}FindAll> $items */
-        $items = {Entity}FindAll::fromRows($rows);
-
-        return new ModelCountItemsResult(
-            items: $items,
-            count: $total,
-        );
-    }
 }
 ```
 
 ---
 
-## Модульные JOIN (для фильтрации)
-
-Если нужно фильтровать основной список по полям связанных таблиц (например, поиск по номеру телефона или названию компании), используется метод `joinForFilter()`.
-
-- **`ALIAS`** — публичная константа с алиасом таблицы (чтобы избежать «магических строк» в основном фетчере).
-- **`joinForFilter(QueryBuilder $qb, string $targetAlias)`** — метод, который добавляет `LEFT JOIN` к переданному QueryBuilder.
-- В основном фетчере обязательно использовать **`groupBy()`** и **`COUNT(DISTINCT ...)`**, чтобы избежать дублей при связи один-ко-многим.
-
-### Пример фетчера-сателлита
+## Get: обязательная запись
 
 ```php
-final readonly class {RelatedEntity}FindBy{Field}Fetcher
-{
-    private const string TABLE = '{related_table}';
-    public const string ALIAS = '{rt}';
+use App\Components\Exception\DomainExceptionModule;
+use App\Modules\{Module}\ReadModel\{Entity}\{Entity}ById;
+use Doctrine\DBAL\Exception;
 
-    public function joinForFilter(QueryBuilder $qb, string $targetAlias): void
-    {
-        $qb->leftJoin(
-            $targetAlias, 
-            self::TABLE, 
-            self::ALIAS, 
-            self::ALIAS . '.{foreign_id} = ' . $targetAlias . '.id'
+/**
+ * @throws Exception
+ */
+public function fetch({Entity}GetByIdQuery $query): {Entity}ById
+{
+    $row = $this->connection->createQueryBuilder()
+        ->select('id', 'name', 'created_at')
+        ->from(self::TABLE)
+        ->where('id = :id')
+        ->andWhere('deleted_at IS NULL')
+        ->setParameter('id', $query->id)
+        ->setMaxResults(1)
+        ->executeQuery()
+        ->fetchAssociative();
+
+    if ($row === false) {
+        throw new DomainExceptionModule(
+            module: '{module}',
+            message: 'error.{entity}_not_found',
+            code: 1
         );
     }
+
+    return {Entity}ById::fromRow($row);
 }
 ```
 
-### Использование в основном фетчере
+---
+
+## Find: nullable-запись
 
 ```php
-$qb = $this->connection->createQueryBuilder()
-    ->from(self::TABLE, 'c');
+use App\Modules\{Module}\ReadModel\{Entity}\{Entity}ByEmail;
+use Doctrine\DBAL\Exception;
 
-// Подключаем джоин
-$this->relatedFetcher->joinForFilter($qb, 'c');
+/**
+ * @throws Exception
+ */
+public function fetch({Entity}FindByEmailQuery $query): ?{Entity}ByEmail
+{
+    $row = $this->connection->createQueryBuilder()
+        ->select('id', 'email', 'name', 'deleted_at')
+        ->from(self::TABLE)
+        ->where('email = :email')
+        ->setParameter('email', mb_strtolower($query->email))
+        ->setMaxResults(1)
+        ->executeQuery()
+        ->fetchAssociative();
 
-if ($query->search !== null && $query->search !== '') {
-    $relatedAlias = {RelatedEntity}Fetcher::ALIAS;
-    $qb->andWhere(
-        $qb->expr()->or(
-            'LOWER(c.name) LIKE LOWER(:search)',
-            "LOWER({$relatedAlias}.{field}) LIKE LOWER(:search)"
-        )
-    )->setParameter('search', '%' . $query->search . '%');
+    return $row !== false ? {Entity}ByEmail::fromRow($row) : null;
+}
+```
+
+Если для одного запроса нужны разные варианты чтения, используются отдельные методы:
+
+```php
+public function fetchAny({Entity}FindByEmailQuery $query): ?{Entity}ByEmail
+{
+    // query without deleted_at condition
 }
 
-// Обязательно группируем по ID основной сущности
-$qb->groupBy('c.id');
-
-// Считаем общее количество уникальных записей
-$total = (int)$countQb->select('COUNT(DISTINCT c.id)')->executeQuery()->fetchOne();
+public function fetchNotDeleted({Entity}FindByEmailQuery $query): ?{Entity}ByEmail
+{
+    // query with deleted_at IS NULL
+}
 ```
+
+---
+
+## FindAll: список с пагинацией
+
+```php
+use App\Components\ReadModel\ModelCountItemsResult;
+use App\Modules\{Module}\ReadModel\{Entity}\{Entity}FindAll;
+use Doctrine\DBAL\Exception;
+
+/**
+ * @return ModelCountItemsResult<{Entity}FindAll>
+ * @throws Exception
+ */
+public function fetch({Entity}FindAllQuery $query): ModelCountItemsResult
+{
+    $qb = $this->connection->createQueryBuilder()
+        ->from(self::TABLE);
+
+    if ($query->search !== null && $query->search !== '') {
+        $qb->andWhere('LOWER(name) LIKE LOWER(:search)')
+            ->setParameter('search', '%' . $query->search . '%');
+    }
+
+    $total = (int) (clone $qb)
+        ->select('COUNT(id)')
+        ->executeQuery()
+        ->fetchOne();
+
+    $rows = $qb->select('id', 'name', 'created_at')
+        ->orderBy('id', 'DESC')
+        ->setFirstResult($query->getOffset())
+        ->setMaxResults($query->perPage)
+        ->executeQuery()
+        ->fetchAllAssociative();
+
+    return new ModelCountItemsResult(
+        items: {Entity}FindAll::fromRows($rows),
+        count: $total,
+    );
+}
+```
+
+---
+
+## GetBySelect
+
+Используется для коротких списков в селектах.
+Это список, а не `Get` одной обязательной записи.
+Пустой список — нормальный результат.
+
+```php
+/**
+ * @return list<{Entity}GetBySelect>
+ * @throws Exception
+ */
+public function fetch({Entity}GetBySelectQuery $query): array
+{
+    $rows = $this->connection->createQueryBuilder()
+        ->select('id', 'name')
+        ->from(self::TABLE)
+        ->orderBy('name', 'ASC')
+        ->executeQuery()
+        ->fetchAllAssociative();
+
+    return {Entity}GetBySelect::fromRows($rows);
+}
+```
+
+---
+
+## Exists
+
+Используется, когда нужно проверить существование записи.
+
+```php
+public function exists({Entity}EmailExistsQuery $query): bool
+{
+    $qb = $this->connection->createQueryBuilder()
+        ->select('1')
+        ->from(self::TABLE)
+        ->where('email = :email')
+        ->setParameter('email', $query->email)
+        ->setMaxResults(1);
+
+    if ($query->excludeEntityId !== null) {
+        $qb->andWhere('id != :excludeEntityId')
+            ->setParameter('excludeEntityId', $query->excludeEntityId);
+    }
+
+    return $qb->executeQuery()->fetchOne() !== false;
+}
+```
+
+---
+
+## FindByIds
+
+Для `IN (:ids)` используется `ArrayParameterType::INTEGER`.
+Пустой список сразу возвращает `[]`.
+
+```php
+use Doctrine\DBAL\ArrayParameterType;
+
+/**
+ * @return list<{Entity}ByParent>
+ */
+public function fetch({Entity}FindByIdsQuery $query): array
+{
+    if ($query->ids === []) {
+        return [];
+    }
+
+    $rows = $this->connection->createQueryBuilder()
+        ->select('id', 'parent_id', 'name')
+        ->from(self::TABLE)
+        ->where('parent_id IN (:ids)')
+        ->setParameter('ids', $query->ids, ArrayParameterType::INTEGER)
+        ->executeQuery()
+        ->fetchAllAssociative();
+
+    return {Entity}ByParent::fromRows($rows);
+}
+```
+
+---
+
+## JOIN для фильтрации
+
+Если основной список фильтруется по связанным таблицам, связанный Fetcher может дать метод `joinForFilter()`.
+
+```php
+use Doctrine\DBAL\Query\QueryBuilder;
+
+private const string TABLE = 'order_items';
+public const string ALIAS = 'oi';
+
+public function joinForFilter(QueryBuilder $qb, string $alias): void
+{
+    $qb->leftJoin($alias, self::TABLE, self::ALIAS, self::ALIAS . '.order_id = ' . $alias . '.id');
+}
+```
+
+При JOIN один-ко-многим:
+
+- `COUNT(DISTINCT {main_alias}.id)`
+- `groupBy('{main_alias}.id')`
+
+### Использование в основном Fetcher
+
+```php
+private const string TABLE = 'orders';
+
+public function __construct(
+    private Connection $connection,
+    private ClientFindAllFetcher $clientFetcher,
+    private OrderItemFindByOrderIdFetcher $orderItemFetcher,
+    private OrderServiceFindByOrderIdFetcher $orderServiceFetcher,
+) {}
+
+public function fetch(OrderFindAllQuery $query): ModelCountItemsResult
+{
+    $qb = $this->connection->createQueryBuilder()
+        ->from(self::TABLE, 'o');
+
+    $this->clientFetcher->joinForFilter($qb, 'o');
+    $this->orderItemFetcher->joinForFilter($qb, 'o');
+    $this->orderServiceFetcher->joinForFilter($qb, 'o');
+
+    if ($query->search !== null && $query->search !== '') {
+        $clientAlias = ClientFindAllFetcher::ALIAS;
+
+        $qb->andWhere(
+            $qb->expr()->or(
+                "LOWER({$clientAlias}.old_full_name) LIKE LOWER(:search)",
+                "LOWER({$clientAlias}.last_name) LIKE LOWER(:search)",
+                "LOWER({$clientAlias}.first_name) LIKE LOWER(:search)"
+            )
+        )->setParameter('search', '%' . $query->search . '%');
+    }
+
+    if ($query->materialId !== null) {
+        $qb->andWhere(OrderItemFindByOrderIdFetcher::ALIAS . '.material_id = :materialId')
+            ->setParameter('materialId', $query->materialId);
+    }
+
+    if ($query->serviceType !== null) {
+        $qb->andWhere(OrderServiceFindByOrderIdFetcher::ALIAS . '.service_type = :serviceType')
+            ->setParameter('serviceType', $query->serviceType);
+    }
+
+    $countQb = clone $qb;
+    $total = (int) $countQb->select('COUNT(DISTINCT o.id)')->executeQuery()->fetchOne();
+
+    $qb->groupBy('o.id');
+
+    $rows = $qb->select('o.id', 'o.client_id', 'o.status_type', 'o.created_at')
+        ->orderBy('o.id', 'DESC')
+        ->setFirstResult($query->getOffset())
+        ->setMaxResults($query->perPage)
+        ->executeQuery()
+        ->fetchAllAssociative();
+
+    return new ModelCountItemsResult(
+        items: OrderFindAll::fromRows($rows),
+        count: $total,
+    );
+}
+```
+
+---
+
+## Поиск
+
+Для регистронезависимого поиска:
+
+```php
+$qb->andWhere('LOWER(name) LIKE LOWER(:search)')
+    ->setParameter('search', '%' . $query->search . '%');
+```
+
+`ILIKE` не использовать.
+
+Enum в условии передается через `->value`.
