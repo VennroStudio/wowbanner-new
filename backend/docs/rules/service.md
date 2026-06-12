@@ -26,8 +26,6 @@ Service создается только когда в модуле есть от
 
 PermissionService описывается отдельно в [Permission](permission.md).
 
-QueryCacheInvalidator описывается отдельно в [Cache](cache.md).
-
 ---
 
 ## ValidatorService

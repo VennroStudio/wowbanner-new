@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialOption\Update;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Material\Entity\MaterialOption\Fields\Enums\MaterialOptionPricingType;
 use App\Modules\Material\Entity\MaterialOption\MaterialOptionRepository;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 
 final readonly class UpdateMaterialOptionHandler
 {
     public function __construct(
         private MaterialOptionRepository $optionRepository,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
+        private Cacher $cacher,
     ) {}
 
     public function handle(UpdateMaterialOptionCommand $command): void
@@ -26,6 +26,7 @@ final readonly class UpdateMaterialOptionHandler
             isCut: $command->isCut,
         );
 
-        $this->materialQueryCacheInvalidator->invalidateMaterialOption($command->id, $materialId);
+        $this->cacher->deleteTag('material_option_by_id_' . $command->id);
+        $this->cacher->deleteTag('material_option_by_material_id_' . $materialId);
     }
 }

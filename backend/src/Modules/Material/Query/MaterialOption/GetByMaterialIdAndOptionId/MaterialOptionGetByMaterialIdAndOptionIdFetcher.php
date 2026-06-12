@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Material\Query\MaterialOption\GetByMaterialIdAndOptionId;
 
 use App\Components\Exception\DomainExceptionModule;
-use App\Components\Fetcher\FetcherCache;
-use App\Components\Fetcher\FetcherCacheKey;
+use App\Components\Cacher\CacheKey;
+use App\Components\Cacher\Cacher;
 use App\Components\ReadModel\ReadModelFields;
 use App\Modules\Material\ReadModel\MaterialOption\Interface\MaterialOptionModelInterface;
 use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionDetails;
@@ -17,11 +17,11 @@ final readonly class MaterialOptionGetByMaterialIdAndOptionIdFetcher
 {
     private const string TABLE = 'material_options';
     private const int CACHE_TTL = 900;
-    public const string CACHE_TAG = 'material_option.by_material_id_and_option_id';
+    public const string CACHE_TAG = 'material_option_by_material_id';
 
     public function __construct(
         private Connection $connection,
-        private FetcherCache $fetcherCache,
+        private Cacher $cacher,
     ) {}
 
     /**
@@ -35,11 +35,16 @@ final readonly class MaterialOptionGetByMaterialIdAndOptionIdFetcher
         string $modelClass = MaterialOptionDetails::class,
     ): MaterialOptionModelInterface
     {
-        $tag = FetcherCacheKey::tag(self::CACHE_TAG, [$query->materialId, $query->optionId]);
-        $key = FetcherCacheKey::key($tag, $modelClass);
+        $tag = CacheKey::tag(self::CACHE_TAG, [$query->materialId, 'option_id', $query->optionId]);
+        $key = CacheKey::byClass($tag, $modelClass);
+        $tags = [
+            $tag,
+            CacheKey::tag('material_option_by_id', [$query->optionId]),
+            CacheKey::tag('material_option_by_material_id', [$query->materialId]),
+        ];
 
         /** @var T|null $cached */
-        $cached = $this->fetcherCache->get($key);
+        $cached = $this->cacher->get($key);
         if ($cached !== null) {
             return $cached;
         }
@@ -64,7 +69,7 @@ final readonly class MaterialOptionGetByMaterialIdAndOptionIdFetcher
         }
 
         $result = $modelClass::fromRow($row);
-        $this->fetcherCache->set($key, $result, self::CACHE_TTL, [$tag]);
+        $this->cacher->setTagged($key, $result, self::CACHE_TTL, $tags);
 
         return $result;
     }

@@ -16,7 +16,7 @@ Command / Handler собирается только из тех блоков, к
 - Работа с Entity через Repository
 - Вызов Service / Syncer
 - Вызов Handler'ов связанных сущностей
-- Инвалидация query-кеша через `Cacher` или `QueryCacheInvalidator`
+- Инвалидация query-кеша через `Cacher`
 - `flush()`
 - Возврат результата
 
@@ -121,7 +121,8 @@ public function __construct(
 
 Правила `PermissionService` описаны отдельно в [Permission](permission.md). В Handler показывается только использование.
 
-Правила query-кеша описаны отдельно в [Cache](cache.md). В Handler показывается только использование `Cacher` или invalidator.
+Правила query-кеша описаны отдельно в [Cache](cache.md). В Handler показывается только использование `Cacher`.
+Метод удаления зависит от хранения кеша: прямой key удаляется через `delete()`, tagged cache - через `deleteTag()`.
 
 Если проверка только по роли, ее можно делать до загрузки Entity. Если проверка зависит от владельца или состояния Entity, сначала загружается Entity, потом выполняется проверка прав.
 
@@ -196,7 +197,7 @@ final readonly class Update{Entity}Handler
         private {Entity}Repository $repository,
         private {Module}PermissionService $permissionService,
         private {Entity}StructureSyncerService $structureSyncer,
-        private {Module}QueryCacheInvalidator $queryCacheInvalidator,
+        private Cacher $cacher,
         private FlusherInterface $flusher,
     ) {}
 
@@ -216,7 +217,7 @@ final readonly class Update{Entity}Handler
 
         $this->structureSyncer->sync($command->id, $command->children);
 
-        $this->queryCacheInvalidator->invalidateById($command->id);
+        $this->cacher->delete('{entity}_by_id_' . $command->id);
 
         $this->flusher->flush();
     }
@@ -274,11 +275,14 @@ final readonly class Delete{Entity}Handler
 
 Внутренние Handler'ы связанных сущностей могут быть без `PermissionService` и без `FlusherInterface`, если они вызываются из родительского Handler'а или SyncerService. В этом случае `flush()` выполняет верхний сценарий.
 
+Каждый Handler сам удаляет cache tags своей Entity. Родительский Handler не чистит кеш за связанные Handler'ы.
+
 ```php
 final readonly class Create{ChildEntity}Handler
 {
     public function __construct(
         private {ChildEntity}Repository $repository,
+        private Cacher $cacher,
     ) {}
 
     public function handle(Create{ChildEntity}Command $command): {ChildEntity}
@@ -289,6 +293,7 @@ final readonly class Create{ChildEntity}Handler
         );
 
         $this->repository->add($child);
+        $this->cacher->delete('{child_entity}_by_entity_id_' . $command->entityId);
 
         return $child;
     }

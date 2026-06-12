@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialPricingByPiece\Create;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Material\Entity\MaterialPricingByPiece\Fields\Enums\VariantType;
 use App\Modules\Material\Entity\MaterialPricingByPiece\MaterialPricingByPiece;
 use App\Modules\Material\Entity\MaterialPricingByPiece\MaterialPricingByPieceRepository;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 
 final readonly class CreateMaterialPricingByPieceHandler
 {
     public function __construct(
         private MaterialPricingByPieceRepository $repository,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
+        private Cacher $cacher,
     ) {}
 
     public function handle(CreateMaterialPricingByPieceCommand $command): void
     {
-        $this->materialQueryCacheInvalidator->invalidateMaterialAndOptionContext(
-            $command->materialId,
-            $command->optionId
-        );
+        $this->deleteCache($command->materialId, $command->optionId);
 
         $entity = MaterialPricingByPiece::create(
             materialId: $command->materialId,
@@ -33,5 +30,12 @@ final readonly class CreateMaterialPricingByPieceHandler
         );
 
         $this->repository->add($entity);
+    }
+
+    private function deleteCache(int $materialId, int $optionId): void
+    {
+        $this->cacher->deleteTag(
+            'material_pricing_by_piece_by_material_id_' . $materialId . '_option_id_' . $optionId
+        );
     }
 }

@@ -9,6 +9,8 @@ use Redis;
 
 class RedisCacher implements Cacher
 {
+    private const string TAG_PREFIX = 'tag.';
+
     private readonly string $host;
     private readonly int $port;
     private readonly string $password;
@@ -52,6 +54,22 @@ class RedisCacher implements Cacher
     }
 
     #[Override]
+    public function setTagged(string $key, mixed $value, int $ttl, array $tags): bool
+    {
+        $stored = $this->set($key, $value, $ttl);
+
+        if (!$stored) {
+            return false;
+        }
+
+        foreach ($tags as $tag) {
+            $this->addTag($tag, $key, $ttl);
+        }
+
+        return true;
+    }
+
+    #[Override]
     public function delete(string $key): void
     {
         if (!$this->isConnected()) {
@@ -59,6 +77,39 @@ class RedisCacher implements Cacher
         }
 
         $this->redis?->del($key);
+    }
+
+    private function addTag(string $tag, string $key, int $ttl): void
+    {
+        if (!$this->isConnected()) {
+            $this->connect();
+        }
+
+        $tagKey = $this->tagKey($tag);
+
+        $this->redis?->sAdd($tagKey, $key);
+        $this->redis?->expire($tagKey, $ttl);
+    }
+
+    #[Override]
+    public function deleteTag(string $tag): void
+    {
+        if (!$this->isConnected()) {
+            $this->connect();
+        }
+
+        $tagKey = $this->tagKey($tag);
+        $keys = $this->redis?->sMembers($tagKey);
+
+        if (\is_array($keys)) {
+            foreach ($keys as $key) {
+                if (\is_string($key)) {
+                    $this->redis?->del($key);
+                }
+            }
+        }
+
+        $this->redis?->del($tagKey);
     }
 
     #[Override]
@@ -222,5 +273,10 @@ class RedisCacher implements Cacher
     private function isConnected(): bool
     {
         return null !== $this->redis;
+    }
+
+    private function tagKey(string $tag): string
+    {
+        return self::TAG_PREFIX . $tag;
     }
 }

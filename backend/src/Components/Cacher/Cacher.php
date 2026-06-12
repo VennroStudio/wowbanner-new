@@ -10,7 +10,14 @@ interface Cacher
 
     public function set(string $key, mixed $value, ?int $ttl = null): bool;
 
+    /**
+     * @param list<string> $tags
+     */
+    public function setTagged(string $key, mixed $value, int $ttl, array $tags): bool;
+
     public function delete(string $key): void;
+
+    public function deleteTag(string $tag): void;
 
     public function expire(string $key, int $ttl): void;
 

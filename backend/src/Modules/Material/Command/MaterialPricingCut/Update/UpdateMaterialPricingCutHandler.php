@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialPricingCut\Update;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Material\Entity\MaterialPricingCut\Fields\Enums\MaterialPricingCutType;
 use App\Modules\Material\Entity\MaterialPricingCut\MaterialPricingCutRepository;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 
 final readonly class UpdateMaterialPricingCutHandler
 {
     public function __construct(
         private MaterialPricingCutRepository $repository,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
+        private Cacher $cacher,
     ) {}
 
     public function handle(UpdateMaterialPricingCutCommand $command): void
@@ -24,9 +24,8 @@ final readonly class UpdateMaterialPricingCutHandler
             price: $command->price,
         );
 
-        $this->materialQueryCacheInvalidator->invalidateMaterialAndOptionContext(
-            $entity->materialId,
-            $entity->optionId
+        $this->cacher->deleteTag(
+            'material_pricing_cut_by_material_id_' . $entity->materialId . '_option_id_' . $entity->optionId
         );
     }
 }

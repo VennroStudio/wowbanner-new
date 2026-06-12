@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialPricingByArea\Delete;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Material\Entity\MaterialPricingByArea\MaterialPricingByAreaRepository;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 
 final readonly class DeleteMaterialPricingByAreaHandler
 {
     public function __construct(
         private MaterialPricingByAreaRepository $repository,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
+        private Cacher $cacher,
     ) {}
 
     public function handle(DeleteMaterialPricingByAreaCommand $command): void
@@ -22,6 +22,6 @@ final readonly class DeleteMaterialPricingByAreaHandler
 
         $this->repository->remove($entity);
 
-        $this->materialQueryCacheInvalidator->invalidateMaterialAndOptionContext($materialId, $optionId);
+        $this->cacher->deleteTag('material_pricing_by_area_by_material_id_' . $materialId . '_option_id_' . $optionId);
     }
 }

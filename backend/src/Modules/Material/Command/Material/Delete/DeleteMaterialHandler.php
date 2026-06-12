@@ -27,7 +27,6 @@ use App\Modules\Material\Entity\MaterialPricingCut\MaterialPricingCutRepository;
 use App\Modules\Material\Entity\MaterialProcessing\MaterialProcessingRepository;
 use App\Modules\Material\Permission\MaterialPermission;
 use App\Modules\Material\Service\MaterialPermissionService;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 
 final readonly class DeleteMaterialHandler
@@ -49,7 +48,6 @@ final readonly class DeleteMaterialHandler
         private StorageInterface $storage,
         private FlusherInterface $flusher,
         private Cacher $cacher,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
     ) {}
 
     /** @throws AccessDeniedException */
@@ -78,8 +76,7 @@ final readonly class DeleteMaterialHandler
 
         $this->materialRepository->remove($material);
 
-        $this->cacher->delete('material_by_id_' . $materialId);
-        $this->materialQueryCacheInvalidator->invalidateByMaterialId($materialId);
+        $this->cacher->deleteTag('material_by_id_' . $materialId);
 
         $this->flusher->flush();
     }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Material\Query\Material\GetById;
 
 use App\Components\Exception\DomainExceptionModule;
-use App\Components\Fetcher\FetcherCache;
-use App\Components\Fetcher\FetcherCacheKey;
+use App\Components\Cacher\CacheKey;
+use App\Components\Cacher\Cacher;
 use App\Components\ReadModel\ReadModelFields;
 use App\Modules\Material\ReadModel\Material\Interface\MaterialModelInterface;
 use App\Modules\Material\ReadModel\Material\MaterialDetails;
@@ -17,11 +17,11 @@ final readonly class MaterialGetByIdFetcher
 {
     private const string TABLE = 'materials';
     private const int CACHE_TTL = 900;
-    public const string CACHE_TAG = 'material.by_id';
+    public const string CACHE_TAG = 'material_by_id';
 
     public function __construct(
         private Connection $connection,
-        private FetcherCache $fetcherCache,
+        private Cacher $cacher,
     ) {}
 
     /**
@@ -32,11 +32,11 @@ final readonly class MaterialGetByIdFetcher
      */
     public function fetch(MaterialGetByIdQuery $query, string $modelClass = MaterialDetails::class): MaterialModelInterface
     {
-        $tag = FetcherCacheKey::tag(self::CACHE_TAG, [$query->id]);
-        $key = FetcherCacheKey::key($tag, $modelClass);
+        $tag = CacheKey::tag(self::CACHE_TAG, [$query->id]);
+        $key = CacheKey::byClass($tag, $modelClass);
 
         /** @var T|null $cached */
-        $cached = $this->fetcherCache->get($key);
+        $cached = $this->cacher->get($key);
 
         if ($cached !== null) {
             return $cached;
@@ -60,7 +60,7 @@ final readonly class MaterialGetByIdFetcher
         }
 
         $result = $modelClass::fromRow($row);
-        $this->fetcherCache->set($key, $result, self::CACHE_TTL, [$tag]);
+        $this->cacher->setTagged($key, $result, self::CACHE_TTL, [$tag]);
 
         return $result;
     }

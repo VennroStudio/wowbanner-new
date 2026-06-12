@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialProcessing\Delete;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Material\Entity\MaterialProcessing\MaterialProcessingRepository;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 
 final readonly class DeleteMaterialProcessingHandler
 {
     public function __construct(
         private MaterialProcessingRepository $repository,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
+        private Cacher $cacher,
     ) {}
 
     public function handle(DeleteMaterialProcessingCommand $command): void
@@ -22,6 +22,6 @@ final readonly class DeleteMaterialProcessingHandler
 
         $this->repository->remove($entity);
 
-        $this->materialQueryCacheInvalidator->invalidateMaterialAndOptionContext($materialId, $optionId);
+        $this->cacher->deleteTag('material_processing_by_material_id_' . $materialId . '_option_id_' . $optionId);
     }
 }

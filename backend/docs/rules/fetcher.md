@@ -248,8 +248,11 @@ $rows = $this->connection->createQueryBuilder()
 
 - добавить `CACHE_TTL`
 - добавить `public const string CACHE_TAG`
-- использовать `FetcherCache`
-- key строить через `FetcherCacheKey::key($tag, $modelClass)`
-- сохранять результат с `tags: [$tag]`
+- использовать `Cacher`
+- tag строить через `CacheKey::tag(self::CACHE_TAG, [...])`
+- key строить через `CacheKey::byClass($tag, $modelClass)`
+- сохранять результат через `Cacher::setTagged($key, $result, self::CACHE_TTL, [$tag])`
+- удалять tagged cache через `Cacher::deleteTag('{entity}_by_id_' . $id)`
+- если Fetcher сохраняет прямой key через `Cacher::set()`, удалять через `Cacher::delete($key)`
 
-Fetcher без кеша не получает `FetcherCache`.
+Fetcher без кеша не получает `Cacher`.

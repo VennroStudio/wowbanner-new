@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialProcessing\Update;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Material\Entity\MaterialProcessing\MaterialProcessingRepository;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 use App\Modules\Processing\Query\Processing\GetById\ProcessingGetByIdFetcher;
 use App\Modules\Processing\Query\Processing\GetById\ProcessingGetByIdQuery;
 use Doctrine\DBAL\Exception as DbalException;
@@ -14,7 +14,7 @@ final readonly class UpdateMaterialProcessingHandler
 {
     public function __construct(
         private MaterialProcessingRepository $repository,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
+        private Cacher $cacher,
         private ProcessingGetByIdFetcher $processingGetByIdFetcher,
     ) {}
 
@@ -38,14 +38,13 @@ final readonly class UpdateMaterialProcessingHandler
         );
 
         if ($prevMaterialId !== $command->materialId || $prevOptionId !== $command->optionId) {
-            $this->materialQueryCacheInvalidator->invalidateMaterialAndOptionContext(
-                $prevMaterialId,
-                $prevOptionId
-            );
+            $this->deleteCache($prevMaterialId, $prevOptionId);
         }
-        $this->materialQueryCacheInvalidator->invalidateMaterialAndOptionContext(
-            $command->materialId,
-            $command->optionId
-        );
+        $this->deleteCache($command->materialId, $command->optionId);
+    }
+
+    private function deleteCache(int $materialId, int $optionId): void
+    {
+        $this->cacher->deleteTag('material_processing_by_material_id_' . $materialId . '_option_id_' . $optionId);
     }
 }

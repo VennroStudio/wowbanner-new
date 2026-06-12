@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Modules\Material\Command\MaterialPricingByArea\Update;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Material\Entity\MaterialPricingByArea\Fields\Enums\AreaRangeType;
 use App\Modules\Material\Entity\MaterialPricingByArea\Fields\Enums\DpiType;
 use App\Modules\Material\Entity\MaterialPricingByArea\MaterialPricingByAreaRepository;
-use App\Modules\Material\Service\MaterialQueryCacheInvalidator;
 
 final readonly class UpdateMaterialPricingByAreaHandler
 {
     public function __construct(
         private MaterialPricingByAreaRepository $repository,
-        private MaterialQueryCacheInvalidator $materialQueryCacheInvalidator,
+        private Cacher $cacher,
     ) {}
 
     public function handle(UpdateMaterialPricingByAreaCommand $command): void
@@ -28,9 +28,8 @@ final readonly class UpdateMaterialPricingByAreaHandler
             printHours: $command->printHours,
         );
 
-        $this->materialQueryCacheInvalidator->invalidateMaterialAndOptionContext(
-            $entity->materialId,
-            $entity->optionId
+        $this->cacher->deleteTag(
+            'material_pricing_by_area_by_material_id_' . $entity->materialId . '_option_id_' . $entity->optionId
         );
     }
 }
