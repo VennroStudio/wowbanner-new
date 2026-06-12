@@ -1,113 +1,114 @@
 # ReadModel — DTO для чтения
 
-Проекция данных из БД для Fetcher'а. Один Fetcher — один ReadModel.
+ReadModel — проекция данных из БД для Fetcher'а.
 
 **Расположение:**
-- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}By{Field}.php` (или `{Entity}FindAll.php` и т.д.)
+
+- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}By{Field}.php`
+- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}FindAll.php`
+- `src/Modules/{Module}/ReadModel/{Entity}/{Entity}GetBySelect.php`
 - `src/Modules/{Module}/ReadModel/{Entity}/Interface/{Entity}ModelInterface.php`
 
 ---
 
-## Правила
+## Состав ReadModel
 
-- `final readonly class`, реализует `{Entity}ModelInterface`
-- Интерфейс: минимум `getId(): int` и `toArray(): array`; расширяется геттерами если нужен доступ к полям в коде
-- `fromRow(array $row): self` — маппинг строки БД; PHPDoc с array shape для `$row`
-- `FromRowsTrait` — подключать в ReadModel'ах для списков; даёт `fromRows()` автоматически
-- Enum в `toArray()` — `['id' => $enum->value, 'label' => $enum->getLabel()]`
-- Ключи `toArray()` для API — snake_case; для внутреннего использования допустим camelCase
-- `#[Override]` на методах интерфейса
+ReadModel собирается только из тех блоков, которые нужны конкретной проекции.
+
+- Интерфейс модели
+- `final readonly class`
+- Публичные readonly-свойства через конструктор
+- `fromRow()`
+- `FromRowsTrait`
+- Геттеры интерфейса
+- `toArray()`
 
 ---
 
 ## Интерфейс
 
-```php
-// Базовый:
-interface {Entity}ModelInterface
-{
-    public function getId(): int;
-    public function toArray(): array;
-}
+Интерфейс задает общий контракт для ReadModel одной сущности.
+Минимально нужны `getId()` и `toArray()`.
 
-// Расширенный (если нужен доступ к полям в коде, не только в JSON):
+Если ReadModel используется во внутренней логике, интерфейс можно расширить геттерами нужных полей.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\ReadModel\{Entity}\Interface;
+
 interface {Entity}ModelInterface
 {
     public function getId(): int;
-    public function getOwnerId(): int;
-    public function getExpiresAt(): string;
-    public function getRevokedAt(): ?string;
+
     public function toArray(): array;
 }
 ```
 
 ---
 
-## Пример — проекция по ID (с enum, для API)
-
-`FromRowsTrait` подключается для единообразия даже если запись одна.
+## Класс ReadModel
 
 ```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\ReadModel\{Entity};
+
+use App\Components\ReadModel\FromRowsTrait;
+use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Status;
+use App\Modules\{Module}\ReadModel\{Entity}\Interface\{Entity}ModelInterface;
+use Override;
+
 final readonly class {Entity}ById implements {Entity}ModelInterface
 {
     use FromRowsTrait;
 
     public function __construct(
         public int $id,
-        public {Entity}Role $role,
-        public {Entity}Status $status,
         public string $name,
-        public string $email,
-        public ?string $avatar,
+        public {Entity}Status $status,
         public string $createdAt,
-        public ?string $updatedAt,
-        public ?string $deletedAt,
     ) {}
 
     /**
      * @param array{
      *     id: int,
-     *     role: int,
-     *     status: int,
      *     name: string,
-     *     email: string,
-     *     avatar: string|null,
-     *     created_at: string,
-     *     updated_at: string|null,
-     *     deleted_at: string|null
+     *     status: int,
+     *     created_at: string
      * } $row
      */
     public static function fromRow(array $row): self
     {
         return new self(
-            id: $row['id'],
-            role: {Entity}Role::from($row['role']),
-            status: {Entity}Status::from($row['status']),
+            id: (int) $row['id'],
             name: $row['name'],
-            email: $row['email'],
-            avatar: $row['avatar'],
+            status: {Entity}Status::from((int) $row['status']),
             createdAt: $row['created_at'],
-            updatedAt: $row['updated_at'],
-            deletedAt: $row['deleted_at'],
         );
     }
 
     #[Override]
-    public function getId(): int { return $this->id; }
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
     #[Override]
     public function toArray(): array
     {
         return [
-            'id'         => $this->id,
-            'role'       => ['id' => $this->role->value, 'label' => $this->role->getLabel()],
-            'status'     => ['id' => $this->status->value, 'label' => $this->status->getLabel()],
-            'name'       => $this->name,
-            'email'      => $this->email,
-            'avatar'     => $this->avatar,
+            'id' => $this->id,
+            'name' => $this->name,
+            'status' => [
+                'id' => $this->status->value,
+                'label' => $this->status->getLabel(),
+            ],
             'created_at' => $this->createdAt,
-            'updated_at' => $this->updatedAt,
-            'deleted_at' => $this->deletedAt,
         ];
     }
 }
@@ -115,104 +116,125 @@ final readonly class {Entity}ById implements {Entity}ModelInterface
 
 ---
 
-## Пример — элемент списка (с FromRowsTrait)
+## fromRow()
 
-`FromRowsTrait` обязателен — Fetcher вызывает `{Entity}FindAll::fromRows($rows)`.
+`fromRow()` преобразует строку БД в ReadModel.
+
+Для `$row` указывается PHPDoc array shape.
+Поля БД приходят в `snake_case`, поля объекта обычно в `camelCase`.
 
 ```php
+/**
+ * @param array{
+ *     id: int,
+ *     owner_id: int,
+ *     created_at: string
+ * } $row
+ */
+public static function fromRow(array $row): self
+{
+    return new self(
+        id: (int) $row['id'],
+        ownerId: (int) $row['owner_id'],
+        createdAt: $row['created_at'],
+    );
+}
+```
+
+---
+
+## toArray()
+
+`toArray()` готовит данные для API.
+
+Ключи ответа всегда пишутся в `snake_case`.
+Enum-поля отдаются как объект `{ id, label }`.
+
+```php
+#[Override]
+public function toArray(): array
+{
+    return [
+        'id' => $this->id,
+        'is_cut' => $this->isCut,
+        'status_type' => [
+            'id' => $this->statusType->value,
+            'label' => $this->statusType->getLabel(),
+        ],
+        'pricing_type' => [
+            'id' => $this->pricingType->value,
+            'label' => $this->pricingType->getLabel(),
+        ],
+        'created_at' => $this->createdAt,
+    ];
+}
+```
+
+---
+
+## Внутренняя ReadModel
+
+Если ReadModel используется не для API-ответа, а внутри backend-логики, интерфейс может иметь дополнительные геттеры.
+
+```php
+interface {Entity}TokenModelInterface
+{
+    public function getId(): int;
+
+    public function getUserId(): int;
+
+    public function getExpiresAt(): string;
+
+    public function toArray(): array;
+}
+```
+
+---
+
+## Компоненты ReadModel
+
+Общие компоненты лежат в `src/Components/ReadModel/`.
+Они нужны, чтобы не дублировать одинаковую логику в каждом модуле.
+
+### FromRowsTrait
+
+Используется в ReadModel, когда Fetcher вызывает `{Entity}ReadModel::fromRows($rows)`.
+В проекте trait подключается почти во всех ReadModel для единообразия.
+Если ReadModel точно используется только для одной записи и `fromRows()` не нужен, trait можно не подключать.
+
+```php
+use App\Components\ReadModel\FromRowsTrait;
+
 final readonly class {Entity}FindAll implements {Entity}ModelInterface
 {
     use FromRowsTrait;
-
-    public function __construct(
-        public int $id,
-        public {Entity}Role $role,
-        public string $name,
-        public string $email,
-        public string $createdAt,
-    ) {}
-
-    public static function fromRow(array $row): self
-    {
-        return new self(
-            id: $row['id'],
-            role: {Entity}Role::from($row['role']),
-            name: $row['name'],
-            email: $row['email'],
-            createdAt: $row['created_at'],
-        );
-    }
-
-    #[Override]
-    public function getId(): int { return $this->id; }
-
-    #[Override]
-    public function toArray(): array
-    {
-        return [
-            'id'         => $this->id,
-            'role'       => ['id' => $this->role->value, 'label' => $this->role->getLabel()],
-            'name'       => $this->name,
-            'email'      => $this->email,
-            'created_at' => $this->createdAt,
-        ];
-    }
 }
 ```
 
----
+### ReadModelArray
 
-## Пример — внутренняя проекция (без FromRowsTrait, расширенный интерфейс)
-
-Используется только для одной записи во внутренней логике. `FromRowsTrait` не нужен. `toArray()` допустим в camelCase.
+Используется в Action, когда нужно преобразовать список ReadModel в массивы через `toArray()`.
 
 ```php
-final readonly class {Entity}By{Field} implements {Entity}ModelInterface
-{
-    public function __construct(
-        public int $id,
-        public int $ownerId,
-        public string $expiresAt,
-        public ?string $revokedAt,
-        public ?string $usedAt,
-    ) {}
+use App\Components\ReadModel\ReadModelArray;
 
-    public static function fromRow(array $row): self
-    {
-        return new self(
-            id: $row['id'],
-            ownerId: $row['owner_id'],
-            expiresAt: $row['expires_at'],
-            revokedAt: $row['revoked_at'],
-            usedAt: $row['used_at'],
-        );
-    }
+return new JsonDataResponse(
+    ReadModelArray::fromItems(
+        $this->fetcher->fetch(new {Entity}GetBySelectQuery())
+    )
+);
+```
 
-    #[Override]
-    public function getId(): int { return $this->id; }
+### ModelCountItemsResult
 
-    #[Override]
-    public function getOwnerId(): int { return $this->ownerId; }
+Используется в Fetcher'ах списков с пагинацией.
+Хранит `items` и общее `count`.
 
-    #[Override]
-    public function getExpiresAt(): string { return $this->expiresAt; }
+```php
+use App\Components\ReadModel\ModelCountItemsResult;
 
-    #[Override]
-    public function getRevokedAt(): ?string { return $this->revokedAt; }
-
-    #[Override]
-    public function getUsedAt(): ?string { return $this->usedAt; }
-
-    #[Override]
-    public function toArray(): array
-    {
-        return [
-            'id'        => $this->id,
-            'ownerId'   => $this->ownerId,
-            'expiresAt' => $this->expiresAt,
-            'revokedAt' => $this->revokedAt,
-            'usedAt'    => $this->usedAt,
-        ];
-    }
-}
+return new ModelCountItemsResult(
+    items: {Entity}FindAll::fromRows($rows),
+    count: $total,
+);
 ```
