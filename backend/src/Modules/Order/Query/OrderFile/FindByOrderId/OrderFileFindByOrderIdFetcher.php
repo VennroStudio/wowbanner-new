@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Query\OrderFile\FindByOrderId;
 
-use App\Modules\Order\ReadModel\OrderFile\OrderFileByOrderId;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Order\ReadModel\OrderFile\Interface\OrderFileModelInterface;
+use App\Modules\Order\ReadModel\OrderFile\OrderFileDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,22 +19,21 @@ final readonly class OrderFileFindByOrderIdFetcher
     ) {}
 
     /**
-     * @return list<OrderFileByOrderId>
+     * @template T of OrderFileModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(OrderFileFindByOrderIdQuery $query): array
+    public function fetch(OrderFileFindByOrderIdQuery $query, string $modelClass = OrderFileDetails::class): array
     {
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'order_id', 'disk_path', 'file_name', 'original_name', 'created_at')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('order_id = :orderId')
             ->setParameter('orderId', $query->orderId)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<OrderFileByOrderId> $items */
-        $items = OrderFileByOrderId::fromRows($rows);
-
-        return $items;
+        return $modelClass::fromRows($rows);
     }
 }

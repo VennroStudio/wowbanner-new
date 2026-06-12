@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Order;
 
-use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
 use App\Modules\Order\ReadModel\OrderNotification\Interface\OrderNotificationModelInterface;
 use Override;
@@ -41,6 +40,6 @@ final readonly class OrderNotificationUnifier implements UnifierInterface
     #[Override]
     public function map(object $item): array
     {
-        return UnifierHelper::toArrayWithout($item, 'order_id');
+        return $item->toArray();
     }
 }

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Query\OrderPayment\FindByOrderId;
 
-use App\Modules\Order\ReadModel\OrderPayment\OrderPaymentByOrderId;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Order\ReadModel\OrderPayment\Interface\OrderPaymentModelInterface;
+use App\Modules\Order\ReadModel\OrderPayment\OrderPaymentDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,32 +19,21 @@ final readonly class OrderPaymentFindByOrderIdFetcher
     ) {}
 
     /**
-     * @return list<OrderPaymentByOrderId>
+     * @template T of OrderPaymentModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(OrderPaymentFindByOrderIdQuery $query): array
+    public function fetch(OrderPaymentFindByOrderIdQuery $query, string $modelClass = OrderPaymentDetails::class): array
     {
         $rows = $this->connection->createQueryBuilder()
-            ->select(
-                'id',
-                'order_id',
-                'client_id',
-                'operation_type',
-                'payment_type',
-                'reason',
-                'note',
-                'confirmation',
-                'created_at'
-            )
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('order_id = :orderId')
             ->setParameter('orderId', $query->orderId)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<OrderPaymentByOrderId> $items */
-        $items = OrderPaymentByOrderId::fromRows($rows);
-
-        return $items;
+        return $modelClass::fromRows($rows);
     }
 }

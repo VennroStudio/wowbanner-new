@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Order;
 
-use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
 use App\Http\Unifier\Printing\PrintingUnifier;
 use App\Modules\Material\Query\Material\GetById\MaterialGetByIdFetcher;
@@ -16,7 +15,7 @@ use App\Modules\Material\ReadModel\MaterialOption\MaterialOptionIdName;
 use App\Modules\Order\Query\OrderItemProcessing\FindByItemId\OrderItemProcessingFindByItemIdFetcher;
 use App\Modules\Order\Query\OrderItemProcessing\FindByItemId\OrderItemProcessingFindByItemIdQuery;
 use App\Modules\Order\ReadModel\OrderItem\Interface\OrderItemModelInterface;
-use App\Modules\Order\ReadModel\OrderItem\OrderItemByOrderId;
+use App\Modules\Order\ReadModel\OrderItem\OrderItemDetails;
 use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdFetcher;
 use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdQuery;
 use Doctrine\DBAL\Exception;
@@ -65,8 +64,8 @@ final readonly class OrderItemUnifier implements UnifierInterface
     #[Override]
     public function map(object $item): array
     {
-        /** @var OrderItemByOrderId $item */
-        $data = UnifierHelper::toArrayWithout($item, 'order_id');
+        /** @var OrderItemDetails $item */
+        $data = $item->toArray();
         $processings = $this->itemProcessingFetcher->fetch(new OrderItemProcessingFindByItemIdQuery($item->id));
         $printing = $this->printingFetcher->fetch(new PrintingGetByIdQuery($item->printId));
         $material = $this->materialFetcher->fetch(

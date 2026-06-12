@@ -96,7 +96,7 @@ final readonly class UpdateOrderAction implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);
-        $body = (array) $request->getParsedBody();
+        $body = (array)$request->getParsedBody();
         $files = RequestFile::extractItems(
             request: $request,
             fileKey: 'files',
@@ -107,11 +107,11 @@ final readonly class UpdateOrderAction implements RequestHandlerInterface
 
         $command = $this->denormalizer->denormalize(
             array_merge($body, [
-                'id' => Route::getArgumentToInt($request, 'id'),
-                'currentUserId' => $identity->id,
+                'id'              => Route::getArgumentToInt($request, 'id'),
+                'currentUserId'   => $identity->id,
                 'currentUserRole' => $identity->role->value,
-                'files' => $files,
-                'keepFileIds' => $this->extractKeepFileIds($body),
+                'files'           => $files,
+                'keepFileIds'     => $this->extractKeepFileIds($body),
             ]),
             UpdateOrderCommand::class,
         );
@@ -128,10 +128,10 @@ final readonly class UpdateOrderAction implements RequestHandlerInterface
      */
     private function extractKeepFileIds(array $body): ?array
     {
-        if (!array_key_exists('keepFileIds', $body)) {
+        if (!\array_key_exists('keepFileIds', $body)) {
             return null;
         }
 
-        return array_map('intval', array_values((array) $body['keepFileIds']));
+        return array_map('intval', array_values((array)$body['keepFileIds']));
     }
 }

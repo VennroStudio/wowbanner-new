@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Query\OrderNotification\FindByOrderId;
 
-use App\Modules\Order\ReadModel\OrderNotification\OrderNotificationByOrderId;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Order\ReadModel\OrderNotification\Interface\OrderNotificationModelInterface;
+use App\Modules\Order\ReadModel\OrderNotification\OrderNotificationDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,22 +19,23 @@ final readonly class OrderNotificationFindByOrderIdFetcher
     ) {}
 
     /**
-     * @return list<OrderNotificationByOrderId>
+     * @template T of OrderNotificationModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(OrderNotificationFindByOrderIdQuery $query): array
-    {
+    public function fetch(
+        OrderNotificationFindByOrderIdQuery $query,
+        string $modelClass = OrderNotificationDetails::class,
+    ): array {
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'order_id', 'notification_type', 'created_at')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('order_id = :orderId')
             ->setParameter('orderId', $query->orderId)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<OrderNotificationByOrderId> $items */
-        $items = OrderNotificationByOrderId::fromRows($rows);
-
-        return $items;
+        return $modelClass::fromRows($rows);
     }
 }

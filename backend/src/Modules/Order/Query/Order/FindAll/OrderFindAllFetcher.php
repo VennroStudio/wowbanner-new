@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Modules\Order\Query\Order\FindAll;
 
 use App\Components\ReadModel\ModelCountItemsResult;
+use App\Components\ReadModel\ReadModelFields;
 use App\Modules\Client\Query\Client\FindAll\ClientFindAllFetcher;
 use App\Modules\Order\Query\OrderItem\FindByOrderId\OrderItemFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderItemMilling\FindByOrderId\OrderItemMillingFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderService\FindByOrderId\OrderServiceFindByOrderIdFetcher;
-use App\Modules\Order\ReadModel\Order\OrderFindAll;
+use App\Modules\Order\ReadModel\Order\Interface\OrderModelInterface;
+use App\Modules\Order\ReadModel\Order\OrderDetails;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -27,10 +29,12 @@ final readonly class OrderFindAllFetcher
     ) {}
 
     /**
-     * @return ModelCountItemsResult<OrderFindAll>
+     * @template T of OrderModelInterface
+     * @param class-string<T> $modelClass
+     * @return ModelCountItemsResult<T>
      * @throws Exception
      */
-    public function fetch(OrderFindAllQuery $query): ModelCountItemsResult
+    public function fetch(OrderFindAllQuery $query, string $modelClass = OrderDetails::class): ModelCountItemsResult
     {
         $qb = $this->connection->createQueryBuilder()
             ->from(self::TABLE, 'o');
@@ -134,32 +138,18 @@ final readonly class OrderFindAllFetcher
         }
 
         $countQb = clone $qb;
-        $total = (int) $countQb->select('COUNT(DISTINCT o.id)')->executeQuery()->fetchOne();
+        $total = (int)$countQb->select('COUNT(DISTINCT o.id)')->executeQuery()->fetchOne();
 
         $qb->groupBy('o.id');
 
-        $rows = $qb->select(
-            'o.id',
-            'o.creator_id',
-            'o.manager_id',
-            'o.designer_id',
-            'o.client_id',
-            'o.status_type',
-            'o.storage_type',
-            'o.general_note',
-            'o.extension',
-            'o.created_at',
-            'o.accepted_at',
-            'o.deadline_at'
-        )
+        $rows = $qb->select(...ReadModelFields::select($modelClass::fields(), 'o'))
             ->orderBy('o.id', 'DESC')
             ->setFirstResult($query->getOffset())
             ->setMaxResults($query->perPage)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<OrderFindAll> $items */
-        $items = OrderFindAll::fromRows($rows);
+        $items = $modelClass::fromRows($rows);
 
         return new ModelCountItemsResult(
             items: $items,

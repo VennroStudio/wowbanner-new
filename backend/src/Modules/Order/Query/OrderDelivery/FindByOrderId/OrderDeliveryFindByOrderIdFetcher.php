@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Query\OrderDelivery\FindByOrderId;
 
-use App\Modules\Order\ReadModel\OrderDelivery\OrderDeliveryByOrderId;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Order\ReadModel\OrderDelivery\Interface\OrderDeliveryModelInterface;
+use App\Modules\Order\ReadModel\OrderDelivery\OrderDeliveryDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,12 +19,17 @@ final readonly class OrderDeliveryFindByOrderIdFetcher
     ) {}
 
     /**
+     * @template T of OrderDeliveryModelInterface
+     * @param class-string<T> $modelClass
+     * @return T|null
      * @throws Exception
      */
-    public function fetch(OrderDeliveryFindByOrderIdQuery $query): ?OrderDeliveryByOrderId
-    {
+    public function fetch(
+        OrderDeliveryFindByOrderIdQuery $query,
+        string $modelClass = OrderDeliveryDetails::class,
+    ): ?OrderDeliveryModelInterface {
         $row = $this->connection->createQueryBuilder()
-            ->select('id', 'order_id', 'delivery_type', 'address', 'comment')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('order_id = :orderId')
             ->setParameter('orderId', $query->orderId)
@@ -33,15 +40,6 @@ final readonly class OrderDeliveryFindByOrderIdFetcher
             return null;
         }
 
-        /**
-         * @var array{
-         *     id: int,
-         *     order_id: int,
-         *     delivery_type: int,
-         *     address: string|null,
-         *     comment: string|null
-         * } $row
-         */
-        return OrderDeliveryByOrderId::fromRow($row);
+        return $modelClass::fromRow($row);
     }
 }

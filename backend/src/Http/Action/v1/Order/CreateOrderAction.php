@@ -116,7 +116,7 @@ final readonly class CreateOrderAction implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);
-        $body = (array) $request->getParsedBody();
+        $body = (array)$request->getParsedBody();
         $files = RequestFile::extractItems(
             request: $request,
             fileKey: 'files',
@@ -127,9 +127,9 @@ final readonly class CreateOrderAction implements RequestHandlerInterface
 
         $command = $this->denormalizer->denormalize(
             array_merge($body, [
-                'currentUserId' => $identity->id,
+                'currentUserId'   => $identity->id,
                 'currentUserRole' => $identity->role->value,
-                'files' => $files,
+                'files'           => $files,
             ]),
             CreateOrderCommand::class,
         );

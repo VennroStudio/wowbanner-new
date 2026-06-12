@@ -26,7 +26,7 @@ final readonly class OrderFileItem implements RequestFileItemInterface
         $originalName = $meta;
 
         if ($originalName === null || $originalName === '') {
-            $originalName = (string) ($file->getOriginalFile()->getClientFilename() ?? basename($file->getPath()));
+            $originalName = (string)($file->getOriginalFile()->getClientFilename() ?? basename($file->getPath()));
         }
 
         return new self(

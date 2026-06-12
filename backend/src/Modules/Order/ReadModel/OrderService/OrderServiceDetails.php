@@ -9,7 +9,7 @@ use App\Modules\Order\Entity\OrderService\Fields\Enums\ServiceType;
 use App\Modules\Order\ReadModel\OrderService\Interface\OrderServiceModelInterface;
 use Override;
 
-final readonly class OrderServiceByOrderId implements OrderServiceModelInterface
+final readonly class OrderServiceDetails implements OrderServiceModelInterface
 {
     use FromRowsTrait;
 
@@ -20,6 +20,20 @@ final readonly class OrderServiceByOrderId implements OrderServiceModelInterface
         public string $price,
         public ?string $note,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'           => 'id',
+            'order_id'     => 'order_id',
+            'service_type' => 'service_type',
+            'price'        => 'price',
+            'note'         => 'note',
+        ];
+    }
 
     /**
      * @param array{
@@ -33,9 +47,9 @@ final readonly class OrderServiceByOrderId implements OrderServiceModelInterface
     public static function fromRow(array $row): self
     {
         return new self(
-            id: (int) $row['id'],
-            orderId: (int) $row['order_id'],
-            serviceType: ServiceType::from((int) $row['service_type']),
+            id: (int)$row['id'],
+            orderId: (int)$row['order_id'],
+            serviceType: ServiceType::from((int)$row['service_type']),
             price: $row['price'],
             note: $row['note'],
         );
@@ -51,11 +65,10 @@ final readonly class OrderServiceByOrderId implements OrderServiceModelInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'order_id' => $this->orderId,
+            'id'           => $this->id,
             'service_type' => ['id' => $this->serviceType->value, 'label' => $this->serviceType->getLabel()],
-            'price' => $this->price,
-            'note' => $this->note,
+            'price'        => $this->price,
+            'note'         => $this->note,
         ];
     }
 }

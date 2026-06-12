@@ -24,7 +24,7 @@ final readonly class DeleteOrderHandler
 
     public function handle(DeleteOrderCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: OrderPermission::DELETE,
         );
@@ -34,7 +34,7 @@ final readonly class DeleteOrderHandler
         $this->structureDeleteService->delete($command->id);
 
         $this->repository->remove($order);
-        $this->cacher->delete('order_by_id_' . $command->id);
+        $this->cacher->deleteTag('order_by_id_' . $command->id);
         $this->flusher->flush();
     }
 }

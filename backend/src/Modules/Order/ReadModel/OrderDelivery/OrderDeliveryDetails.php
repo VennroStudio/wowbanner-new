@@ -9,7 +9,7 @@ use App\Modules\Order\Entity\OrderDelivery\Fields\Enums\DeliveryType;
 use App\Modules\Order\ReadModel\OrderDelivery\Interface\OrderDeliveryModelInterface;
 use Override;
 
-final readonly class OrderDeliveryByOrderId implements OrderDeliveryModelInterface
+final readonly class OrderDeliveryDetails implements OrderDeliveryModelInterface
 {
     use FromRowsTrait;
 
@@ -20,6 +20,20 @@ final readonly class OrderDeliveryByOrderId implements OrderDeliveryModelInterfa
         public ?string $address,
         public ?string $comment,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'            => 'id',
+            'order_id'      => 'order_id',
+            'delivery_type' => 'delivery_type',
+            'address'       => 'address',
+            'comment'       => 'comment',
+        ];
+    }
 
     /**
      * @param array{
@@ -33,9 +47,9 @@ final readonly class OrderDeliveryByOrderId implements OrderDeliveryModelInterfa
     public static function fromRow(array $row): self
     {
         return new self(
-            id: (int) $row['id'],
-            orderId: (int) $row['order_id'],
-            deliveryType: DeliveryType::from((int) $row['delivery_type']),
+            id: (int)$row['id'],
+            orderId: (int)$row['order_id'],
+            deliveryType: DeliveryType::from((int)$row['delivery_type']),
             address: $row['address'],
             comment: $row['comment'],
         );
@@ -51,11 +65,10 @@ final readonly class OrderDeliveryByOrderId implements OrderDeliveryModelInterfa
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'order_id' => $this->orderId,
+            'id'            => $this->id,
             'delivery_type' => ['id' => $this->deliveryType->value, 'label' => $this->deliveryType->getLabel()],
-            'address' => $this->address,
-            'comment' => $this->comment,
+            'address'       => $this->address,
+            'comment'       => $this->comment,
         ];
     }
 }

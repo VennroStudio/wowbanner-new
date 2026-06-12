@@ -29,20 +29,20 @@ final readonly class OrderFileSyncerService
     public function sync(int $orderId, array $items, ?array $keepFileIds = null): void
     {
         $currentItems = $this->repository->findByOrderId($orderId);
-        $currentIds = array_map(static fn($item) => $item->id, $currentItems);
-        $commandIds = array_filter(array_map(static fn(OrderFileItem $item) => $item->id, $items));
+        $currentIds = array_map(static fn ($item) => $item->id, $currentItems);
+        $commandIds = array_filter(array_map(static fn (OrderFileItem $item) => $item->id, $items));
         $retainedIds = $keepFileIds !== null
             ? array_values(array_unique([...$keepFileIds, ...$commandIds]))
             : $currentIds;
 
         foreach ($currentItems as $currentItem) {
-            if (!in_array($currentItem->id, $retainedIds, true)) {
+            if (!\in_array($currentItem->id, $retainedIds, true)) {
                 $this->deleteHandler->handle(new DeleteOrderFileCommand($currentItem->id));
             }
         }
 
         foreach ($items as $item) {
-            if ($item->id !== null && in_array($item->id, $currentIds, true)) {
+            if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateOrderFileCommand(
                     id: $item->id,
                     tmpFilePath: $item->tmpFilePath,

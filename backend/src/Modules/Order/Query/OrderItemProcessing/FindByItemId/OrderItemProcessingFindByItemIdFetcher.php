@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Query\OrderItemProcessing\FindByItemId;
 
-use App\Modules\Order\ReadModel\OrderItemProcessing\OrderItemProcessingByOrderId;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Order\ReadModel\OrderItemProcessing\Interface\OrderItemProcessingModelInterface;
+use App\Modules\Order\ReadModel\OrderItemProcessing\OrderItemProcessingDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,22 +19,23 @@ final readonly class OrderItemProcessingFindByItemIdFetcher
     ) {}
 
     /**
-     * @return list<OrderItemProcessingByOrderId>
+     * @template T of OrderItemProcessingModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(OrderItemProcessingFindByItemIdQuery $query): array
-    {
+    public function fetch(
+        OrderItemProcessingFindByItemIdQuery $query,
+        string $modelClass = OrderItemProcessingDetails::class,
+    ): array {
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'order_item_id', 'processing_id')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('order_item_id = :itemId')
             ->setParameter('itemId', $query->itemId)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<OrderItemProcessingByOrderId> $items */
-        $items = OrderItemProcessingByOrderId::fromRows($rows);
-
-        return $items;
+        return $modelClass::fromRows($rows);
     }
 }

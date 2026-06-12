@@ -25,7 +25,7 @@ final readonly class CreateOrderHandler
 
     public function handle(CreateOrderCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: OrderPermission::CREATE,
         );
@@ -47,7 +47,7 @@ final readonly class CreateOrderHandler
         $this->flusher->flush();
 
         $pendingProcessings = $this->structureSyncerService->sync(
-            orderId: (int) $order->id,
+            orderId: (int)$order->id,
             delivery: $command->delivery,
             files: $command->files,
             keepFileIds: null,

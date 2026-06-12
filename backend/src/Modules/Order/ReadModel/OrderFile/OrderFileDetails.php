@@ -8,7 +8,7 @@ use App\Components\ReadModel\FromRowsTrait;
 use App\Modules\Order\ReadModel\OrderFile\Interface\OrderFileModelInterface;
 use Override;
 
-final readonly class OrderFileByOrderId implements OrderFileModelInterface
+final readonly class OrderFileDetails implements OrderFileModelInterface
 {
     use FromRowsTrait;
 
@@ -20,6 +20,21 @@ final readonly class OrderFileByOrderId implements OrderFileModelInterface
         public string $originalName,
         public string $createdAt,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'            => 'id',
+            'order_id'      => 'order_id',
+            'disk_path'     => 'disk_path',
+            'file_name'     => 'file_name',
+            'original_name' => 'original_name',
+            'created_at'    => 'created_at',
+        ];
+    }
 
     /**
      * @param array{
@@ -34,8 +49,8 @@ final readonly class OrderFileByOrderId implements OrderFileModelInterface
     public static function fromRow(array $row): self
     {
         return new self(
-            id: (int) $row['id'],
-            orderId: (int) $row['order_id'],
+            id: (int)$row['id'],
+            orderId: (int)$row['order_id'],
             diskPath: $row['disk_path'],
             fileName: $row['file_name'],
             originalName: $row['original_name'],
@@ -53,12 +68,11 @@ final readonly class OrderFileByOrderId implements OrderFileModelInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'order_id' => $this->orderId,
-            'disk_path' => $this->diskPath,
-            'file_name' => $this->fileName,
+            'id'            => $this->id,
+            'disk_path'     => $this->diskPath,
+            'file_name'     => $this->fileName,
             'original_name' => $this->originalName,
-            'created_at' => $this->createdAt,
+            'created_at'    => $this->createdAt,
         ];
     }
 }

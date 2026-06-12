@@ -16,8 +16,8 @@ enum NotificationType: int implements EnumInterface
     {
         return match ($this) {
             self::SENT_TO_PRODUCTION => 'Отправлен на производство',
-            self::DELAYED => 'Задерживается',
-            self::READY => 'Готов',
+            self::DELAYED            => 'Задерживается',
+            self::READY              => 'Готов',
         };
     }
 }

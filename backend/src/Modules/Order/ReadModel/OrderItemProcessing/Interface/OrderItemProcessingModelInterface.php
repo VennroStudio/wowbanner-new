@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\ReadModel\OrderItemProcessing\Interface;
 
-interface OrderItemProcessingModelInterface
-{
-    public function getId(): int;
-    public function toArray(): array;
-}
+use App\Components\ReadModel\ReadModelInterface;
+
+interface OrderItemProcessingModelInterface extends ReadModelInterface {}

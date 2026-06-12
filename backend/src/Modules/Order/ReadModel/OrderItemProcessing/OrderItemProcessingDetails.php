@@ -8,7 +8,7 @@ use App\Components\ReadModel\FromRowsTrait;
 use App\Modules\Order\ReadModel\OrderItemProcessing\Interface\OrderItemProcessingModelInterface;
 use Override;
 
-final readonly class OrderItemProcessingByOrderId implements OrderItemProcessingModelInterface
+final readonly class OrderItemProcessingDetails implements OrderItemProcessingModelInterface
 {
     use FromRowsTrait;
 
@@ -17,6 +17,18 @@ final readonly class OrderItemProcessingByOrderId implements OrderItemProcessing
         public int $orderItemId,
         public int $processingId,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'            => 'id',
+            'order_item_id' => 'order_item_id',
+            'processing_id' => 'processing_id',
+        ];
+    }
 
     /**
      * @param array{
@@ -28,9 +40,9 @@ final readonly class OrderItemProcessingByOrderId implements OrderItemProcessing
     public static function fromRow(array $row): self
     {
         return new self(
-            id: (int) $row['id'],
-            orderItemId: (int) $row['order_item_id'],
-            processingId: (int) $row['processing_id'],
+            id: (int)$row['id'],
+            orderItemId: (int)$row['order_item_id'],
+            processingId: (int)$row['processing_id'],
         );
     }
 
@@ -44,8 +56,7 @@ final readonly class OrderItemProcessingByOrderId implements OrderItemProcessing
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'order_item_id' => $this->orderItemId,
+            'id'            => $this->id,
             'processing_id' => $this->processingId,
         ];
     }

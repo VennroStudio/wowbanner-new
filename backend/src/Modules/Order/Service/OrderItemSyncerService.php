@@ -31,19 +31,19 @@ final readonly class OrderItemSyncerService
     public function sync(int $orderId, array $items): array
     {
         $currentItems = $this->repository->findByOrderId($orderId);
-        $currentIds = array_map(static fn($item) => $item->id, $currentItems);
-        $commandIds = array_filter(array_map(static fn(OrderItemItem $item) => $item->id, $items));
+        $currentIds = array_map(static fn ($item) => $item->id, $currentItems);
+        $commandIds = array_filter(array_map(static fn (OrderItemItem $item) => $item->id, $items));
         $pendingProcessings = [];
 
         foreach ($currentItems as $currentItem) {
-            if (!in_array($currentItem->id, $commandIds, true)) {
+            if (!\in_array($currentItem->id, $commandIds, true)) {
                 $this->processingSyncerService->sync($currentItem->id, []);
                 $this->deleteHandler->handle(new DeleteOrderItemCommand($currentItem->id));
             }
         }
 
         foreach ($items as $item) {
-            if ($item->id !== null && in_array($item->id, $currentIds, true)) {
+            if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateOrderItemCommand(
                     id: $item->id,
                     sourceItemId: $item->sourceItemId,
@@ -64,7 +64,7 @@ final readonly class OrderItemSyncerService
                 ));
 
                 $pendingProcessings[] = [
-                    'orderItem' => $this->repository->getById($item->id),
+                    'orderItem'   => $this->repository->getById($item->id),
                     'processings' => $item->processings,
                 ];
             } else {
@@ -88,7 +88,7 @@ final readonly class OrderItemSyncerService
                 ));
 
                 $pendingProcessings[] = [
-                    'orderItem' => $createdItem,
+                    'orderItem'   => $createdItem,
                     'processings' => $item->processings,
                 ];
             }
@@ -104,7 +104,7 @@ final readonly class OrderItemSyncerService
     {
         foreach ($pendingProcessings as $item) {
             $this->processingSyncerService->sync(
-                orderItemId: (int) $item['orderItem']->id,
+                orderItemId: (int)$item['orderItem']->id,
                 items: $item['processings'],
             );
         }

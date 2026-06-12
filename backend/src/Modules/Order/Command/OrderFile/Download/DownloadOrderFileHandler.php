@@ -34,7 +34,7 @@ final readonly class DownloadOrderFileHandler
         return new DownloadOrderFileResult(
             fileName: $orderFile->originalName ?: $orderFile->fileName,
             contentType: $downloadResponse->getHeaderLine('Content-Type') ?: 'application/octet-stream',
-            content: (string) $downloadResponse->getBody(),
+            content: (string)$downloadResponse->getBody(),
         );
     }
 }

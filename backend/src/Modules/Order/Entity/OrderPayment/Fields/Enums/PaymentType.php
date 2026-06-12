@@ -14,7 +14,7 @@ enum PaymentType: int implements EnumInterface
     public function getLabel(): string
     {
         return match ($this) {
-            self::CASH => 'Наличный',
+            self::CASH     => 'Наличный',
             self::CASHLESS => 'Безналичный',
         };
     }

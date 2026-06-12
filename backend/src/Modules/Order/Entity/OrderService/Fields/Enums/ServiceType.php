@@ -19,11 +19,11 @@ enum ServiceType: int implements EnumInterface
     public function getLabel(): string
     {
         return match ($this) {
-            self::PRINT => 'Печать',
+            self::PRINT        => 'Печать',
             self::INSTALLATION => 'Монтаж',
-            self::LAYOUT => 'Макет',
-            self::ADDITIONAL => 'Доп.услуги',
-            self::DELIVERY => 'Доставка',
+            self::LAYOUT       => 'Макет',
+            self::ADDITIONAL   => 'Доп.услуги',
+            self::DELIVERY     => 'Доставка',
         };
     }
 }

@@ -10,7 +10,7 @@ use App\Modules\Order\Entity\OrderPayment\Fields\Enums\PaymentType;
 use App\Modules\Order\ReadModel\OrderPayment\Interface\OrderPaymentModelInterface;
 use Override;
 
-final readonly class OrderPaymentByOrderId implements OrderPaymentModelInterface
+final readonly class OrderPaymentDetails implements OrderPaymentModelInterface
 {
     use FromRowsTrait;
 
@@ -25,6 +25,24 @@ final readonly class OrderPaymentByOrderId implements OrderPaymentModelInterface
         public bool $confirmation,
         public string $createdAt,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'             => 'id',
+            'order_id'       => 'order_id',
+            'client_id'      => 'client_id',
+            'operation_type' => 'operation_type',
+            'payment_type'   => 'payment_type',
+            'reason'         => 'reason',
+            'note'           => 'note',
+            'confirmation'   => 'confirmation',
+            'created_at'     => 'created_at',
+        ];
+    }
 
     /**
      * @param array{
@@ -42,14 +60,14 @@ final readonly class OrderPaymentByOrderId implements OrderPaymentModelInterface
     public static function fromRow(array $row): self
     {
         return new self(
-            id: (int) $row['id'],
-            orderId: (int) $row['order_id'],
-            clientId: (int) $row['client_id'],
-            operationType: OperationType::from((int) $row['operation_type']),
-            paymentType: PaymentType::from((int) $row['payment_type']),
+            id: (int)$row['id'],
+            orderId: (int)$row['order_id'],
+            clientId: (int)$row['client_id'],
+            operationType: OperationType::from((int)$row['operation_type']),
+            paymentType: PaymentType::from((int)$row['payment_type']),
             reason: $row['reason'],
             note: $row['note'],
-            confirmation: (bool) $row['confirmation'],
+            confirmation: (bool)$row['confirmation'],
             createdAt: $row['created_at'],
         );
     }
@@ -64,15 +82,14 @@ final readonly class OrderPaymentByOrderId implements OrderPaymentModelInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'order_id' => $this->orderId,
-            'client_id' => $this->clientId,
+            'id'             => $this->id,
+            'client_id'      => $this->clientId,
             'operation_type' => ['id' => $this->operationType->value, 'label' => $this->operationType->getLabel()],
-            'payment_type' => ['id' => $this->paymentType->value, 'label' => $this->paymentType->getLabel()],
-            'reason' => $this->reason,
-            'note' => $this->note,
-            'confirmation' => $this->confirmation,
-            'created_at' => $this->createdAt,
+            'payment_type'   => ['id' => $this->paymentType->value, 'label' => $this->paymentType->getLabel()],
+            'reason'         => $this->reason,
+            'note'           => $this->note,
+            'confirmation'   => $this->confirmation,
+            'created_at'     => $this->createdAt,
         ];
     }
 }

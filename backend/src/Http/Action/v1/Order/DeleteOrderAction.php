@@ -52,8 +52,8 @@ final readonly class DeleteOrderAction implements RequestHandlerInterface
         $identity = RequestIdentity::get($request);
 
         $command = $this->denormalizer->denormalize([
-            'id' => Route::getArgumentToInt($request, 'id'),
-            'currentUserId' => $identity->id,
+            'id'              => Route::getArgumentToInt($request, 'id'),
+            'currentUserId'   => $identity->id,
             'currentUserRole' => $identity->role->value,
         ], DeleteOrderCommand::class);
 

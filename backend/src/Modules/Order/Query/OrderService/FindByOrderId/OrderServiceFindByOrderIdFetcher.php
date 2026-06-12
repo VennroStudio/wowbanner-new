@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Query\OrderService\FindByOrderId;
 
-use App\Modules\Order\ReadModel\OrderService\OrderServiceByOrderId;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Order\ReadModel\OrderService\Interface\OrderServiceModelInterface;
+use App\Modules\Order\ReadModel\OrderService\OrderServiceDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
 
 final readonly class OrderServiceFindByOrderIdFetcher
 {
-    private const string TABLE = 'order_services';
     public const string ALIAS = 'os';
+    private const string TABLE = 'order_services';
 
     public function __construct(
         private Connection $connection,
@@ -24,22 +26,21 @@ final readonly class OrderServiceFindByOrderIdFetcher
     }
 
     /**
-     * @return list<OrderServiceByOrderId>
+     * @template T of OrderServiceModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(OrderServiceFindByOrderIdQuery $query): array
+    public function fetch(OrderServiceFindByOrderIdQuery $query, string $modelClass = OrderServiceDetails::class): array
     {
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'order_id', 'service_type', 'price', 'note')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('order_id = :orderId')
             ->setParameter('orderId', $query->orderId)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<OrderServiceByOrderId> $items */
-        $items = OrderServiceByOrderId::fromRows($rows);
-
-        return $items;
+        return $modelClass::fromRows($rows);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Order\Command\Order\Update;
 
 use App\Components\Cacher\Cacher;
+use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
 use App\Modules\Order\Entity\Order\Fields\Enums\StatusType;
 use App\Modules\Order\Entity\Order\Fields\Enums\StorageType;
@@ -24,9 +25,12 @@ final readonly class UpdateOrderHandler
         private OrderStructureSyncerService $structureSyncerService,
     ) {}
 
+    /**
+     * @throws AccessDeniedException
+     */
     public function handle(UpdateOrderCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: OrderPermission::UPDATE,
         );
@@ -59,7 +63,7 @@ final readonly class UpdateOrderHandler
 
         $this->flusher->flush();
         $this->structureSyncerService->syncItemProcessings($pendingProcessings);
-        $this->cacher->delete('order_by_id_' . $command->id);
+        $this->cacher->deleteTag('order_by_id_' . $command->id);
         $this->flusher->flush();
     }
 }

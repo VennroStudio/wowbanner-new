@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Order;
 
-use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
 use App\Http\Unifier\Printing\PrintingUnifier;
 use App\Modules\Order\ReadModel\OrderItemMilling\Interface\OrderItemMillingModelInterface;
-use App\Modules\Order\ReadModel\OrderItemMilling\OrderItemMillingByOrderId;
+use App\Modules\Order\ReadModel\OrderItemMilling\OrderItemMillingDetails;
 use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdFetcher;
 use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdQuery;
 use Doctrine\DBAL\Exception;
@@ -53,8 +52,8 @@ final readonly class OrderItemMillingUnifier implements UnifierInterface
     #[Override]
     public function map(object $item): array
     {
-        /** @var OrderItemMillingByOrderId $item */
-        $data = UnifierHelper::toArrayWithout($item, 'order_id');
+        /** @var OrderItemMillingDetails $item */
+        $data = $item->toArray();
         $printing = $this->printingFetcher->fetch(new PrintingGetByIdQuery($item->printId));
 
         $data['print'] = $this->printingUnifier->unifyOne(null, $printing);

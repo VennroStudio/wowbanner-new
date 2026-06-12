@@ -30,7 +30,7 @@ final readonly class UpdateOrderFileHandler
         $fileName = $this->fileNameGenerator->generate($command->originalName);
         $diskPath = $this->yandexDiskClient->upload(
             tmpFilePath: $command->tmpFilePath,
-            folder: OrderFileDirectory::FILES->getPath((int) $orderFile->orderId),
+            folder: OrderFileDirectory::FILES->getPath((int)$orderFile->orderId),
             fileName: $fileName,
         );
 

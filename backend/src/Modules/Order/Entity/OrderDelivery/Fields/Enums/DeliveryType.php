@@ -14,7 +14,7 @@ enum DeliveryType: int implements EnumInterface
     public function getLabel(): string
     {
         return match ($this) {
-            self::COURIER => 'Курьер',
+            self::COURIER   => 'Курьер',
             self::TRANSPORT => 'Транспорт',
         };
     }

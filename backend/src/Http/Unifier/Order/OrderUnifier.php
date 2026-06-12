@@ -26,7 +26,7 @@ use App\Modules\Order\Query\OrderSection\FindByOrderId\OrderSectionFindByOrderId
 use App\Modules\Order\Query\OrderService\FindByOrderId\OrderServiceFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderService\FindByOrderId\OrderServiceFindByOrderIdQuery;
 use App\Modules\Order\ReadModel\Order\Interface\OrderModelInterface;
-use App\Modules\Order\ReadModel\OrderService\OrderServiceByOrderId;
+use App\Modules\Order\ReadModel\OrderService\OrderServiceDetails;
 use App\Modules\User\Query\User\GetById\UserGetByIdFetcher;
 use App\Modules\User\Query\User\GetById\UserGetByIdQuery;
 use Doctrine\DBAL\Exception;
@@ -59,7 +59,7 @@ final readonly class OrderUnifier implements UnifierInterface
     #[Override]
     public function unifyOne(?int $userId, ?object $item): array
     {
-        if ($item === null) {
+        if (!$item instanceof OrderModelInterface) {
             return [];
         }
 
@@ -79,7 +79,7 @@ final readonly class OrderUnifier implements UnifierInterface
         }
 
         return array_map(
-            fn(OrderModelInterface $item): array => $this->map($item),
+            fn (OrderModelInterface $item): array => $this->map($item),
             $items,
         );
     }
@@ -118,13 +118,13 @@ final readonly class OrderUnifier implements UnifierInterface
         $data['client']['name'] = $this->buildClientName($client);
         $data['manager'] = $manager !== null
             ? [
-                'id' => $manager->id,
+                'id'   => $manager->id,
                 'name' => $this->buildUserName($manager->firstName, $manager->lastName),
             ]
             : null;
         $data['designer'] = $designer !== null
             ? [
-                'id' => $designer->id,
+                'id'   => $designer->id,
                 'name' => $this->buildUserName($designer->firstName, $designer->lastName),
             ]
             : null;
@@ -141,13 +141,13 @@ final readonly class OrderUnifier implements UnifierInterface
     }
 
     /**
-     * @param list<OrderServiceByOrderId> $services
+     * @param list<OrderServiceDetails> $services
      */
     private function calculatePrice(array $services): string
     {
         $sum = array_reduce(
             $services,
-            static fn(float $carry, OrderServiceByOrderId $service): float => $carry + (float) $service->price,
+            static fn (float $carry, OrderServiceDetails $service): float => $carry + (float)$service->price,
             0.0,
         );
 

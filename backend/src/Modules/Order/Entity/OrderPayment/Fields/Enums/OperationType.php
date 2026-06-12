@@ -15,7 +15,7 @@ enum OperationType: int implements EnumInterface
     {
         return match ($this) {
             self::EXPENSE => 'Расход',
-            self::INCOME => 'Приход',
+            self::INCOME  => 'Приход',
         };
     }
 }

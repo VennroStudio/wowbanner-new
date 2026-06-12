@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Order\Query\OrderSection\FindByOrderId;
 
-use App\Modules\Order\ReadModel\OrderSection\OrderSectionByOrderId;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Order\ReadModel\OrderSection\Interface\OrderSectionModelInterface;
+use App\Modules\Order\ReadModel\OrderSection\OrderSectionDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,22 +19,21 @@ final readonly class OrderSectionFindByOrderIdFetcher
     ) {}
 
     /**
-     * @return list<OrderSectionByOrderId>
+     * @template T of OrderSectionModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(OrderSectionFindByOrderIdQuery $query): array
+    public function fetch(OrderSectionFindByOrderIdQuery $query, string $modelClass = OrderSectionDetails::class): array
     {
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'order_id', 'section_type')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('order_id = :orderId')
             ->setParameter('orderId', $query->orderId)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<OrderSectionByOrderId> $items */
-        $items = OrderSectionByOrderId::fromRows($rows);
-
-        return $items;
+        return $modelClass::fromRows($rows);
     }
 }

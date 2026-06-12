@@ -28,17 +28,17 @@ final readonly class OrderSectionSyncerService
     public function sync(int $orderId, array $items): void
     {
         $currentItems = $this->repository->findByOrderId($orderId);
-        $currentIds = array_map(static fn($item) => $item->id, $currentItems);
-        $commandIds = array_filter(array_map(static fn(OrderSectionItem $item) => $item->id, $items));
+        $currentIds = array_map(static fn ($item) => $item->id, $currentItems);
+        $commandIds = array_filter(array_map(static fn (OrderSectionItem $item) => $item->id, $items));
 
         foreach ($currentItems as $currentItem) {
-            if (!in_array($currentItem->id, $commandIds, true)) {
+            if (!\in_array($currentItem->id, $commandIds, true)) {
                 $this->deleteHandler->handle(new DeleteOrderSectionCommand($currentItem->id));
             }
         }
 
         foreach ($items as $item) {
-            if ($item->id !== null && in_array($item->id, $currentIds, true)) {
+            if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateOrderSectionCommand(
                     id: $item->id,
                     sectionType: $item->sectionType,

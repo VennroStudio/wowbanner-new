@@ -9,7 +9,7 @@ use App\Modules\Order\Entity\OrderSection\Fields\Enums\SectionType;
 use App\Modules\Order\ReadModel\OrderSection\Interface\OrderSectionModelInterface;
 use Override;
 
-final readonly class OrderSectionByOrderId implements OrderSectionModelInterface
+final readonly class OrderSectionDetails implements OrderSectionModelInterface
 {
     use FromRowsTrait;
 
@@ -18,6 +18,18 @@ final readonly class OrderSectionByOrderId implements OrderSectionModelInterface
         public int $orderId,
         public SectionType $sectionType,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'           => 'id',
+            'order_id'     => 'order_id',
+            'section_type' => 'section_type',
+        ];
+    }
 
     /**
      * @param array{
@@ -29,9 +41,9 @@ final readonly class OrderSectionByOrderId implements OrderSectionModelInterface
     public static function fromRow(array $row): self
     {
         return new self(
-            id: (int) $row['id'],
-            orderId: (int) $row['order_id'],
-            sectionType: SectionType::from((int) $row['section_type']),
+            id: (int)$row['id'],
+            orderId: (int)$row['order_id'],
+            sectionType: SectionType::from((int)$row['section_type']),
         );
     }
 
@@ -45,8 +57,7 @@ final readonly class OrderSectionByOrderId implements OrderSectionModelInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'order_id' => $this->orderId,
+            'id'           => $this->id,
             'section_type' => ['id' => $this->sectionType->value, 'label' => $this->sectionType->getLabel()],
         ];
     }

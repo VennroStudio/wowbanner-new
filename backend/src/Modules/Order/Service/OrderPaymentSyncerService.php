@@ -6,6 +6,8 @@ namespace App\Modules\Order\Service;
 
 use App\Modules\Order\Command\OrderPayment\Create\CreateOrderPaymentCommand;
 use App\Modules\Order\Command\OrderPayment\Create\CreateOrderPaymentHandler;
+use App\Modules\Order\Command\OrderPayment\Delete\DeleteOrderPaymentCommand;
+use App\Modules\Order\Command\OrderPayment\Delete\DeleteOrderPaymentHandler;
 use App\Modules\Order\Command\OrderPayment\Update\UpdateOrderPaymentCommand;
 use App\Modules\Order\Command\OrderPayment\Update\UpdateOrderPaymentHandler;
 use App\Modules\Order\Entity\OrderPayment\OrderPaymentRepository;
@@ -17,6 +19,7 @@ final readonly class OrderPaymentSyncerService
         private OrderPaymentRepository $repository,
         private CreateOrderPaymentHandler $createHandler,
         private UpdateOrderPaymentHandler $updateHandler,
+        private DeleteOrderPaymentHandler $deleteHandler,
     ) {}
 
     /**
@@ -25,17 +28,17 @@ final readonly class OrderPaymentSyncerService
     public function sync(int $orderId, array $items): void
     {
         $currentItems = $this->repository->findByOrderId($orderId);
-        $currentIds = array_map(static fn($item) => $item->id, $currentItems);
-        $commandIds = array_filter(array_map(static fn(OrderPaymentItem $item) => $item->id, $items));
+        $currentIds = array_map(static fn ($item) => $item->id, $currentItems);
+        $commandIds = array_filter(array_map(static fn (OrderPaymentItem $item) => $item->id, $items));
 
         foreach ($currentItems as $currentItem) {
-            if (!in_array($currentItem->id, $commandIds, true)) {
-                $this->repository->remove($currentItem);
+            if (!\in_array($currentItem->id, $commandIds, true)) {
+                $this->deleteHandler->handle(new DeleteOrderPaymentCommand((int)$currentItem->id));
             }
         }
 
         foreach ($items as $item) {
-            if ($item->id !== null && in_array($item->id, $currentIds, true)) {
+            if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateOrderPaymentCommand(
                     id: $item->id,
                     clientId: $item->clientId,
