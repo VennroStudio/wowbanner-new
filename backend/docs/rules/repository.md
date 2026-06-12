@@ -1,23 +1,26 @@
 # Repository — Репозиторий
 
-Только для **write-операций**. Чтение — исключительно через Fetcher/Query.
+Только для **write-операций**. Чтение для API-ответов выполняется через Query / Fetcher.
 
 **Расположение:**
 - Интерфейс: `src/Modules/{Module}/Entity/{Entity}/{Entity}Repository.php`
 - Реализация: `src/Modules/{Module}/Entity/{Entity}/Persistence/Doctrine/Doctrine{Entity}Repository.php`
-- Регистрация: `config/common/repositories.php` — `{Entity}Repository::class => get(Doctrine{Entity}Repository::class)`
+- Регистрация: `config/common/repositories.php`
 
 ---
 
-## Правила
+## Состав Repository
 
-- **`add()`** — persist сущности (без flush), параметр именуется по сущности
-- **`remove()`** — только при необходимости hard delete
-- **`getById()`** — для write; бросает `DomainExceptionModule` если не найден
-- **`findById()`** — для write; возвращает `null` если не найден
-- Дополнительные методы поиска — только под реальные write-сценарии
-- Flush — через `FlusherInterface` в Handler'е, не в репозитории
-- `getById`/`findById` — только для изменения сущности в Handler'е, не для ответа клиенту
+Repository собирается только из методов, которые нужны конкретному write-сценарию.
+
+- Интерфейс
+- `add()`
+- `remove()`
+- `getById()`
+- `findById()`
+- Дополнительные `find...()` методы для write-сценариев
+- Doctrine-реализация
+- Регистрация в DI
 
 ---
 
@@ -30,27 +33,128 @@ declare(strict_types=1);
 
 namespace App\Modules\{Module}\Entity\{Entity};
 
+use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Type;
+
 interface {Entity}Repository
 {
     public function add({Entity} ${entity}): void;
+
+    public function remove({Entity} ${entity}): void;
 
     public function getById(int $id): {Entity};
 
     public function findById(int $id): ?{Entity};
 
-    // При необходимости hard delete:
-    // public function remove({Entity} ${entity}): void;
+    /**
+     * @return list<{Entity}>
+     */
+    public function findByOwnerId(int $ownerId): array;
 
-    // Дополнительные методы под write-сценарии:
-    // public function findByOwnerAndType(int $ownerId, {Entity}Type $type): array;
+    /**
+     * @return list<{Entity}>
+     */
+    public function findByOwnerIdAndType(int $ownerId, {Entity}Type $type): array;
+}
+```
+
+---
+
+## add()
+
+```php
+#[Override]
+public function add({Entity} ${entity}): void
+{
+    $this->em->persist(${entity});
+}
+```
+
+---
+
+## remove()
+
+```php
+#[Override]
+public function remove({Entity} ${entity}): void
+{
+    $this->em->remove(${entity});
+}
+```
+
+---
+
+## getById()
+
+```php
+#[Override]
+public function getById(int $id): {Entity}
+{
+    if (!${entity} = $this->findById($id)) {
+        throw new DomainExceptionModule(
+            module: '{module}',
+            message: 'error.{entity}_not_found',
+            code: 1
+        );
+    }
+
+    return ${entity};
+}
+```
+
+---
+
+## findById()
+
+```php
+#[Override]
+public function findById(int $id): ?{Entity}
+{
+    return $this->repo->findOneBy(['id' => $id]);
+}
+```
+
+---
+
+## Дополнительные find-методы
+
+Используются только для write-сценариев: синхронизация дочерних сущностей, проверка уникальности, массовое удаление связанных записей.
+
+```php
+/**
+ * @return list<{Entity}>
+ */
+#[Override]
+public function findByOwnerId(int $ownerId): array
+{
+    return $this->repo->findBy(['ownerId' => $ownerId]);
+}
+```
+
+```php
+/**
+ * @return list<{Entity}>
+ */
+#[Override]
+public function findByOwnerIdAndType(int $ownerId, {Entity}Type $type): array
+{
+    return $this->repo->findBy([
+        'ownerId' => $ownerId,
+        'type'    => $type,
+    ]);
+}
+```
+
+```php
+#[Override]
+public function findByEmail(string $email): ?{Entity}
+{
+    return $this->repo->findOneBy(['email' => $email]);
 }
 ```
 
 ---
 
 ## Doctrine-реализация
-
-`final class`. Единственная зависимость — `EntityManagerInterface`; `EntityRepository` создаётся в конструкторе. Все методы интерфейса помечаются `#[Override]`.
 
 ```php
 <?php
@@ -60,18 +164,20 @@ declare(strict_types=1);
 namespace App\Modules\{Module}\Entity\{Entity}\Persistence\Doctrine;
 
 use App\Components\Exception\DomainExceptionModule;
+use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Type;
 use App\Modules\{Module}\Entity\{Entity}\{Entity};
 use App\Modules\{Module}\Entity\{Entity}\{Entity}Repository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Override;
 
-final class Doctrine{Entity}Repository implements {Entity}Repository
+final readonly class Doctrine{Entity}Repository implements {Entity}Repository
 {
     /** @var EntityRepository<{Entity}> */
     private EntityRepository $repo;
 
     public function __construct(
-        private readonly EntityManagerInterface $em,
+        private EntityManagerInterface $em,
     ) {
         $this->repo = $em->getRepository({Entity}::class);
     }
@@ -80,6 +186,12 @@ final class Doctrine{Entity}Repository implements {Entity}Repository
     public function add({Entity} ${entity}): void
     {
         $this->em->persist(${entity});
+    }
+
+    #[Override]
+    public function remove({Entity} ${entity}): void
+    {
+        $this->em->remove(${entity});
     }
 
     #[Override]
@@ -102,11 +214,40 @@ final class Doctrine{Entity}Repository implements {Entity}Repository
         return $this->repo->findOneBy(['id' => $id]);
     }
 
-    // При необходимости hard delete:
-    // #[Override]
-    // public function remove({Entity} ${entity}): void
-    // {
-    //     $this->em->remove(${entity});
-    // }
+    /**
+     * @return list<{Entity}>
+     */
+    #[Override]
+    public function findByOwnerId(int $ownerId): array
+    {
+        return $this->repo->findBy(['ownerId' => $ownerId]);
+    }
+
+    /**
+     * @return list<{Entity}>
+     */
+    #[Override]
+    public function findByOwnerIdAndType(int $ownerId, {Entity}Type $type): array
+    {
+        return $this->repo->findBy([
+            'ownerId' => $ownerId,
+            'type'    => $type,
+        ]);
+    }
 }
+```
+
+---
+
+## Регистрация
+
+```php
+use App\Modules\{Module}\Entity\{Entity}\{Entity}Repository;
+use App\Modules\{Module}\Entity\{Entity}\Persistence\Doctrine\Doctrine{Entity}Repository;
+
+use function DI\get;
+
+return [
+    {Entity}Repository::class => get(Doctrine{Entity}Repository::class),
+];
 ```
