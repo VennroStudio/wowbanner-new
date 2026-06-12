@@ -4,21 +4,240 @@
 
 ---
 
-## Правила
+## Состав Entity
 
-- Класс `class` (не `readonly`, не `final`) — Doctrine требует proxy-объекты
-- Конструктор **`private`**, создание только через статический `create()`
-- Свойства — **`private(set)`** (чтение публичное, запись только внутри класса)
-- ID — `int`, автоинкремент: `#[ORM\GeneratedValue]`
-- Даты — `DateTimeImmutable` через `UtcClock::now()`
-- Enum в БД — `int`-backed: `#[ORM\Column(type: Types::INTEGER, enumType: SomeEnum::class)]`
-- Бизнес-методы изменения состояния возвращают `bool`, если переход может не произойти в штатной ситуации
-- `DomainExceptionModule` — только при нарушении бизнес-правила, не для чтения состояния
-- Все зависимости импортируются через `use`
+Entity собирается только из тех блоков, которые нужны конкретной сущности.
+
+- Заголовок класса
+- `private(set)` поля
+- `private` конструктор
+- Статическая фабрика `create()`
+- Метод редактирования `edit()`
+- Дополнительные доменные методы
+- Вспомогательные приватные методы
 
 ---
 
-## Пример: сущность с переходами состояния
+## Заголовок класса
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Entity\{Entity};
+
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[ORM\Table(name: '{table_name}')]
+#[ORM\Index(name: 'idx_{table_name}_owner_id', columns: ['owner_id'])]
+class {Entity}
+{
+}
+```
+
+---
+
+## Поля
+
+### ID
+
+```php
+#[ORM\Id]
+#[ORM\Column(type: Types::INTEGER)]
+#[ORM\GeneratedValue(strategy: 'AUTO')]
+private(set) ?int $id = null;
+```
+
+### Простые поля
+
+```php
+#[ORM\Column(type: Types::INTEGER)]
+private(set) int $ownerId;
+
+#[ORM\Column(type: Types::STRING, length: 255)]
+private(set) string $name;
+
+#[ORM\Column(type: Types::TEXT, nullable: true)]
+private(set) ?string $description;
+
+#[ORM\Column(type: Types::BOOLEAN)]
+private(set) bool $enabled;
+```
+
+### Decimal-поля
+
+```php
+#[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+private(set) string $price;
+```
+
+### Enum-поля
+
+Enum-класс описывается отдельно в [Enum](enum.md). В Entity показывается только использование поля.
+
+```php
+use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Status;
+
+#[ORM\Column(type: Types::INTEGER, enumType: {Entity}Status::class)]
+private(set) {Entity}Status $status;
+```
+
+### Даты
+
+```php
+use App\Components\Clock\UtcClock;
+use DateTimeImmutable;
+
+#[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+private(set) DateTimeImmutable $createdAt;
+
+#[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+private(set) ?DateTimeImmutable $updatedAt = null;
+
+#[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+private(set) ?DateTimeImmutable $deletedAt = null;
+```
+
+---
+
+## Конструктор
+
+```php
+/**
+ * @throws DateMalformedStringException
+ */
+private function __construct(
+    int $ownerId,
+    string $name,
+    ?string $description,
+    {Entity}Status $status,
+    string $price,
+    bool $enabled,
+) {
+    $this->ownerId = $ownerId;
+    $this->name = $name;
+    $this->description = $description;
+    $this->status = $status;
+    $this->price = $price;
+    $this->enabled = $enabled;
+    $this->createdAt = UtcClock::now();
+}
+```
+
+---
+
+## create()
+
+```php
+/**
+ * @throws DateMalformedStringException
+ */
+public static function create(
+    int $ownerId,
+    string $name,
+    ?string $description,
+    {Entity}Status $status,
+    string $price,
+    bool $enabled = true,
+): self {
+    return new self(
+        ownerId: $ownerId,
+        name: $name,
+        description: $description,
+        status: $status,
+        price: $price,
+        enabled: $enabled,
+    );
+}
+```
+
+---
+
+## edit()
+
+```php
+/**
+ * @throws DateMalformedStringException
+ */
+public function edit(
+    string $name,
+    ?string $description,
+    string $price,
+    bool $enabled,
+): void {
+    $this->assertNotDeleted();
+
+    $this->name = $name;
+    $this->description = $description;
+    $this->price = $price;
+    $this->enabled = $enabled;
+    $this->touch();
+}
+```
+
+---
+
+## Дополнительные методы
+
+```php
+/**
+ * @throws DateMalformedStringException
+ */
+public function changeStatus({Entity}Status $status): void
+{
+    $this->assertNotDeleted();
+
+    if ($this->status === $status) {
+        return;
+    }
+
+    $this->status = $status;
+    $this->touch();
+}
+
+/**
+ * @throws DateMalformedStringException
+ */
+public function markDeleted(): void
+{
+    $this->assertNotDeleted();
+
+    $this->deletedAt = UtcClock::now();
+    $this->touch();
+}
+```
+
+---
+
+## Вспомогательные методы
+
+```php
+/**
+ * @throws DateMalformedStringException
+ */
+private function touch(): void
+{
+    $this->updatedAt = UtcClock::now();
+}
+
+private function assertNotDeleted(): void
+{
+    if ($this->deletedAt !== null) {
+        throw new DomainExceptionModule(
+            module: '{module}',
+            message: 'error.{entity}_is_deleted',
+            code: 1
+        );
+    }
+}
+```
+
+---
+
+## Полный пример
 
 ```php
 <?php
@@ -28,8 +247,8 @@ declare(strict_types=1);
 namespace App\Modules\{Module}\Entity\{Entity};
 
 use App\Components\Clock\UtcClock;
-use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}State;
-use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Type;
+use App\Components\Exception\DomainExceptionModule;
+use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Status;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
@@ -37,110 +256,36 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: '{table_name}')]
+#[ORM\Index(name: 'idx_{table_name}_owner_id', columns: ['owner_id'])]
+#[ORM\Index(name: 'idx_{table_name}_status', columns: ['status'])]
+#[ORM\Index(name: 'idx_{table_name}_created_at', columns: ['created_at'])]
 class {Entity}
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private(set) ?int $id = null;
 
-    #[ORM\Column(type: Types::INTEGER, enumType: {Entity}Type::class)]
-    private(set) {Entity}Type $type;
+    #[ORM\Column(type: Types::INTEGER)]
+    private(set) int $ownerId;
 
-    #[ORM\Column(type: Types::STRING, length: 64)]
-    private(set) string $hash;
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    private(set) string $name;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private(set) DateTimeImmutable $expiresAt;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private(set) ?string $description;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    private(set) ?DateTimeImmutable $usedAt = null;
+    #[ORM\Column(type: Types::INTEGER, enumType: {Entity}Status::class)]
+    private(set) {Entity}Status $status;
 
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    private(set) ?DateTimeImmutable $revokedAt = null;
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private(set) string $price;
+
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private(set) bool $enabled;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private(set) DateTimeImmutable $createdAt;
-
-    /** @throws DateMalformedStringException */
-    private function __construct(
-        {Entity}Type $type,
-        string $hash,
-        DateTimeImmutable $expiresAt,
-    ) {
-        $this->type = $type;
-        $this->hash = $hash;
-        $this->expiresAt = $expiresAt;
-        $this->createdAt = UtcClock::now();
-    }
-
-    /** @throws DateMalformedStringException */
-    public static function create(
-        {Entity}Type $type,
-        string $hash,
-        DateTimeImmutable $expiresAt,
-    ): self {
-        return new self($type, $hash, $expiresAt);
-    }
-
-    /** @throws DateMalformedStringException */
-    public function markUsed(): bool
-    {
-        if (!$this->isActive()) {
-            return false;
-        }
-        $this->usedAt = UtcClock::now();
-        return true;
-    }
-
-    /** @throws DateMalformedStringException */
-    public function revoke(): bool
-    {
-        if ($this->revokedAt !== null) {
-            return false;
-        }
-        $this->revokedAt = UtcClock::now();
-        return true;
-    }
-
-    /** @throws DateMalformedStringException */
-    public function getState(): {Entity}State
-    {
-        return match (true) {
-            $this->revokedAt !== null       => {Entity}State::REVOKED,
-            $this->usedAt !== null          => {Entity}State::USED,
-            $this->expiresAt <= UtcClock::now() => {Entity}State::EXPIRED,
-            default                         => {Entity}State::ACTIVE,
-        };
-    }
-
-    /** @throws DateMalformedStringException */
-    public function isActive(): bool
-    {
-        return $this->getState() === {Entity}State::ACTIVE;
-    }
-}
-```
-
----
-
-## Пример: сущность с soft delete и `updatedAt`
-
-```php
-#[ORM\Entity]
-#[ORM\Table(name: '{table_name}')]
-class {Entity}
-{
-    #[ORM\Id]
-    #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue]
-    private(set) ?int $id = null;
-
-    #[ORM\Column(type: Types::STRING, length: 255, unique: true)]
-    private(set) string $email;
-
-    #[ORM\Column(type: Types::INTEGER, enumType: {Entity}Role::class)]
-    private(set) {Entity}Role $role;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private(set) ?DateTimeImmutable $updatedAt = null;
@@ -148,16 +293,94 @@ class {Entity}
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private(set) ?DateTimeImmutable $deletedAt = null;
 
-    // ...
+    /**
+     * @throws DateMalformedStringException
+     */
+    private function __construct(
+        int $ownerId,
+        string $name,
+        ?string $description,
+        {Entity}Status $status,
+        string $price,
+        bool $enabled,
+    ) {
+        $this->ownerId = $ownerId;
+        $this->name = $name;
+        $this->description = $description;
+        $this->status = $status;
+        $this->price = $price;
+        $this->enabled = $enabled;
+        $this->createdAt = UtcClock::now();
+    }
 
-    public function edit(string $email, {Entity}Role $role): void
-    {
+    /**
+     * @throws DateMalformedStringException
+     */
+    public static function create(
+        int $ownerId,
+        string $name,
+        ?string $description,
+        {Entity}Status $status,
+        string $price,
+        bool $enabled = true,
+    ): self {
+        return new self(
+            ownerId: $ownerId,
+            name: $name,
+            description: $description,
+            status: $status,
+            price: $price,
+            enabled: $enabled,
+        );
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public function edit(
+        string $name,
+        ?string $description,
+        string $price,
+        bool $enabled,
+    ): void {
         $this->assertNotDeleted();
-        $this->email = $email;
-        $this->role = $role;
+
+        $this->name = $name;
+        $this->description = $description;
+        $this->price = $price;
+        $this->enabled = $enabled;
         $this->touch();
     }
 
+    /**
+     * @throws DateMalformedStringException
+     */
+    public function changeStatus({Entity}Status $status): void
+    {
+        $this->assertNotDeleted();
+
+        if ($this->status === $status) {
+            return;
+        }
+
+        $this->status = $status;
+        $this->touch();
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public function markDeleted(): void
+    {
+        $this->assertNotDeleted();
+
+        $this->deletedAt = UtcClock::now();
+        $this->touch();
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
     private function touch(): void
     {
         $this->updatedAt = UtcClock::now();
@@ -173,93 +396,5 @@ class {Entity}
             );
         }
     }
-}
-```
-
----
-
-## Enum-поля
-
-**Расположение:** `src/Modules/{Module}/Entity/{Entity}/Fields/Enums/{EnumName}.php`
-
-### Колонка в БД → `int`-backed + `getLabel()`
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Modules\{Module}\Entity\{Entity}\Fields\Enums;
-
-use App\Components\Enum\EnumInterface;
-
-enum {EnumName}: int implements EnumInterface
-{
-    case ACTIVE = 1;
-    case INACTIVE = 2;
-
-    public function getLabel(): string
-    {
-        return match ($this) {
-            self::ACTIVE   => 'Активен',
-            self::INACTIVE => 'Неактивен',
-        };
-    }
-}
-```
-
-### Enum для API-справочников
-
-- Если enum должен отдаваться во frontend как справочник `{ id, label }`, он должен реализовывать `App\Components\Enum\EnumInterface`
-- Такие enum используются через `EnumModel::fromEnumClass(...)`
-- Если набор значений зависит от роли пользователя, enum дополнительно реализует `App\Components\Enum\RoleAwareEnumInterface`
-- В этом случае логика доступных значений хранится в самом enum через `casesForRole(UserRole $role)`, а не размазывается по Action
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Modules\{Module}\Entity\{Entity}\Fields\Enums;
-
-use App\Components\Enum\EnumInterface;
-use App\Components\Enum\RoleAwareEnumInterface;
-use App\Modules\User\Entity\User\Fields\Enums\UserRole;
-
-enum {EnumName}: int implements EnumInterface, RoleAwareEnumInterface
-{
-    case ONE = 1;
-    case TWO = 2;
-
-    public function getLabel(): string
-    {
-        return match ($this) {
-            self::ONE => 'Первый',
-            self::TWO => 'Второй',
-        };
-    }
-
-    /**
-     * @return list<self>
-     */
-    public static function casesForRole(UserRole $role): array
-    {
-        return match ($role) {
-            UserRole::ADMIN => self::cases(),
-            default => [self::ONE],
-        };
-    }
-}
-```
-
-### Только доменная логика (не в БД) → `string`-backed, без `getLabel()`
-
-```php
-enum {EnumName}: string
-{
-    case ACTIVE  = 'active';
-    case EXPIRED = 'expired';
-    case USED    = 'used';
-    case REVOKED = 'revoked';
 }
 ```
