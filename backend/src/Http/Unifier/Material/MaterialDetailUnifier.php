@@ -69,9 +69,6 @@ final readonly class MaterialDetailUnifier implements UnifierInterface
     {
         $options = $this->materialOptionFetcher->fetch(new MaterialOptionFindByMaterialIdQuery($materialId));
 
-        return array_map(
-            fn(object $option): array => $this->materialOptionUnifier->map($option),
-            $options,
-        );
+        return $this->materialOptionUnifier->unify(null, $options);
     }
 }

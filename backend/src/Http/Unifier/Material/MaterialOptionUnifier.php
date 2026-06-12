@@ -37,7 +37,7 @@ final readonly class MaterialOptionUnifier implements UnifierInterface
             return [];
         }
 
-        return $this->map($item);
+        return $this->unify($userId, [$item])[0] ?? [];
     }
 
     /**
