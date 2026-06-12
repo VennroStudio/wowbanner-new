@@ -19,10 +19,11 @@
 9. [Query / Fetcher](rules/fetcher.md)
 10. [ReadModel](rules/readmodel.md)
 11. [Action](rules/action.md)
-12. [Translation](rules/translation.md)
-13. [Components](rules/components.md)
-14. [Исключения и HTTP-коды](rules/exceptions.md)
-15. [Frontend API Docs](rules/frontend-api-docs.md)
+12. [Unifier](rules/unifier.md)
+13. [Translation](rules/translation.md)
+14. [Components](rules/components.md)
+15. [Исключения и HTTP-коды](rules/exceptions.md)
+16. [Frontend API Docs](rules/frontend-api-docs.md)
 
 ---
 

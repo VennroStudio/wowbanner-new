@@ -1,28 +1,80 @@
 # Action — HTTP-обработчик
 
-Точка входа HTTP: денормализация запроса → валидация → Handler/Fetcher → ответ.
+Точка входа HTTP: получить данные из запроса, собрать Command/Query, провалидировать, вызвать Handler/Fetcher и вернуть Response.
 
 **Расположение:**
-- Action: `src/Http/Action/v1/{Entity}/{Action}{Entity}Action.php`
-- Unifier: `src/Http/Unifier/{Entity}/{Entity}Unifier.php`
+- Action: `src/Http/Action/v1/{Module}/{Action}{Entity}Action.php`
 - Маршруты: `config/routes/v1.php`
 
 ---
 
-## Правила
+## Состав Action
 
-- `final readonly class`, реализует `RequestHandlerInterface`
-- Один метод `handle(ServerRequestInterface $request): ResponseInterface`
-- **OpenAPI атрибуты** (`#[OA\Get]`, `#[OA\Post]`, `#[OA\Patch]`, `#[OA\Delete]`) — обязательны на каждом Action для генерации документации
-- **POST/PATCH/DELETE:** `denormalize` → `validate` → `handle` → Response
-- **GET:** `denormalize` (query params) → `validate` → `fetch` → `unify` → Response
-- Body: `(array) $request->getParsedBody()`, query: `$request->getQueryParams()`
-- Дополнительные поля (userId, currentUserId, currentUserRole, locale) подставляются через `array_merge()`
-- Параметр маршрута: `Route::getArgumentToInt($request, 'id')`
-- Защищённый маршрут: `RequestIdentity::get($request)`
-- Имена полей JSON совпадают с именами свойств Command/Query (camelCase)
-- Enum-справочники для frontend отдаются отдельными `GET` Action через `EnumModel`
-- Permission map для frontend отдаётся отдельными `GET` Action через `UiPermissionService`
+Action собирается только из тех блоков, которые нужны конкретному endpoint.
+
+- OpenAPI атрибут
+- `final readonly class`
+- `RequestHandlerInterface`
+- зависимости через конструктор
+- `handle(ServerRequestInterface $request): ResponseInterface`
+- получение route/query/body/file/cookie данных
+- `denormalize()` и `validate()`
+- вызов Handler или Fetcher
+- сборка Response
+
+В Action не пишется бизнес-логика. Проверки доступа, изменение сущностей, работа с БД и внешними API остаются в Handler/Fetcher/Service.
+
+---
+
+## Заголовок класса
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Action\v1\{Module};
+
+use OpenApi\Attributes as OA;
+use Override;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+
+#[OA\Get(
+    path: '/{entities}/{id}',
+    summary: 'Получить {entity}',
+    security: [['bearerAuth' => []]],
+    tags: ['{Modules}'],
+    responses: [
+        new OA\Response(response: 200, description: 'Успех'),
+        new OA\Response(response: 401, description: 'Не авторизован'),
+        new OA\Response(response: 404, description: 'Не найдено'),
+    ]
+)]
+final readonly class Get{Entity}ByIdAction implements RequestHandlerInterface
+{
+    #[Override]
+    public function handle(ServerRequestInterface $request): ResponseInterface
+    {
+    }
+}
+```
+
+---
+
+## Данные запроса
+
+- route params: `Route::getArgumentToInt($request, 'id')`
+- query params: `$request->getQueryParams()`
+- body: `(array) $request->getParsedBody()`
+- current user: `RequestIdentity::get($request)`
+- file: `RequestFile::extract($request, 'file')`
+- cookies: `RequestCookies::get($request)`
+
+Дополнительные поля из route и identity добавляются в Command через `array_merge()`.
+
+Имена входных JSON-полей совпадают с полями Command/Query. Ответ API собирается через ReadModel/Unifier, ключи ответа описаны в [ReadModel](readmodel.md).
 
 ---
 
@@ -30,143 +82,45 @@
 
 | Класс | Когда |
 |-------|-------|
-| `JsonDataResponse($data, $status)` | Один объект или скаляр; по умолчанию 200 |
-| `JsonDataItemsResponse(count: $n, items: $list)` | Список с количеством; `$list` — массив после Unifier |
-| `JsonDataSuccessResponse()` | Успех без тела, **201** |
-| `JsonDataSuccessResponse(1, 200)` | Успех без тела, **200** (update/delete) |
-| `new Response(204)` | Logout и аналоги; к нему применяется `cookieManager->discard()` |
+| `JsonDataResponse($data)` | Один объект, справочник, token response |
+| `JsonDataItemsResponse(count: $count, items: $items)` | Список с количеством |
+| `JsonDataSuccessResponse()` | Успех создания, статус `201` |
+| `JsonDataSuccessResponse(1, 200)` | Успех update/delete, статус `200` |
+| `new Response(204)` | Успех без JSON, например logout |
 
 ---
 
-## Unifier
+## GET один объект
 
-Преобразует ReadModel (или список) в массив для ответа API: вызывает `toArray()`, подставляет URL для файлов (S3), подмешивает связанные сущности. Используется во всех Action, возвращающих данные сущности.
-
-**Интерфейс:** `App\Components\Http\Unifier\UnifierInterface`
-
-```php
-interface UnifierInterface
-{
-    public function unifyOne(?int $userId, ?object $item): array;
-
-    /** @param list<object> $items
-     *  @return list<array<string,mixed>> */
-    public function unify(?int $userId, array $items): array;
-
-    public function map(object $item): array;
-}
-```
-
-### Простой Unifier (один тип сущности)
-
-```php
-final readonly class {Entity}Unifier implements UnifierInterface
-{
-    public function __construct(
-        private S3Transformer $s3Transformer,
-    ) {}
-
-    #[Override]
-    public function unifyOne(?int $userId, ?object $item): array
-    {
-        if ($item === null) return [];
-        return $this->unify($userId, [$item])[0] ?? [];
-    }
-
-    /** @param list<{Entity}ModelInterface> $items
-     *  @return list<array<string,mixed>> */
-    #[Override]
-    public function unify(?int $userId, array $items): array
-    {
-        if ($items === []) return [];
-        return array_map(fn({Entity}ModelInterface $item): array => $this->map($item), $items);
-    }
-
-    #[Override]
-    public function map(object $item): array
-    {
-        $data = $item->toArray();
-        $data['file'] = $this->s3Transformer->buildUrl($data['file']);
-        return $data;
-    }
-}
-```
-
-### Unifier с подгрузкой связанных сущностей
-
-Если ответ должен содержать связанные данные (например, Entity + Profile + Items) — Unifier инжектирует нужные Fetcher'ы, делает один запрос по всем id, группирует по `ownerId` и подмешивает в `map()`. Так избегается N+1.
-
-```php
-final readonly class {Entity}Unifier implements UnifierInterface
-{
-    public function __construct(
-        private S3Transformer $s3Transformer,
-        private {Related}Fetcher $relatedFetcher,
-    ) {}
-
-    #[Override]
-    public function unifyOne(?int $userId, ?object $item): array
-    {
-        if ($item === null) return [];
-        return $this->unify($userId, [$item])[0] ?? [];
-    }
-
-    /** @param list<{Entity}ModelInterface> $items
-     *  @return list<array<string,mixed>> */
-    #[Override]
-    public function unify(?int $userId, array $items): array
-    {
-        if ($items === []) return [];
-
-        $ids = array_map(static fn({Entity}ModelInterface $i): int => $i->getId(), $items);
-        $related = $this->groupRelated($this->relatedFetcher->fetchByOwnerIds($ids));
-
-        return array_map(fn({Entity}ModelInterface $item): array => $this->map($item, $related), $items);
-    }
-
-    #[Override]
-    public function map(object $item, array $related = []): array
-    {
-        $data = $item->toArray();
-        $data['file']    = $this->s3Transformer->buildUrl($data['file']);
-        $data['related'] = $related[$item->getId()] ?? [];
-        return $data;
-    }
-
-    /** @param list<{Related}ModelInterface> $items
-     *  @return array<int, array<string,mixed>> */
-    private function groupRelated(array $items): array
-    {
-        $grouped = [];
-        foreach ($items as $item) {
-            $grouped[$item->getOwnerId()][] = $item->toArray();
-        }
-        return $grouped;
-    }
-}
-```
-
----
-
-## Примеры Action
-
-### GET — один объект
+Fetcher ищет данные, Unifier собирает ответ.
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
     $id = Route::getArgumentToInt($request, 'id');
+
     $item = $this->fetcher->fetch(new {Entity}GetByIdQuery($id));
-    return new JsonDataResponse($this->unifier->unifyOne(null, $item));
+
+    return new JsonDataResponse(
+        $this->unifier->unifyOne(null, $item)
+    );
 }
 ```
 
-### GET — список
+---
+
+## GET список
+
+Список всегда возвращается через `JsonDataItemsResponse`: `count` и `items`.
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
-    $query = $this->denormalizer->denormalize($request->getQueryParams(), {Entity}FindAllQuery::class);
+    $query = $this->denormalizer->denormalize(
+        $request->getQueryParams(),
+        {Entity}FindAllQuery::class,
+    );
+
     $this->validator->validate($query);
 
     $result = $this->fetcher->fetch($query);
@@ -178,25 +132,45 @@ public function handle(ServerRequestInterface $request): ResponseInterface
 }
 ```
 
-### GET — enum-справочник
+---
 
-Если endpoint отдаёт статический список enum-значений `{ id, label }`, Action не использует Fetcher/Unifier и отвечает напрямую через `EnumModel`.
+## GET select
 
-Enum-класс описан отдельно в [Enum](enum.md). В Action показывается только отдача справочника.
+Select endpoint возвращает легкий список ReadModel без Unifier, если не нужно подмешивать дополнительные данные.
 
 ```php
+use App\Components\ReadModel\ReadModelArray;
+
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
-    return new JsonDataResponse(EnumModel::fromEnumClass({EnumName}::class));
+    return new JsonDataResponse(
+        ReadModelArray::fromItems(
+            $this->fetcher->fetch(new {Entity}GetBySelectQuery())
+        )
+    );
 }
 ```
 
-### GET — enum-справочник с учётом роли
+Если у select есть фильтры, сначала собирается Query из `$request->getQueryParams()` и валидируется.
 
-Если список enum-значений зависит от роли текущего пользователя:
-- маршрут должен быть защищён `Authenticate`
-- Action получает роль через `RequestIdentity::get($request)`
-- фильтрация выполняется не в Action, а в самом enum через `RoleAwareEnumInterface`
+---
+
+## GET enum
+
+Enum-класс описывается отдельно в [Enum](enum.md). В Action показывается только отдача справочника.
+
+```php
+use App\Components\Enum\EnumModel;
+
+public function handle(ServerRequestInterface $request): ResponseInterface
+{
+    return new JsonDataResponse(
+        EnumModel::fromEnumClass({EnumName}::class)
+    );
+}
+```
+
+Если enum зависит от роли:
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
@@ -204,14 +178,16 @@ public function handle(ServerRequestInterface $request): ResponseInterface
     $identity = RequestIdentity::get($request);
 
     return new JsonDataResponse(
-        EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role),
+        EnumModel::fromEnumClassForRole({EnumName}::class, $identity->role)
     );
 }
 ```
 
-### GET — UI permission map
+---
 
-Permission-класс и правила доступа описаны отдельно в [Permission](permission.md). В Action показывается только отдача map.
+## GET UI permissions
+
+Permission описывается отдельно в [Permission](permission.md). В Action показывается только отдача frontend map.
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
@@ -224,24 +200,33 @@ public function handle(ServerRequestInterface $request): ResponseInterface
 }
 ```
 
-### POST — создание
+---
+
+## POST создание
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
+    $identity = RequestIdentity::get($request);
+
     $command = $this->denormalizer->denormalize(
         array_merge((array) $request->getParsedBody(), [
-            'locale' => $this->translator->getLocale(),
+            'currentUserId'   => $identity->id,
+            'currentUserRole' => $identity->role->value,
         ]),
         Create{Entity}Command::class,
     );
+
     $this->validator->validate($command);
     $this->handler->handle($command);
+
     return new JsonDataSuccessResponse();
 }
 ```
 
-### PATCH — обновление (защищённый)
+---
+
+## PATCH обновление
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
@@ -256,13 +241,17 @@ public function handle(ServerRequestInterface $request): ResponseInterface
         ]),
         Update{Entity}Command::class,
     );
+
     $this->validator->validate($command);
     $this->handler->handle($command);
+
     return new JsonDataSuccessResponse(1, 200);
 }
 ```
 
-### DELETE — без body
+---
+
+## DELETE
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
@@ -274,13 +263,19 @@ public function handle(ServerRequestInterface $request): ResponseInterface
         'currentUserId'   => $identity->id,
         'currentUserRole' => $identity->role->value,
     ], Delete{Entity}Command::class);
+
     $this->validator->validate($command);
     $this->handler->handle($command);
+
     return new JsonDataSuccessResponse(1, 200);
 }
 ```
 
-### POST — файл (multipart)
+---
+
+## Multipart upload
+
+Для multipart Action получает файл через `RequestFile::extract()` и передает во входную Command только нужные данные.
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
@@ -289,76 +284,118 @@ public function handle(ServerRequestInterface $request): ResponseInterface
     $file = RequestFile::extract($request, 'file');
 
     if ($file === null) {
-        throw new DomainExceptionModule(module: '{module}', message: 'error.file_required', code: 1);
+        throw new DomainExceptionModule(
+            module: '{module}',
+            message: 'error.file_required',
+            code: 1,
+        );
     }
 
     $url = $this->handler->handle(new Upload{Entity}FileCommand(
-        entityId:        Route::getArgumentToInt($request, 'id'),
-        currentUserId:   $identity->id,
+        entityId: Route::getArgumentToInt($request, 'id'),
+        currentUserId: $identity->id,
         currentUserRole: $identity->role->value,
-        tmpFilePath:     $file->getPath(),
+        tmpFilePath: $file->getPath(),
     ));
-    return new JsonDataResponse(['file' => $url]);
+
+    return new JsonDataResponse(['file' => $url], 200);
 }
 ```
 
-### POST — ответ с Cookie (login/refresh)
+---
+
+## Auth cookies
+
+### Login / refresh
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
-    // ...denormalize, validate...
+    $command = $this->denormalizer->denormalize(
+        (array) $request->getParsedBody(),
+        LoginCommand::class,
+    );
+
+    $this->validator->validate($command);
+
     $result = $this->handler->handle($command);
 
     $response = new JsonDataResponse([
         'access_token' => $result->accessToken,
         'expires_in'   => $result->expiresIn,
     ]);
+
     return $this->cookieManager->apply(
         response: $response,
-        context: new CookieContext(refreshToken: $result->refreshToken),
+        context: new CookieContext(
+            refreshToken: $result->refreshToken,
+            loggedIn: '1',
+        ),
     );
 }
 ```
 
-### POST — данные из Cookie (logout)
+### Logout
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
     $cookies = RequestCookies::get($request);
-    $this->handler->handle(new LogoutCommand(refreshToken: $cookies->refreshToken));
-    return $this->cookieManager->discard(new Response(204), new CookieContext());
+
+    $this->handler->handle(new LogoutCommand(
+        refreshToken: $cookies->refreshToken,
+    ));
+
+    return $this->cookieManager->discard(
+        new Response(204),
+        new CookieContext(),
+    );
 }
 ```
 
 ---
 
-## Регистрация маршрутов
+## Unifier
 
-`config/routes/v1.php`:
+Unifier описан отдельно в [Unifier](unifier.md). В Action показывается только вызов.
 
 ```php
-$app->group('/v1', new Group(static function (RouteCollectorProxy $group): void {
-    $group->get('', OpenApiAction::class); // Swagger UI / OpenAPI spec
+return new JsonDataResponse(
+    $this->unifier->unifyOne(null, $item)
+);
+```
 
-    $group->group('/{entities}', new Group(static function (RouteCollectorProxy $group): void {
-        $group->get('', GetAll{Entity}Action::class)->add(Authenticate::class);
-        $group->post('/create', Create{Entity}Action::class);
-        $group->get('/{id}', Get{Entity}ByIdAction::class);
-        $group->patch('/update/{id}', Update{Entity}Action::class)->add(Authenticate::class);
-        $group->delete('/delete/{id}', Delete{Entity}Action::class)->add(Authenticate::class);
-        $group->post('/{id}/file', Upload{Entity}FileAction::class)->add(Authenticate::class);
-    }));
+```php
+return new JsonDataItemsResponse(
+    count: $result->count,
+    items: $this->unifier->unify(null, $result->items),
+);
+```
 
-    $group->group('/auth', new Group(static function (RouteCollectorProxy $group): void {
-        $group->post('/login', LoginAction::class);
-        $group->post('/refresh', RefreshTokenAction::class)->add(ExtractCookies::class);
-        $group->post('/logout', LogoutAction::class)->add(ExtractCookies::class);
-    }));
+Если endpoint возвращает select, enum, permission map или success response, Unifier не нужен.
+
+---
+
+## Регистрация маршрутов
+
+Маршруты регистрируются в `config/routes/v1.php`.
+
+```php
+$group->group('/{entities}', new Group(static function (RouteCollectorProxy $group): void {
+    $group->get('', Get{Entities}Action::class)->add(Authenticate::class);
+    $group->get('/select', Get{Entity}SelectAction::class)->add(Authenticate::class);
+    $group->post('/create', Create{Entity}Action::class)->add(Authenticate::class);
+    $group->patch('/update/{id}', Update{Entity}Action::class)->add(Authenticate::class);
+    $group->delete('/delete/{id}', Delete{Entity}Action::class)->add(Authenticate::class);
+    $group->get('/{id}', Get{Entity}ByIdAction::class)->add(Authenticate::class);
 }));
 ```
 
-- `->add(Authenticate::class)` — маршрут требует JWT (`RequestIdentity` доступен в Action)
-- `->add(ExtractCookies::class)` — извлечение cookie перед обработчиком (refresh/logout)
-- `GET /v1` — отдаёт OpenAPI спецификацию (Swagger)
+`Authenticate` нужен, если Action использует `RequestIdentity::get($request)`.
+
+Для refresh/logout используется `ExtractCookies`.
+
+```php
+$group->post('/refresh', RefreshTokenAction::class)->add(ExtractCookies::class);
+$group->post('/logout', LogoutAction::class)->add(ExtractCookies::class);
+```
