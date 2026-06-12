@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Unifier\Order;
+
+use App\Components\Http\Unifier\UnifierHelper;
+use App\Components\Http\Unifier\UnifierInterface;
+use App\Modules\Order\ReadModel\OrderDelivery\Interface\OrderDeliveryModelInterface;
+use Override;
+
+final readonly class OrderDeliveryUnifier implements UnifierInterface
+{
+    #[Override]
+    public function unifyOne(?int $userId, ?object $item): array
+    {
+        if (!$item instanceof OrderDeliveryModelInterface) {
+            return [];
+        }
+
+        return $this->unify($userId, [$item])[0] ?? [];
+    }
+
+    /**
+     * @param list<object> $items
+     * @return list<array<string, mixed>>
+     */
+    #[Override]
+    public function unify(?int $userId, array $items): array
+    {
+        if ($items === []) {
+            return [];
+        }
+
+        return array_map($this->map(...), $items);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[Override]
+    public function map(object $item): array
+    {
+        return UnifierHelper::toArrayWithout($item, 'order_id');
+    }
+}

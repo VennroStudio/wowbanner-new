@@ -9,10 +9,6 @@ use App\Components\Http\Unifier\UnifierInterface;
 use App\Http\Unifier\Client\ClientUnifier;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdFetcher;
 use App\Modules\Client\Query\Client\GetById\ClientGetByIdQuery;
-use App\Modules\Material\Query\Material\GetById\MaterialGetByIdFetcher;
-use App\Modules\Material\Query\Material\GetById\MaterialGetByIdQuery;
-use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdFetcher;
-use App\Modules\Material\Query\MaterialOption\GetById\MaterialOptionGetByIdQuery;
 use App\Modules\Order\Query\OrderDelivery\FindByOrderId\OrderDeliveryFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderDelivery\FindByOrderId\OrderDeliveryFindByOrderIdQuery;
 use App\Modules\Order\Query\OrderFile\FindByOrderId\OrderFileFindByOrderIdFetcher;
@@ -21,8 +17,6 @@ use App\Modules\Order\Query\OrderItem\FindByOrderId\OrderItemFindByOrderIdFetche
 use App\Modules\Order\Query\OrderItem\FindByOrderId\OrderItemFindByOrderIdQuery;
 use App\Modules\Order\Query\OrderItemMilling\FindByOrderId\OrderItemMillingFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderItemMilling\FindByOrderId\OrderItemMillingFindByOrderIdQuery;
-use App\Modules\Order\Query\OrderItemProcessing\FindByItemId\OrderItemProcessingFindByItemIdFetcher;
-use App\Modules\Order\Query\OrderItemProcessing\FindByItemId\OrderItemProcessingFindByItemIdQuery;
 use App\Modules\Order\Query\OrderNotification\FindByOrderId\OrderNotificationFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderNotification\FindByOrderId\OrderNotificationFindByOrderIdQuery;
 use App\Modules\Order\Query\OrderPayment\FindByOrderId\OrderPaymentFindByOrderIdFetcher;
@@ -32,17 +26,7 @@ use App\Modules\Order\Query\OrderSection\FindByOrderId\OrderSectionFindByOrderId
 use App\Modules\Order\Query\OrderService\FindByOrderId\OrderServiceFindByOrderIdFetcher;
 use App\Modules\Order\Query\OrderService\FindByOrderId\OrderServiceFindByOrderIdQuery;
 use App\Modules\Order\ReadModel\Order\Interface\OrderModelInterface;
-use App\Modules\Order\ReadModel\OrderDelivery\OrderDeliveryByOrderId;
-use App\Modules\Order\ReadModel\OrderFile\OrderFileByOrderId;
-use App\Modules\Order\ReadModel\OrderItem\OrderItemByOrderId;
-use App\Modules\Order\ReadModel\OrderItemMilling\OrderItemMillingByOrderId;
-use App\Modules\Order\ReadModel\OrderItemProcessing\OrderItemProcessingByOrderId;
-use App\Modules\Order\ReadModel\OrderNotification\OrderNotificationByOrderId;
-use App\Modules\Order\ReadModel\OrderPayment\OrderPaymentByOrderId;
-use App\Modules\Order\ReadModel\OrderSection\OrderSectionByOrderId;
 use App\Modules\Order\ReadModel\OrderService\OrderServiceByOrderId;
-use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdFetcher;
-use App\Modules\Printing\Query\Printing\GetById\PrintingGetByIdQuery;
 use App\Modules\User\Query\User\GetById\UserGetByIdFetcher;
 use App\Modules\User\Query\User\GetById\UserGetByIdQuery;
 use Doctrine\DBAL\Exception;
@@ -54,18 +38,22 @@ final readonly class OrderUnifier implements UnifierInterface
         private ClientGetByIdFetcher $clientFetcher,
         private ClientUnifier $clientUnifier,
         private UserGetByIdFetcher $userFetcher,
-        private PrintingGetByIdFetcher $printingFetcher,
-        private MaterialGetByIdFetcher $materialFetcher,
-        private MaterialOptionGetByIdFetcher $materialOptionFetcher,
         private OrderDeliveryFindByOrderIdFetcher $deliveryFetcher,
+        private OrderDeliveryUnifier $deliveryUnifier,
         private OrderFileFindByOrderIdFetcher $fileFetcher,
+        private OrderFileUnifier $fileUnifier,
         private OrderItemFindByOrderIdFetcher $itemFetcher,
-        private OrderItemProcessingFindByItemIdFetcher $itemProcessingFetcher,
+        private OrderItemUnifier $itemUnifier,
         private OrderItemMillingFindByOrderIdFetcher $itemMillingFetcher,
+        private OrderItemMillingUnifier $itemMillingUnifier,
         private OrderPaymentFindByOrderIdFetcher $paymentFetcher,
+        private OrderPaymentUnifier $paymentUnifier,
         private OrderSectionFindByOrderIdFetcher $sectionFetcher,
+        private OrderSectionUnifier $sectionUnifier,
         private OrderServiceFindByOrderIdFetcher $serviceFetcher,
+        private OrderServiceUnifier $serviceUnifier,
         private OrderNotificationFindByOrderIdFetcher $notificationFetcher,
+        private OrderNotificationUnifier $notificationUnifier,
     ) {}
 
     #[Override]
@@ -124,7 +112,7 @@ final readonly class OrderUnifier implements UnifierInterface
         $designer = $designerId !== null ? $this->userFetcher->fetch(new UserGetByIdQuery($designerId)) : null;
 
         $data['delivery'] = $delivery !== null
-            ? UnifierHelper::toArrayWithout($delivery, 'order_id')
+            ? $this->deliveryUnifier->unifyOne(null, $delivery)
             : null;
         $data['client'] = $this->clientUnifier->unifyOne(null, $client);
         $data['client']['name'] = $this->buildClientName($client);
@@ -140,121 +128,16 @@ final readonly class OrderUnifier implements UnifierInterface
                 'name' => $this->buildUserName($designer->firstName, $designer->lastName),
             ]
             : null;
-        $data['files'] = $this->mapFiles($files);
-        $data['items'] = $this->mapItems($items);
-        $data['millings'] = $this->mapMillings($millings);
-        $data['payments'] = $this->mapPayments($payments);
-        $data['sections'] = $this->mapSections($sections);
-        $data['services'] = $this->mapServices($services);
-        $data['notifications'] = $this->mapNotifications($notifications);
+        $data['files'] = $this->fileUnifier->unify(null, $files);
+        $data['items'] = $this->itemUnifier->unify(null, $items);
+        $data['millings'] = $this->itemMillingUnifier->unify(null, $millings);
+        $data['payments'] = $this->paymentUnifier->unify(null, $payments);
+        $data['sections'] = $this->sectionUnifier->unify(null, $sections);
+        $data['services'] = $this->serviceUnifier->unify(null, $services);
+        $data['notifications'] = $this->notificationUnifier->unify(null, $notifications);
         $data['price'] = $this->calculatePrice($services);
 
         return UnifierHelper::withTimestamps($data, $item);
-    }
-
-    /**
-     * @param list<OrderItemByOrderId> $items
-     * @return list<array<string, mixed>>
-     * @throws Exception
-     */
-    private function mapItems(array $items): array
-    {
-        return array_map(function (OrderItemByOrderId $item): array {
-            $data = UnifierHelper::toArrayWithout($item, 'order_id');
-            $processings = $this->itemProcessingFetcher->fetch(new OrderItemProcessingFindByItemIdQuery($item->id));
-            $printing = $this->printingFetcher->fetch(new PrintingGetByIdQuery($item->printId));
-            $material = $this->materialFetcher->fetch(new MaterialGetByIdQuery($item->materialId));
-            $option = $this->materialOptionFetcher->fetch(new MaterialOptionGetByIdQuery($item->optionId));
-
-            $data['processings'] = array_map(
-                static fn(OrderItemProcessingByOrderId $processing): array => UnifierHelper::toArrayWithout(
-                    $processing,
-                    'order_item_id',
-                ),
-                $processings,
-            );
-            $data['print'] = UnifierHelper::toArrayWithout($printing);
-            $data['material'] = UnifierHelper::toArrayWithout($material, 'description');
-            $data['option'] = UnifierHelper::toArrayWithout($option, 'material_id', 'pricingType', 'isCut');
-
-            return $data;
-        }, $items);
-    }
-
-    /**
-     * @param list<OrderFileByOrderId> $items
-     * @return list<array<string, mixed>>
-     */
-    private function mapFiles(array $items): array
-    {
-        return array_map(
-            static fn(OrderFileByOrderId $item): array => UnifierHelper::toArrayWithout($item, 'order_id'),
-            $items,
-        );
-    }
-
-    /**
-     * @param list<OrderItemMillingByOrderId> $items
-     * @return list<array<string, mixed>>
-     */
-    private function mapMillings(array $items): array
-    {
-        return array_map(function (OrderItemMillingByOrderId $item): array {
-            $data = UnifierHelper::toArrayWithout($item, 'order_id');
-            $printing = $this->printingFetcher->fetch(new PrintingGetByIdQuery($item->printId));
-
-            $data['print'] = UnifierHelper::toArrayWithout($printing);
-
-            return $data;
-        }, $items);
-    }
-
-    /**
-     * @param list<OrderPaymentByOrderId> $items
-     * @return list<array<string, mixed>>
-     */
-    private function mapPayments(array $items): array
-    {
-        return array_map(
-            static fn(OrderPaymentByOrderId $item): array => UnifierHelper::toArrayWithout($item, 'order_id'),
-            $items,
-        );
-    }
-
-    /**
-     * @param list<OrderSectionByOrderId> $items
-     * @return list<array<string, mixed>>
-     */
-    private function mapSections(array $items): array
-    {
-        return array_map(
-            static fn(OrderSectionByOrderId $item): array => UnifierHelper::toArrayWithout($item, 'order_id'),
-            $items,
-        );
-    }
-
-    /**
-     * @param list<OrderServiceByOrderId> $items
-     * @return list<array<string, mixed>>
-     */
-    private function mapServices(array $items): array
-    {
-        return array_map(
-            static fn(OrderServiceByOrderId $item): array => UnifierHelper::toArrayWithout($item, 'order_id'),
-            $items,
-        );
-    }
-
-    /**
-     * @param list<OrderNotificationByOrderId> $items
-     * @return list<array<string, mixed>>
-     */
-    private function mapNotifications(array $items): array
-    {
-        return array_map(
-            static fn(OrderNotificationByOrderId $item): array => UnifierHelper::toArrayWithout($item, 'order_id'),
-            $items,
-        );
     }
 
     /**
