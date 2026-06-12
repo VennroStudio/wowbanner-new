@@ -4,15 +4,25 @@
 
 ---
 
-## Состав Service
+## Назначение
 
-Service собирается только из тех блоков, которые нужны конкретному сценарию.
+Service - это вспомогательная логика модуля.
 
-- Обычный Service
-- SyncerService для связанных сущностей
-- Storage / File Service
-- Вызов Handler'ов подсущностей
-- Приватные методы алгоритма
+Он нужен, чтобы не превращать `Handler`, `Entity` и `Repository` в мусорный класс со всем подряд.
+
+Service создается только когда в модуле есть отдельная задача:
+
+- сложная валидация или нормализация данных;
+- синхронизация связанных сущностей;
+- генерация, хеширование, расчет;
+- файловая логика конкретного модуля;
+- координация нескольких Handler'ов подсущностей.
+
+Не нужно создавать Service ради одного простого вызова.
+Если логика спокойно помещается в Handler и не раздувает его, отдельный Service не нужен.
+
+В этом файле описываются только сервисы модулей из `src/Modules/{Module}/Service/`.
+Переиспользуемые сервисы из `src/Components/` здесь не описываются.
 
 PermissionService описывается отдельно в [Permission](permission.md).
 
@@ -20,9 +30,86 @@ QueryCacheInvalidator описывается отдельно в [Cache](cache.m
 
 ---
 
-## Обычный Service
+## ValidatorService
 
-Используется для повторяемой логики, внешнего клиента, хеширования, генерации, расчета или технической операции.
+Используется, когда проверка данных состоит из нескольких условий, проверок списков или запросов.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Service;
+
+use App\Components\Exception\DomainExceptionModule;
+
+final readonly class {Entity}ValidatorService
+{
+    /**
+     * @param list<{Item}> $items
+     */
+    public function validate(array $items): void
+    {
+        foreach ($items as $item) {
+            if ($item->name === '') {
+                throw new DomainExceptionModule(
+                    module: '{module}',
+                    message: 'error.{entity}_name_required',
+                    code: 1,
+                );
+            }
+        }
+    }
+}
+```
+
+---
+
+## SyncerService
+
+Используется, когда основная сущность имеет связанные таблицы, которые нужно создать, обновить или удалить одним сценарием.
+
+Пример: `{Entity}` и `{Entity}Image`, `{Entity}` и `{Entity}Option`, `{Entity}` и `{Entity}Price`.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Modules\{Module}\Service;
+
+use App\Modules\{Module}\Command\{ChildEntity}\Create\Create{ChildEntity}Handler;
+use App\Modules\{Module}\Command\{ChildEntity}\Delete\Delete{ChildEntity}Handler;
+use App\Modules\{Module}\Command\{ChildEntity}\Update\Update{ChildEntity}Handler;
+use App\Modules\{Module}\Entity\{ChildEntity}\{ChildEntity}Repository;
+
+final readonly class {Entity}StructureSyncerService
+{
+    public function __construct(
+        private {ChildEntity}Repository $repository,
+        private Create{ChildEntity}Handler $createHandler,
+        private Update{ChildEntity}Handler $updateHandler,
+        private Delete{ChildEntity}Handler $deleteHandler,
+    ) {}
+
+    /**
+     * @param list<{ChildEntity}Item> $items
+     */
+    public function sync(int $entityId, array $items): void
+    {
+        // create / update / delete linked rows
+    }
+}
+```
+
+SyncerService координирует сценарий.
+Состояние сущностей меняется через Handler'ы и методы самих Entity.
+
+---
+
+## Технический Service
+
+Используется для небольшой технической логики модуля: хеширование, генерация токена, расчет значения.
 
 ```php
 <?php
@@ -35,23 +122,18 @@ final readonly class {Name}HasherService
 {
     public function hash(string $value): string
     {
-        return password_hash($value, PASSWORD_ARGON2I);
-    }
-
-    public function verify(string $value, string $hash): bool
-    {
-        return password_verify($value, $hash);
+        return hash('sha256', $value);
     }
 }
 ```
 
 ---
 
-## SyncerService
+## ExternalApiService
 
-Используется, когда основная сущность имеет связанные таблицы, которые нужно синхронизировать как часть одного сценария.
+Используется как вспомогательный сервис модуля для работы с внешними API, клиентами и интеграциями.
 
-Пример: `{Entity}` и `{Entity}Image`, `{Entity}` и `{Entity}Option`, `{Entity}` и `{Entity}Price`.
+Если в модуле нет внешнего API или отдельной интеграционной логики, такой Service не нужен.
 
 ```php
 <?php
@@ -60,104 +142,24 @@ declare(strict_types=1);
 
 namespace App\Modules\{Module}\Service;
 
-use App\Modules\{Module}\Command\{ChildEntity}\Create\Create{ChildEntity}Command;
-use App\Modules\{Module}\Command\{ChildEntity}\Create\Create{ChildEntity}Handler;
-use App\Modules\{Module}\Command\{ChildEntity}\Delete\Delete{ChildEntity}Command;
-use App\Modules\{Module}\Command\{ChildEntity}\Delete\Delete{ChildEntity}Handler;
-use App\Modules\{Module}\Command\{ChildEntity}\Update\Update{ChildEntity}Command;
-use App\Modules\{Module}\Command\{ChildEntity}\Update\Update{ChildEntity}Handler;
-use App\Modules\{Module}\Entity\{ChildEntity}\{ChildEntity}Repository;
-
-final readonly class {Entity}StructureSyncerService
+final readonly class {Entity}ExternalApiService
 {
-    public function __construct(
-        private {ChildEntity}Repository $childRepository,
-        private Create{ChildEntity}Handler $createHandler,
-        private Update{ChildEntity}Handler $updateHandler,
-        private Delete{ChildEntity}Handler $deleteHandler,
-    ) {}
-
     /**
-     * @param list<{ChildEntity}Payload> $children
+     * @return array{path: string, originalName: string}
      */
-    public function sync(int $entityId, array $children): void
+    public function upload(int $entityId, string $tmpFilePath, string $originalName): array
     {
-        $existing = $this->childRepository->findByEntityId($entityId);
-        $incomingIds = [];
+        $path = sprintf('{entity}/%d/%s', $entityId, basename($tmpFilePath));
 
-        foreach ($children as $child) {
-            if ($child->id === null) {
-                $this->createHandler->handle(
-                    new Create{ChildEntity}Command(
-                        entityId: $entityId,
-                        name: $child->name,
-                        sort: $child->sort,
-                    )
-                );
-
-                continue;
-            }
-
-            $incomingIds[] = $child->id;
-
-            $this->updateHandler->handle(
-                new Update{ChildEntity}Command(
-                    id: $child->id,
-                    name: $child->name,
-                    sort: $child->sort,
-                )
-            );
-        }
-
-        foreach ($existing as $entity) {
-            if (!\in_array((int) $entity->id, $incomingIds, true)) {
-                $this->deleteHandler->handle(
-                    new Delete{ChildEntity}Command(id: (int) $entity->id)
-                );
-            }
-        }
-    }
-}
-```
-
-SyncerService координирует сценарий, но состояние Entity меняется через методы самой Entity внутри соответствующих Handler'ов.
-
----
-
-## Storage / File Service
-
-Используется для работы с файлами, путями, внешним хранилищем и заменой старого файла новым.
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Modules\{Module}\Service;
-
-use App\Components\Storage\StorageInterface;
-use App\Modules\{Module}\Entity\{Entity}\Fields\Enums\{Entity}Directory;
-use Psr\Http\Message\UploadedFileInterface;
-
-final readonly class {Entity}FileStorageService
-{
-    public function __construct(
-        private StorageInterface $storage,
-    ) {}
-
-    public function upload(int $entityId, UploadedFileInterface $file): string
-    {
-        return $this->storage->upload(
-            file: $file,
-            directory: {Entity}Directory::FILES->getPath($entityId),
-        );
+        return [
+            'path' => $path,
+            'originalName' => $originalName,
+        ];
     }
 
-    public function replace(?string $oldPath, string $newPath): void
+    public function delete(string $path): void
     {
-        if ($oldPath !== null) {
-            $this->storage->delete($oldPath);
-        }
+        // delete file by module path
     }
 }
 ```
@@ -170,13 +172,16 @@ Enum-директории описаны отдельно в [Enum](enum.md).
 
 ```php
 public function __construct(
+    private {Entity}ValidatorService $validator,
     private {Entity}StructureSyncerService $structureSyncer,
 ) {}
 
 public function handle(Update{Entity}Command $command): void
 {
-    // ...
+    $this->validator->validate($command->items);
 
-    $this->structureSyncer->sync($command->id, $command->children);
+    // update main entity
+
+    $this->structureSyncer->sync($command->id, $command->items);
 }
 ```
