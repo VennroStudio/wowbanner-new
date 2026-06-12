@@ -66,10 +66,9 @@ final readonly class MaterialImageByMaterial implements MaterialImageModelInterf
     public function toArray(): array
     {
         return [
-            'id'          => $this->id,
-            'material_id' => $this->materialId,
-            'path'        => $this->path,
-            'alt'         => $this->alt,
+            'id'   => $this->id,
+            'path' => $this->path,
+            'alt'  => $this->alt,
         ];
     }
 }

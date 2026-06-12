@@ -73,7 +73,6 @@ final readonly class MaterialOptionDetails implements MaterialOptionModelInterfa
         return [
             'id'           => $this->id,
             'name'         => $this->name,
-            'material_id'  => $this->materialId,
             'pricing_type' => [
                 'id'    => $this->pricingType->value,
                 'label' => $this->pricingType->getLabel(),

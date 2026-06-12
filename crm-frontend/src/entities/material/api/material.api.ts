@@ -6,11 +6,60 @@ import type {
   Material,
   MaterialCreateUpdateOption,
   MaterialEnumRef,
+  MaterialImage,
   MaterialOption,
   MaterialOptionSelectOption,
   MaterialSelectOption,
   PaginatedResponse,
 } from '../model/types';
+
+type ApiMaterialOptionProcessing = {
+  id: number;
+  processing_id: number;
+  processing_name?: string;
+};
+
+type ApiMaterialPricingByAreaRow = {
+  id: number;
+  dpi_type: MaterialEnumRef;
+  area_range_type: MaterialEnumRef;
+  price: string;
+  cost: string;
+  print_hours: string;
+};
+
+type ApiMaterialPricingByPieceRow = {
+  id: number;
+  variant_type: MaterialEnumRef;
+  price: string;
+  cost: string;
+  print_hours: string;
+};
+
+type ApiMaterialPricingByCutRow = {
+  id: number;
+  type: MaterialEnumRef;
+  price: string;
+};
+
+type ApiMaterialOption = {
+  id: number;
+  name: string;
+  pricing_type: MaterialEnumRef;
+  is_cut: boolean;
+  pricing_by_area?: ApiMaterialPricingByAreaRow[];
+  pricing_by_piece?: ApiMaterialPricingByPieceRow[];
+  pricing_by_cut?: ApiMaterialPricingByCutRow[];
+  processings?: ApiMaterialOptionProcessing[];
+};
+
+type ApiMaterial = {
+  id: number;
+  name: string;
+  description: string;
+  images?: MaterialImage[];
+  options?: ApiMaterialOption[];
+};
 
 export type CreateMaterialBody = {
   name: string;
@@ -24,21 +73,72 @@ export type UpdateMaterialBody = {
   options?: MaterialCreateUpdateOption[];
 };
 
+const mapMaterialOption = (option: ApiMaterialOption): MaterialOption => ({
+  id: option.id,
+  name: option.name,
+  pricingType: option.pricing_type,
+  isCut: option.is_cut,
+  pricingByArea: (option.pricing_by_area ?? []).map((row) => ({
+    id: row.id,
+    dpiType: row.dpi_type,
+    areaRangeType: row.area_range_type,
+    price: row.price,
+    cost: row.cost,
+    printHours: row.print_hours,
+  })),
+  pricingByPiece: (option.pricing_by_piece ?? []).map((row) => ({
+    id: row.id,
+    variantType: row.variant_type,
+    price: row.price,
+    cost: row.cost,
+    printHours: row.print_hours,
+  })),
+  pricingByCut: (option.pricing_by_cut ?? []).map((row) => ({
+    id: row.id,
+    type: row.type,
+    price: row.price,
+  })),
+  processings: (option.processings ?? []).map((processing) => ({
+    id: processing.id,
+    processingId: processing.processing_id,
+    processingName: processing.processing_name,
+  })),
+});
+
+const mapMaterial = (material: ApiMaterial): Material => ({
+  id: material.id,
+  name: material.name,
+  description: material.description,
+  images: material.images ?? [],
+  options: material.options?.map(mapMaterialOption),
+});
+
 export const materialApi = {
   getMaterials: async (params?: GetMaterialsParams) => {
-    const { data } = await apiClient.get<PaginatedResponse<Material>>(API_ENDPOINTS.MATERIALS.LIST, {
+    const { data } = await apiClient.get<PaginatedResponse<ApiMaterial>>(API_ENDPOINTS.MATERIALS.LIST, {
       params: {
         page: params?.page || 1,
         perPage: params?.perPage || 20,
         search: params?.search,
       },
     });
-    return data;
+
+    return {
+      ...data,
+      data: {
+        ...data.data,
+        items: data.data.items.map(mapMaterial),
+      },
+    };
   },
 
   getMaterial: async (id: number | string) => {
-    const { data } = await apiClient.get<ApiDataResponse<Material>>(API_ENDPOINTS.MATERIALS.BY_ID(id));
-    return data;
+    const { data } = await apiClient.get<ApiDataResponse<ApiMaterial>>(API_ENDPOINTS.MATERIALS.BY_ID(id));
+
+    return {
+      ...data,
+      data: mapMaterial(data.data),
+    };
   },
 
   getMaterialSelectOptions: async (): Promise<MaterialSelectOption[]> => {
@@ -61,11 +161,11 @@ export const materialApi = {
     materialId: number | string,
     optionId: number | string,
   ): Promise<MaterialOption> => {
-    const { data } = await apiClient.get<ApiDataResponse<MaterialOption>>(
+    const { data } = await apiClient.get<ApiDataResponse<ApiMaterialOption>>(
       API_ENDPOINTS.MATERIALS.OPTION_DETAIL(materialId, optionId),
     );
 
-    return data.data;
+    return mapMaterialOption(data.data);
   },
 
   createMaterial: async (body: CreateMaterialBody) => {

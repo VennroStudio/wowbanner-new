@@ -82,9 +82,7 @@ final readonly class MaterialProcessingByMaterialIdAndOptionId implements Materi
     public function toArray(): array
     {
         return [
-            'id'            => $this->id,
-            'material_id'   => $this->materialId,
-            'option_id'     => $this->optionId,
+            'id'              => $this->id,
             'processing_id'   => $this->processingId,
             'processing_name' => $this->processingName,
         ];

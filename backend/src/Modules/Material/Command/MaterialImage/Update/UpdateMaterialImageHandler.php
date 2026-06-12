@@ -22,7 +22,7 @@ final readonly class UpdateMaterialImageHandler
     /** @throws AccessDeniedException */
     public function handle(UpdateMaterialImageCommand $command): void
     {
-        $this->materialPermissionService->check(
+        $this->materialPermissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: MaterialPermission::UPDATE,
         );

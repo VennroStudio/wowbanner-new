@@ -33,7 +33,7 @@ final readonly class CreateMaterialImageHandler
      */
     public function handle(CreateMaterialImageCommand $command): void
     {
-        $this->materialPermissionService->check(
+        $this->materialPermissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: MaterialPermission::CREATE,
         );

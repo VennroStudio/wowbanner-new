@@ -77,11 +77,9 @@ final readonly class MaterialPricingCutByMaterialIdAndOptionId implements Materi
     public function toArray(): array
     {
         return [
-            'id'          => $this->id,
-            'material_id' => $this->materialId,
-            'option_id'   => $this->optionId,
-            'type'        => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
-            'price'       => $this->price,
+            'id'    => $this->id,
+            'type'  => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
+            'price' => $this->price,
         ];
     }
 }

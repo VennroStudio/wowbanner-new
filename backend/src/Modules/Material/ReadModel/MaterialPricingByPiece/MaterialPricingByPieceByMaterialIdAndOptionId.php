@@ -86,8 +86,6 @@ final readonly class MaterialPricingByPieceByMaterialIdAndOptionId implements Ma
     {
         return [
             'id'           => $this->id,
-            'material_id'  => $this->materialId,
-            'option_id'    => $this->optionId,
             'variant_type' => [
                 'id'    => $this->variantType->value,
                 'label' => $this->variantType->getLabel(),

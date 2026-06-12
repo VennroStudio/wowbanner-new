@@ -26,7 +26,7 @@ final readonly class CreateMaterialHandler
     /** @throws AccessDeniedException|Exception */
     public function handle(CreateMaterialCommand $command): void
     {
-        $this->materialPermissionService->check(
+        $this->materialPermissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: MaterialPermission::CREATE,
         );

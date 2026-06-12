@@ -24,7 +24,7 @@ final readonly class DeleteMaterialImageHandler
     /** @throws AccessDeniedException */
     public function handle(DeleteMaterialImageCommand $command): void
     {
-        $this->materialPermissionService->check(
+        $this->materialPermissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: MaterialPermission::DELETE,
         );

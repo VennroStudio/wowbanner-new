@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Material;
 
-use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
+use App\Components\ReadModel\ReadModelInterface;
 use App\Modules\Material\Query\MaterialPricingByArea\FindByMaterialIdAndOptionId\MaterialPricingByAreaFindByMaterialIdAndOptionIdFetcher;
 use App\Modules\Material\Query\MaterialPricingByArea\FindByMaterialIdAndOptionId\MaterialPricingByAreaFindByMaterialIdAndOptionIdQuery;
 use App\Modules\Material\Query\MaterialPricingByPiece\FindByMaterialIdAndOptionId\MaterialPricingByPieceFindByMaterialIdAndOptionIdFetcher;
@@ -71,25 +71,25 @@ final readonly class MaterialOptionUnifier implements UnifierInterface
         $optionId = $item->getId();
 
         $data['pricing_by_area'] = array_map(
-            static fn(object $price): array => UnifierHelper::toArrayWithout($price, 'material_id', 'option_id'),
+            static fn(ReadModelInterface $price): array => $price->toArray(),
             $this->materialPricingByAreaFetcher->fetch(
                 new MaterialPricingByAreaFindByMaterialIdAndOptionIdQuery($materialId, $optionId),
             ),
         );
         $data['pricing_by_piece'] = array_map(
-            static fn(object $price): array => UnifierHelper::toArrayWithout($price, 'material_id', 'option_id'),
+            static fn(ReadModelInterface $price): array => $price->toArray(),
             $this->materialPricingByPieceFetcher->fetch(
                 new MaterialPricingByPieceFindByMaterialIdAndOptionIdQuery($materialId, $optionId),
             ),
         );
         $data['pricing_by_cut'] = array_map(
-            static fn(object $price): array => UnifierHelper::toArrayWithout($price, 'material_id', 'option_id'),
+            static fn(ReadModelInterface $price): array => $price->toArray(),
             $this->materialPricingCutFetcher->fetch(
                 new MaterialPricingCutFindByMaterialIdAndOptionIdQuery($materialId, $optionId),
             ),
         );
         $data['processings'] = array_map(
-            static fn(object $processing): array => UnifierHelper::toArrayWithout($processing, 'material_id', 'option_id'),
+            static fn(ReadModelInterface $processing): array => $processing->toArray(),
             $this->materialProcessingFetcher->fetch(
                 new MaterialProcessingFindByMaterialIdAndOptionIdQuery($materialId, $optionId),
             ),

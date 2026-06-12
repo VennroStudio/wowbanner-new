@@ -75,7 +75,7 @@ final readonly class MaterialUnifier implements UnifierInterface
         $grouped = [];
 
         foreach ($images as $image) {
-            $data = UnifierHelper::toArrayWithout($image, 'material_id');
+            $data = $image->toArray();
             $data = UnifierHelper::transformField($data, 'path', $this->s3Transformer->buildUrl(...));
             $grouped[$image->getMaterialId()][] = $data;
         }
