@@ -43,12 +43,6 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
                     new OA\Property(property: 'generalNote', type: 'string', nullable: true),
                     new OA\Property(property: 'extension', type: 'string', nullable: true),
                     new OA\Property(property: 'delivery', type: 'object', nullable: true),
-                    new OA\Property(
-                        property: 'keepFileIds',
-                        description: 'ID уже загруженных файлов, которые нужно оставить у заказа',
-                        type: 'array',
-                        items: new OA\Items(type: 'integer')
-                    ),
                     new OA\Property(property: 'items', type: 'array', items: new OA\Items(type: 'object')),
                     new OA\Property(property: 'millings', type: 'array', items: new OA\Items(type: 'object')),
                     new OA\Property(property: 'payments', type: 'array', items: new OA\Items(type: 'object')),
@@ -111,7 +105,6 @@ final readonly class UpdateOrderAction implements RequestHandlerInterface
                 'currentUserId'   => $identity->id,
                 'currentUserRole' => $identity->role->value,
                 'files'           => $files,
-                'keepFileIds'     => $this->extractKeepFileIds($body),
             ]),
             UpdateOrderCommand::class,
         );
@@ -120,18 +113,5 @@ final readonly class UpdateOrderAction implements RequestHandlerInterface
         $this->handler->handle($command);
 
         return new JsonDataSuccessResponse(1, 200);
-    }
-
-    /**
-     * @param array<string, mixed> $body
-     * @return list<int>|null
-     */
-    private function extractKeepFileIds(array $body): ?array
-    {
-        if (!\array_key_exists('keepFileIds', $body)) {
-            return null;
-        }
-
-        return array_map('intval', array_values((array)$body['keepFileIds']));
     }
 }
