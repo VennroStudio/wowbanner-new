@@ -83,11 +83,7 @@ export const buildCreateOrderBody = (
 export const buildUpdateOrderBody = (
   values: OrderFormValues,
   files: File[],
-  keepFileIds: number[],
-): UpdateOrderBody => ({
-  ...buildOrderBodyBase(values, files),
-  keepFileIds,
-});
+): UpdateOrderBody => buildOrderBodyBase(values, files);
 
 export const mapOrderToFormValues = (order: Order): OrderFormValues => ({
   clientId: String(order.client_id),

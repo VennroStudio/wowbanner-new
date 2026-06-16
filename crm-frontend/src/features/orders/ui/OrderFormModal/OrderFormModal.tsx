@@ -76,7 +76,7 @@ export const OrderFormModal = ({
     docs: string | null;
   } | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [removedFileIds, setRemovedFileIds] = useState<number[]>([]);
+  const [deletedFileIds, setDeletedFileIds] = useState<number[]>([]);
   const [downloadingFileId, setDownloadingFileId] = useState<number | null>(null);
 
   const { data: userOptions = [], isLoading: isLoadingUsers } = useUserSelectQuery(undefined, { enabled: open });
@@ -145,7 +145,7 @@ export const OrderFormModal = ({
       reset(getOrderFormDefaultValues());
       setSelectedClientOverride(null);
       setFiles([]);
-      setRemovedFileIds([]);
+      setDeletedFileIds([]);
       setIsClientModalOpen(false);
     },
   });
@@ -184,7 +184,7 @@ export const OrderFormModal = ({
       } else if (orderId != null) {
         await updateMutation.mutateAsync({
           id: orderId,
-          body: buildUpdateOrderBody(values, files, keepFileIds),
+          body: buildUpdateOrderBody(values, files),
         });
       }
       onSuccess?.(mode);
@@ -203,8 +203,8 @@ export const OrderFormModal = ({
     setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index));
   };
 
-  const handleRemoveExistingFile = (fileId: number) => {
-    setRemovedFileIds((current) => (
+  const hideDeletedExistingFile = (fileId: number) => {
+    setDeletedFileIds((current) => (
       current.includes(fileId) ? current : [...current, fileId]
     ));
   };
@@ -236,7 +236,7 @@ export const OrderFormModal = ({
 
     try {
       await deleteOrderFileMutation.mutateAsync({ fileId, orderId });
-      handleRemoveExistingFile(fileId);
+      hideDeletedExistingFile(fileId);
     } catch (e) {
       setSubmitError(getApiErrorMessage(e));
     }
@@ -255,10 +255,7 @@ export const OrderFormModal = ({
   };
 
   const existingFiles = orderResponse?.data?.files ?? [];
-  const keepFileIds = existingFiles
-    .filter((file) => !removedFileIds.includes(file.id))
-    .map((file) => file.id);
-  const visibleExistingFiles = existingFiles.filter((file) => keepFileIds.includes(file.id));
+  const visibleExistingFiles = existingFiles.filter((file) => !deletedFileIds.includes(file.id));
   const selectedClient = selectedClientOverride ?? (
     mode === 'edit' && orderResponse?.data
       ? {

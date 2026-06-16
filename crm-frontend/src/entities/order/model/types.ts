@@ -220,9 +220,7 @@ export interface CreateUpdateOrderBody {
 
 export type CreateOrderBody = CreateUpdateOrderBody;
 
-export interface UpdateOrderBody extends CreateUpdateOrderBody {
-  keepFileIds?: number[];
-}
+export type UpdateOrderBody = CreateUpdateOrderBody;
 
 export interface GetOrdersParams {
   page?: number;
