@@ -17,14 +17,11 @@ final readonly class UpdateProductCommand
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
         public int $currentUserId,
-
         #[Assert\NotBlank]
         public int $currentUserRole,
-
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
         public int $id,
-
         #[Assert\NotBlank(message: 'validation.product_name_required')]
         #[Assert\Length(
             min: self::NAME_MIN_LENGTH,

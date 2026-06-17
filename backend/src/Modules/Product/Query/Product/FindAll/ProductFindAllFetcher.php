@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Product\Query\Product\FindAll;
 
 use App\Components\ReadModel\ModelCountItemsResult;
-use App\Modules\Product\ReadModel\Product\ProductFindAll;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Product\ReadModel\Product\Interface\ProductModelInterface;
+use App\Modules\Product\ReadModel\Product\ProductIdName;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -18,10 +20,12 @@ final readonly class ProductFindAllFetcher
     ) {}
 
     /**
-     * @return ModelCountItemsResult<ProductFindAll>
+     * @template T of ProductModelInterface
+     * @param class-string<T> $modelClass
+     * @return ModelCountItemsResult<T>
      * @throws Exception
      */
-    public function fetch(ProductFindAllQuery $query): ModelCountItemsResult
+    public function fetch(ProductFindAllQuery $query, string $modelClass = ProductIdName::class): ModelCountItemsResult
     {
         $qb = $this->connection->createQueryBuilder()
             ->from(self::TABLE);
@@ -34,15 +38,14 @@ final readonly class ProductFindAllFetcher
         $countQb = clone $qb;
         $total = (int)$countQb->select('COUNT(id)')->executeQuery()->fetchOne();
 
-        $rows = $qb->select('id', 'name')
+        $rows = $qb->select(...ReadModelFields::select($modelClass::fields()))
             ->orderBy('id', 'DESC')
             ->setFirstResult($query->getOffset())
             ->setMaxResults($query->perPage)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<ProductFindAll> $items */
-        $items = ProductFindAll::fromRows($rows);
+        $items = $modelClass::fromRows($rows);
 
         return new ModelCountItemsResult(
             items: $items,

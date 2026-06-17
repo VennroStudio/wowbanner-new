@@ -4,19 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Product\ReadModel\ProductMaterial\Interface;
 
-interface ProductMaterialModelInterface
+use App\Components\ReadModel\ReadModelInterface;
+
+interface ProductMaterialModelInterface extends ReadModelInterface
 {
-    public function getId(): int;
-
     public function getProductId(): int;
-
-    /**
-     * @return array{
-     *     id: int,
-     *     product_id: int,
-     *     material_id: int,
-     *     material_option_id: int
-     * }
-     */
-    public function toArray(): array;
 }

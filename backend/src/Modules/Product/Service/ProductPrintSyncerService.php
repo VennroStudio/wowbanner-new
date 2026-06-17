@@ -16,7 +16,7 @@ use App\Modules\Product\ReadModel\ProductPrint\ProductPrintItem;
 final readonly class ProductPrintSyncerService
 {
     public function __construct(
-        private ProductPrintRepository    $repository,
+        private ProductPrintRepository $repository,
         private CreateProductPrintHandler $createHandler,
         private UpdateProductPrintHandler $updateHandler,
         private DeleteProductPrintHandler $deleteHandler,
@@ -28,8 +28,8 @@ final readonly class ProductPrintSyncerService
     public function sync(int $productId, array $items): void
     {
         $currentRows = $this->repository->findByProductId($productId);
-        $currentIds = array_map(static fn($p) => $p->id, $currentRows);
-        $commandIds = array_filter(array_map(static fn($p) => $p->id, $items));
+        $currentIds = array_map(static fn ($p) => $p->id, $currentRows);
+        $commandIds = array_filter(array_map(static fn ($p) => $p->id, $items));
 
         foreach ($currentRows as $row) {
             if ($row->id === null) {

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Product\Query\Product\GetBySelect;
 
-use App\Modules\Product\ReadModel\Product\ProductGetBySelect;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Product\ReadModel\Product\Interface\ProductModelInterface;
+use App\Modules\Product\ReadModel\Product\ProductIdName;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -18,27 +20,28 @@ final readonly class ProductGetBySelectFetcher
     ) {}
 
     /**
-     * @return list<ProductGetBySelect>
+     * @template T of ProductModelInterface
+     * @param class-string<T> $modelClass
+     * @return list<T>
      * @throws Exception
      */
-    public function fetch(ProductGetBySelectQuery $query): array
+    public function fetch(ProductGetBySelectQuery $query, string $modelClass = ProductIdName::class): array
     {
         $qb = $this->connection->createQueryBuilder()
-            ->select('p.id', 'p.name')
+            ->select(...ReadModelFields::select($modelClass::fields(), 'p'))
             ->from(self::TABLE, 'p')
             ->orderBy('p.name', 'ASC');
 
         if ($query->printId !== null) {
             $qb
+                ->distinct()
                 ->innerJoin('p', self::PRODUCT_PRINTS_TABLE, 'pp', 'pp.product_id = p.id')
                 ->andWhere('pp.print_id = :printId')
-                ->setParameter('printId', $query->printId)
-                ->groupBy('p.id')
-                ->addGroupBy('p.name');
+                ->setParameter('printId', $query->printId);
         }
 
         $rows = $qb->executeQuery()->fetchAllAssociative();
 
-        return ProductGetBySelect::fromRows($rows);
+        return $modelClass::fromRows($rows);
     }
 }

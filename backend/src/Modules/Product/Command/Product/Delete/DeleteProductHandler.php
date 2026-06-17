@@ -21,14 +21,14 @@ use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 final readonly class DeleteProductHandler
 {
     public function __construct(
-        private ProductRepository            $repository,
-        private ProductMaterialRepository    $productMaterialRepository,
-        private ProductPrintRepository       $productPrintRepository,
-        private FlusherInterface             $flusher,
-        private ProductPermissionService     $permissionService,
+        private ProductRepository $repository,
+        private ProductMaterialRepository $productMaterialRepository,
+        private ProductPrintRepository $productPrintRepository,
+        private FlusherInterface $flusher,
+        private ProductPermissionService $permissionService,
         private DeleteProductMaterialHandler $deleteProductMaterialHandler,
-        private DeleteProductPrintHandler    $deleteProductPrintHandler,
-        private Cacher                       $cacher,
+        private DeleteProductPrintHandler $deleteProductPrintHandler,
+        private Cacher $cacher,
     ) {}
 
     /**
@@ -36,7 +36,7 @@ final readonly class DeleteProductHandler
      */
     public function handle(DeleteProductCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ProductPermission::DELETE,
         );
@@ -48,7 +48,7 @@ final readonly class DeleteProductHandler
 
         $this->repository->remove($product);
 
-        $this->cacher->delete('Product_by_id_' . $command->id);
+        $this->cacher->deleteTag('product_by_id_' . $command->id);
 
         $this->flusher->flush();
     }

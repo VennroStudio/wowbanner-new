@@ -13,6 +13,7 @@ use App\Modules\Product\Query\Product\FindAll\ProductFindAllQuery;
 use Doctrine\DBAL\Exception;
 use JsonException;
 use OpenApi\Attributes as OA;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -39,9 +40,9 @@ final readonly class GetProductsAction implements RequestHandlerInterface
 {
     public function __construct(
         private ProductFindAllFetcher $fetcher,
-        private ProductUnifier        $unifier,
-        private Denormalizer          $denormalizer,
-        private Validator             $validator,
+        private ProductUnifier $unifier,
+        private Denormalizer $denormalizer,
+        private Validator $validator,
     ) {}
 
     /**
@@ -49,6 +50,7 @@ final readonly class GetProductsAction implements RequestHandlerInterface
      * @throws Exception
      * @throws JsonException
      */
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $query = $this->denormalizer->denormalize(

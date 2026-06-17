@@ -48,13 +48,16 @@
           {
             "id": 10,
             "material_id": 3,
-            "material_option_id": 5
+            "material_option_id": 5,
+            "material_name": "Баннер",
+            "material_option_name": "Люверс"
           }
         ],
         "prints": [
           {
             "id": 20,
-            "print_id": 2
+            "print_id": 2,
+            "print_name": "УФ-печать"
           }
         ]
       }
@@ -93,13 +96,16 @@
       {
         "id": 10,
         "material_id": 3,
-        "material_option_id": 5
+        "material_option_id": 5,
+        "material_name": "Баннер",
+        "material_option_name": "Люверс"
       }
     ],
     "prints": [
       {
         "id": 20,
-        "print_id": 2
+        "print_id": 2,
+        "print_name": "УФ-печать"
       }
     ]
   }
@@ -140,8 +146,8 @@
 **Валидация полей:**
 
 - `name` — обязательно, длина 2–255 символов
-- `materials` — опционально; элементы: `{ "id"?: number, "materialId": number, "materialOptionId": number }` (для создания `id` не передаётся)
-- `prints` — опционально; элементы: `{ "id"?: number, "printId": number }`
+- `materials` — опционально; элементы: `{ "id"?: number, "materialId": number, "materialOptionId": number }` (для создания `id` не передаётся); `materialId` и `materialOptionId` должны быть больше `0`
+- `prints` — опционально; элементы: `{ "id"?: number, "printId": number }`; `printId` должен быть больше `0`
 
 **Успех (201):**
 

@@ -13,6 +13,7 @@ use App\Modules\Product\Command\Product\Delete\DeleteProductCommand;
 use App\Modules\Product\Command\Product\Delete\DeleteProductHandler;
 use JsonException;
 use OpenApi\Attributes as OA;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -30,6 +31,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
     responses: [
         new OA\Response(response: 200, description: 'Продукт удалён'),
         new OA\Response(response: 401, description: 'Требуется авторизация'),
+        new OA\Response(response: 403, description: 'Доступ запрещён'),
         new OA\Response(response: 404, description: 'Продукт не найден'),
     ]
 )]
@@ -37,14 +39,15 @@ final readonly class DeleteProductAction implements RequestHandlerInterface
 {
     public function __construct(
         private DeleteProductHandler $handler,
-        private Denormalizer         $denormalizer,
-        private Validator            $validator,
+        private Denormalizer $denormalizer,
+        private Validator $validator,
     ) {}
 
     /**
      * @throws ExceptionInterface
      * @throws JsonException
      */
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);

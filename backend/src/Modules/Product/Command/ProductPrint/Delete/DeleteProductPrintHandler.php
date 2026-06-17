@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Modules\Product\Command\ProductPrint\Delete;
 
+use App\Components\Cacher\Cacher;
 use App\Modules\Product\Entity\ProductPrint\ProductPrintRepository;
 
 final readonly class DeleteProductPrintHandler
 {
     public function __construct(
         private ProductPrintRepository $repository,
+        private Cacher $cacher,
     ) {}
 
     public function handle(DeleteProductPrintCommand $command): void
@@ -17,5 +19,6 @@ final readonly class DeleteProductPrintHandler
         $link = $this->repository->getById($command->id);
 
         $this->repository->remove($link);
+        $this->cacher->deleteTag('product_by_id_' . $link->productId);
     }
 }

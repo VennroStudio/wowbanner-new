@@ -16,17 +16,17 @@ use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 final readonly class UpdateProductHandler
 {
     public function __construct(
-        private ProductRepository            $repository,
-        private FlusherInterface             $flusher,
-        private ProductPermissionService     $permissionService,
+        private ProductRepository $repository,
+        private FlusherInterface $flusher,
+        private ProductPermissionService $permissionService,
         private ProductMaterialSyncerService $materialSyncer,
-        private ProductPrintSyncerService    $printSyncer,
-        private Cacher                       $cacher,
+        private ProductPrintSyncerService $printSyncer,
+        private Cacher $cacher,
     ) {}
 
     public function handle(UpdateProductCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ProductPermission::UPDATE,
         );
@@ -38,7 +38,7 @@ final readonly class UpdateProductHandler
         $this->materialSyncer->sync($command->id, $command->materials);
         $this->printSyncer->sync($command->id, $command->prints);
 
-        $this->cacher->delete('Product_by_id_' . $command->id);
+        $this->cacher->deleteTag('product_by_id_' . $command->id);
 
         $this->flusher->flush();
     }

@@ -16,7 +16,7 @@ class ProductMaterial
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private(set) ?int $id = null;
 
     #[ORM\Column(type: Types::INTEGER)]

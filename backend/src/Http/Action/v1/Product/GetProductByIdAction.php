@@ -12,6 +12,7 @@ use App\Modules\Product\Query\Product\GetById\ProductGetByIdQuery;
 use Doctrine\DBAL\Exception;
 use JsonException;
 use OpenApi\Attributes as OA;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -35,13 +36,14 @@ final readonly class GetProductByIdAction implements RequestHandlerInterface
 {
     public function __construct(
         private ProductGetByIdFetcher $fetcher,
-        private ProductUnifier        $unifier,
+        private ProductUnifier $unifier,
     ) {}
 
     /**
      * @throws JsonException
      * @throws Exception
      */
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $id = Route::getArgumentToInt($request, 'id');

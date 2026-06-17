@@ -16,7 +16,7 @@ use App\Modules\Product\ReadModel\ProductMaterial\ProductMaterialItem;
 final readonly class ProductMaterialSyncerService
 {
     public function __construct(
-        private ProductMaterialRepository    $repository,
+        private ProductMaterialRepository $repository,
         private CreateProductMaterialHandler $createHandler,
         private UpdateProductMaterialHandler $updateHandler,
         private DeleteProductMaterialHandler $deleteHandler,
@@ -28,8 +28,8 @@ final readonly class ProductMaterialSyncerService
     public function sync(int $productId, array $items): void
     {
         $currentRows = $this->repository->findByProductId($productId);
-        $currentIds = array_map(static fn($m) => $m->id, $currentRows);
-        $commandIds = array_filter(array_map(static fn($m) => $m->id, $items));
+        $currentIds = array_map(static fn ($m) => $m->id, $currentRows);
+        $commandIds = array_filter(array_map(static fn ($m) => $m->id, $items));
 
         foreach ($currentRows as $row) {
             if ($row->id === null) {

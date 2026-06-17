@@ -20,16 +20,16 @@ use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 final readonly class CreateProductHandler
 {
     public function __construct(
-        private ProductRepository            $repository,
-        private FlusherInterface             $flusher,
-        private ProductPermissionService     $permissionService,
+        private ProductRepository $repository,
+        private FlusherInterface $flusher,
+        private ProductPermissionService $permissionService,
         private CreateProductMaterialHandler $createMaterialHandler,
-        private CreateProductPrintHandler    $createPrintHandler,
+        private CreateProductPrintHandler $createPrintHandler,
     ) {}
 
     public function handle(CreateProductCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ProductPermission::CREATE,
         );
