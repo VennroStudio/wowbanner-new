@@ -8,7 +8,7 @@ use App\Components\ReadModel\FromRowsTrait;
 use App\Modules\Printing\ReadModel\Printing\Interface\PrintingModelInterface;
 use Override;
 
-final readonly class PrintingById implements PrintingModelInterface
+final readonly class PrintingIdName implements PrintingModelInterface
 {
     use FromRowsTrait;
 
@@ -16,6 +16,17 @@ final readonly class PrintingById implements PrintingModelInterface
         public int $id,
         public string $name,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'   => 'id',
+            'name' => 'name',
+        ];
+    }
 
     /**
      * @param array{
@@ -26,7 +37,7 @@ final readonly class PrintingById implements PrintingModelInterface
     public static function fromRow(array $row): self
     {
         return new self(
-            id: $row['id'],
+            id: (int)$row['id'],
             name: $row['name'],
         );
     }

@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Modules\Printing\Query\Printing\GetById;
 
+use App\Components\Cacher\CacheKey;
 use App\Components\Cacher\Cacher;
 use App\Components\Exception\DomainExceptionModule;
-use App\Modules\Printing\ReadModel\Printing\PrintingById;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Printing\ReadModel\Printing\Interface\PrintingModelInterface;
+use App\Modules\Printing\ReadModel\Printing\PrintingIdName;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
 final readonly class PrintingGetByIdFetcher
 {
+    public const string CACHE_TAG = 'printing_by_id';
     private const string TABLE = 'printings';
     private const int CACHE_TTL = 900;
 
@@ -21,13 +25,17 @@ final readonly class PrintingGetByIdFetcher
     ) {}
 
     /**
+     * @template T of PrintingModelInterface
+     * @param class-string<T> $modelClass
+     * @return T
      * @throws Exception
      */
-    public function fetch(PrintingGetByIdQuery $query): PrintingById
+    public function fetch(PrintingGetByIdQuery $query, string $modelClass = PrintingIdName::class): PrintingModelInterface
     {
-        $key = 'printing_by_id_' . $query->id;
+        $tag = CacheKey::tag(self::CACHE_TAG, [$query->id]);
+        $key = CacheKey::byClass($tag, $modelClass);
 
-        /** @var PrintingById|null $cached */
+        /** @var T|null $cached */
         $cached = $this->cacher->get($key);
 
         if ($cached !== null) {
@@ -35,7 +43,7 @@ final readonly class PrintingGetByIdFetcher
         }
 
         $row = $this->connection->createQueryBuilder()
-            ->select('id', 'name')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('id = :id')
             ->setParameter('id', $query->id)
@@ -51,9 +59,8 @@ final readonly class PrintingGetByIdFetcher
             );
         }
 
-        /** @var array{id: int, name: string} $row */
-        $result = PrintingById::fromRow($row);
-        $this->cacher->set($key, $result, self::CACHE_TTL);
+        $result = $modelClass::fromRow($row);
+        $this->cacher->setTagged($key, $result, self::CACHE_TTL, [$tag]);
 
         return $result;
     }

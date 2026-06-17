@@ -23,7 +23,7 @@ final readonly class CreatePrintingHandler
     /** @throws AccessDeniedException */
     public function handle(CreatePrintingCommand $command): void
     {
-        $this->printingPermissionService->check(
+        $this->printingPermissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: PrintingPermission::CREATE,
         );

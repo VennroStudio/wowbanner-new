@@ -24,16 +24,16 @@ final readonly class UpdatePrintingHandler
     /** @throws AccessDeniedException */
     public function handle(UpdatePrintingCommand $command): void
     {
-        $printing = $this->printingRepository->getById($command->printingId);
-
-        $this->printingPermissionService->check(
+        $this->printingPermissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: PrintingPermission::UPDATE,
         );
 
+        $printing = $this->printingRepository->getById($command->printingId);
+
         $printing->edit(name: $command->name);
 
-        $this->cacher->delete('printing_by_id_' . $command->printingId);
+        $this->cacher->deleteTag('printing_by_id_' . $command->printingId);
 
         $this->flusher->flush();
     }

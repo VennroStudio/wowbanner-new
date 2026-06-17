@@ -4,15 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Printing\ReadModel\Printing\Interface;
 
-interface PrintingModelInterface
-{
-    public function getId(): int;
+use App\Components\ReadModel\ReadModelInterface;
 
-    /**
-     * @return array{
-     *     id: int,
-     *     name: string
-     * }
-     */
-    public function toArray(): array;
-}
+interface PrintingModelInterface extends ReadModelInterface {}

@@ -24,16 +24,16 @@ final readonly class DeletePrintingHandler
     /** @throws AccessDeniedException */
     public function handle(DeletePrintingCommand $command): void
     {
-        $printing = $this->printingRepository->getById($command->printingId);
-
-        $this->printingPermissionService->check(
+        $this->printingPermissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: PrintingPermission::DELETE,
         );
 
+        $printing = $this->printingRepository->getById($command->printingId);
+
         $this->printingRepository->remove($printing);
 
-        $this->cacher->delete('printing_by_id_' . $command->printingId);
+        $this->cacher->deleteTag('printing_by_id_' . $command->printingId);
 
         $this->flusher->flush();
     }

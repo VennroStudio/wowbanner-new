@@ -11,7 +11,6 @@ use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Printing\Command\Printing\Create\CreatePrintingCommand;
 use App\Modules\Printing\Command\Printing\Create\CreatePrintingHandler;
-use JsonException;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;

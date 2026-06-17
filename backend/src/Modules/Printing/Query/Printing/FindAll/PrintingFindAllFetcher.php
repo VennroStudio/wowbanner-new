@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Printing\Query\Printing\FindAll;
 
 use App\Components\ReadModel\ModelCountItemsResult;
-use App\Modules\Printing\ReadModel\Printing\PrintingFindAll;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Printing\ReadModel\Printing\Interface\PrintingModelInterface;
+use App\Modules\Printing\ReadModel\Printing\PrintingIdName;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -18,10 +20,12 @@ final readonly class PrintingFindAllFetcher
     ) {}
 
     /**
-     * @return ModelCountItemsResult<PrintingFindAll>
+     * @template T of PrintingModelInterface
+     * @param class-string<T> $modelClass
+     * @return ModelCountItemsResult<T>
      * @throws Exception
      */
-    public function fetch(PrintingFindAllQuery $query): ModelCountItemsResult
+    public function fetch(PrintingFindAllQuery $query, string $modelClass = PrintingIdName::class): ModelCountItemsResult
     {
         $qb = $this->connection->createQueryBuilder()
             ->from(self::TABLE);
@@ -34,15 +38,14 @@ final readonly class PrintingFindAllFetcher
         $countQb = clone $qb;
         $total = (int)$countQb->select('COUNT(id)')->executeQuery()->fetchOne();
 
-        $rows = $qb->select('id', 'name')
+        $rows = $qb->select(...ReadModelFields::select($modelClass::fields()))
             ->orderBy('id', 'DESC')
             ->setFirstResult($query->getOffset())
             ->setMaxResults($query->perPage)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<PrintingFindAll> $items */
-        $items = PrintingFindAll::fromRows($rows);
+        $items = $modelClass::fromRows($rows);
 
         return new ModelCountItemsResult(
             items: $items,

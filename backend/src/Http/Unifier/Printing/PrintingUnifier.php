@@ -21,7 +21,7 @@ final readonly class PrintingUnifier implements UnifierInterface
     }
 
     /**
-     * @param list<object> $items
+     * @param list<PrintingModelInterface> $items
      * @return list<array<string, mixed>>
      */
     #[Override]
@@ -31,7 +31,6 @@ final readonly class PrintingUnifier implements UnifierInterface
             return [];
         }
 
-        /** @var list<array<string, mixed>> */
         return array_map($this->map(...), $items);
     }
 
