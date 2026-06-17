@@ -12,10 +12,8 @@ final readonly class DeleteClientCommand
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
         public int $currentUserId,
-
         #[Assert\NotBlank]
         public int $currentUserRole,
-
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
         public int $id,

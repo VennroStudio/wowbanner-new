@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Client\Entity\ClientPhone;
 
-use App\Modules\Client\Entity\ClientPhone\Fields\PhoneType;
+use App\Modules\Client\Entity\ClientPhone\Fields\Enums\PhoneType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'client_phones')]
 #[ORM\Index(columns: ['client_id'], name: 'idx_client_id')]
 #[ORM\Index(columns: ['phone'], name: 'idx_phone')]
-final class ClientPhone
+class ClientPhone
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]

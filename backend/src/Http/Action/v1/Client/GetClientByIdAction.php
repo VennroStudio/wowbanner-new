@@ -12,6 +12,7 @@ use App\Modules\Client\Query\Client\GetById\ClientGetByIdQuery;
 use Doctrine\DBAL\Exception;
 use JsonException;
 use OpenApi\Attributes as OA;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -42,6 +43,7 @@ final readonly class GetClientByIdAction implements RequestHandlerInterface
      * @throws JsonException
      * @throws Exception
      */
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $id = Route::getArgumentToInt($request, 'id');

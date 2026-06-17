@@ -13,6 +13,7 @@ use App\Modules\Client\Query\Client\FindAll\ClientFindAllQuery;
 use Doctrine\DBAL\Exception;
 use JsonException;
 use OpenApi\Attributes as OA;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -48,6 +49,7 @@ final readonly class GetClientsAction implements RequestHandlerInterface
      * @throws Exception
      * @throws JsonException
      */
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $query = $this->denormalizer->denormalize(

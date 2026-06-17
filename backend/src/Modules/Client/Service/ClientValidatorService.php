@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Client\Service;
 
 use App\Components\Exception\DomainExceptionModule;
-use App\Modules\Client\Entity\Client\Fields\ClientType;
+use App\Modules\Client\Entity\Client\Fields\Enums\ClientType;
 use App\Modules\Client\Query\Client\Exists\ClientEmailExistsFetcher;
 use App\Modules\Client\Query\Client\Exists\ClientEmailExistsQuery;
 use App\Modules\Client\Query\ClientPhone\Exists\ClientPhoneExistsFetcher;
@@ -44,6 +44,23 @@ final readonly class ClientValidatorService
         return $out;
     }
 
+    /**
+     * @param list<ClientPhoneItem> $phones
+     * @param list<ClientCompanyItem> $companies
+     * @throws Exception
+     */
+    public function validate(
+        ?string $email,
+        int $type,
+        array $phones,
+        array $companies,
+        ?int $clientId = null
+    ): void {
+        $this->validateEmail($email, $clientId);
+        $this->validatePhones($phones, $clientId);
+        $this->validateLegalType($type, $companies);
+    }
+
     private function normalizeRuMobile(string $raw): string
     {
         $digits = preg_replace('/\D+/', '', $raw) ?? '';
@@ -57,7 +74,7 @@ final readonly class ClientValidatorService
 
         if (str_starts_with($digits, '8')) {
             $normalized = substr($digits, 0, 11);
-        } elseif (str_starts_with($digits, '7') && strlen($digits) >= 2 && $digits[1] === '9') {
+        } elseif (str_starts_with($digits, '7') && \strlen($digits) >= 2 && $digits[1] === '9') {
             $normalized = '8' . substr($digits, 1, 10);
         } elseif (str_starts_with($digits, '9')) {
             $normalized = '8' . substr($digits, 0, 10);
@@ -78,23 +95,6 @@ final readonly class ClientValidatorService
         }
 
         return $normalized;
-    }
-
-    /**
-     * @param list<ClientPhoneItem> $phones
-     * @param list<ClientCompanyItem> $companies
-     * @throws Exception
-     */
-    public function validate(
-        ?string $email,
-        int $type,
-        array $phones,
-        array $companies,
-        ?int $clientId = null
-    ): void {
-        $this->validateEmail($email, $clientId);
-        $this->validatePhones($phones, $clientId);
-        $this->validateLegalType($type, $companies);
     }
 
     private function validateEmail(?string $email, ?int $clientId): void
@@ -134,7 +134,7 @@ final readonly class ClientValidatorService
      */
     private function validateLegalType(int $type, array $companies): void
     {
-        if ($type === ClientType::LEGAL->value && count($companies) === 0) {
+        if ($type === ClientType::LEGAL->value && \count($companies) === 0) {
             throw new DomainExceptionModule(
                 module: 'client',
                 message: 'error.legal_client_must_have_company',

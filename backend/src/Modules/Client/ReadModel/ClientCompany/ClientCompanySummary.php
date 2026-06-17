@@ -8,7 +8,7 @@ use App\Components\ReadModel\FromRowsTrait;
 use App\Modules\Client\ReadModel\ClientCompany\Interface\ClientCompanyModelInterface;
 use Override;
 
-final readonly class ClientCompanyByClient implements ClientCompanyModelInterface
+final readonly class ClientCompanySummary implements ClientCompanyModelInterface
 {
     use FromRowsTrait;
 
@@ -17,6 +17,18 @@ final readonly class ClientCompanyByClient implements ClientCompanyModelInterfac
         public int $clientId,
         public string $companyName,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'           => 'id',
+            'client_id'    => 'client_id',
+            'company_name' => 'company_name',
+        ];
+    }
 
     /**
      * @param array{
@@ -41,11 +53,16 @@ final readonly class ClientCompanyByClient implements ClientCompanyModelInterfac
     }
 
     #[Override]
+    public function getClientId(): int
+    {
+        return $this->clientId;
+    }
+
+    #[Override]
     public function toArray(): array
     {
         return [
             'id'           => $this->id,
-            'client_id'    => $this->clientId,
             'company_name' => $this->companyName,
         ];
     }

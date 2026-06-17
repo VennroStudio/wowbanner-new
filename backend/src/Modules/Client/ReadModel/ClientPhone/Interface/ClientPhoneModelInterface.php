@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Client\ReadModel\ClientPhone\Interface;
 
-interface ClientPhoneModelInterface
+use App\Components\ReadModel\ReadModelInterface;
+
+interface ClientPhoneModelInterface extends ReadModelInterface
 {
-    public function getId(): int;
-    public function toArray(): array;
+    public function getClientId(): int;
 }

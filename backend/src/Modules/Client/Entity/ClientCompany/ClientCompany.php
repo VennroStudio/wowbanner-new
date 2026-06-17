@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'client_companies')]
 #[ORM\Index(columns: ['client_id'], name: 'idx_client_id')]
-final class ClientCompany
+class ClientCompany
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]

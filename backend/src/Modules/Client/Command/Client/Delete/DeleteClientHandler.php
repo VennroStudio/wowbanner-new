@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Client\Command\Client\Delete;
 
+use App\Components\Cacher\Cacher;
 use App\Components\Exception\AccessDeniedException;
 use App\Components\Flusher\FlusherInterface;
 use App\Modules\Client\Command\ClientCompany\Delete\DeleteClientCompanyCommand;
@@ -27,6 +28,7 @@ final readonly class DeleteClientHandler
         private ClientPermissionService $permissionService,
         private DeleteClientPhoneHandler $deletePhoneHandler,
         private DeleteClientCompanyHandler $deleteCompanyHandler,
+        private Cacher $cacher,
     ) {}
 
     /**
@@ -34,7 +36,7 @@ final readonly class DeleteClientHandler
      */
     public function handle(DeleteClientCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ClientPermission::DELETE,
         );
@@ -45,6 +47,7 @@ final readonly class DeleteClientHandler
         $this->deleteCompanies($client->id);
 
         $this->repository->remove($client);
+        $this->cacher->delete('client_by_id_' . $command->id);
         $this->flusher->flush();
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Client\Entity\Client\Fields;
+namespace App\Modules\Client\Entity\Client\Fields\Enums;
 
 use App\Components\Enum\EnumInterface;
 

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Client\Command\Client\Update;
 
+use App\Components\Cacher\Cacher;
 use App\Components\Flusher\FlusherInterface;
 use App\Modules\Client\Entity\Client\ClientRepository;
-use App\Modules\Client\Entity\Client\Fields\ClientType;
-use App\Modules\Client\Entity\Client\Fields\Docs;
+use App\Modules\Client\Entity\Client\Fields\Enums\ClientType;
+use App\Modules\Client\Entity\Client\Fields\Enums\Docs;
 use App\Modules\Client\Permission\ClientPermission;
 use App\Modules\Client\Service\ClientCompanySyncerService;
 use App\Modules\Client\Service\ClientPermissionService;
@@ -24,11 +25,12 @@ final readonly class UpdateClientHandler
         private ClientValidatorService $validator,
         private ClientPhoneSyncerService $phoneSyncer,
         private ClientCompanySyncerService $companySyncer,
+        private Cacher $cacher,
     ) {}
 
     public function handle(UpdateClientCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ClientPermission::UPDATE,
         );
@@ -57,6 +59,8 @@ final readonly class UpdateClientHandler
 
         $this->phoneSyncer->sync($client->id, $phones);
         $this->companySyncer->sync($client->id, $command->companies);
+
+        $this->cacher->delete('client_by_id_' . $command->id);
 
         $this->flusher->flush();
     }

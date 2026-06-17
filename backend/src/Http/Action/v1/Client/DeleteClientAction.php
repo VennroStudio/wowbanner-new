@@ -13,6 +13,7 @@ use App\Modules\Client\Command\Client\Delete\DeleteClientCommand;
 use App\Modules\Client\Command\Client\Delete\DeleteClientHandler;
 use JsonException;
 use OpenApi\Attributes as OA;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -30,7 +31,9 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
     responses: [
         new OA\Response(response: 200, description: 'Клиент удален'),
         new OA\Response(response: 401, description: 'Требуется авторизация'),
+        new OA\Response(response: 403, description: 'Доступ запрещён'),
         new OA\Response(response: 404, description: 'Клиент не найден'),
+        new OA\Response(response: 422, description: 'Ошибка валидации'),
     ]
 )]
 final readonly class DeleteClientAction implements RequestHandlerInterface
@@ -45,6 +48,7 @@ final readonly class DeleteClientAction implements RequestHandlerInterface
      * @throws ExceptionInterface
      * @throws JsonException
      */
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);

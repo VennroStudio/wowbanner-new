@@ -28,17 +28,17 @@ final readonly class ClientCompanySyncerService
     public function sync(int $clientId, array $items): void
     {
         $currentCompanies = $this->repository->findByClientId($clientId);
-        $currentIds = array_map(static fn($c) => $c->id, $currentCompanies);
-        $commandIds = array_filter(array_map(static fn($c) => $c->id, $items));
+        $currentIds = array_map(static fn ($c) => $c->id, $currentCompanies);
+        $commandIds = array_filter(array_map(static fn ($c) => $c->id, $items));
 
         foreach ($currentCompanies as $company) {
-            if (!in_array($company->id, $commandIds, true)) {
+            if (!\in_array($company->id, $commandIds, true)) {
                 $this->deleteHandler->handle(new DeleteClientCompanyCommand($company->id));
             }
         }
 
         foreach ($items as $item) {
-            if ($item->id !== null && in_array($item->id, $currentIds, true)) {
+            if ($item->id !== null && \in_array($item->id, $currentIds, true)) {
                 $this->updateHandler->handle(new UpdateClientCompanyCommand(
                     id: $item->id,
                     companyName: $item->name

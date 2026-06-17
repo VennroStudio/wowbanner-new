@@ -5,17 +5,18 @@ declare(strict_types=1);
 namespace App\Modules\Client\Query\Client\FindAll;
 
 use App\Components\ReadModel\ModelCountItemsResult;
+use App\Components\ReadModel\ReadModelFields;
 use App\Modules\Client\Query\ClientCompany\FindByClientIds\ClientCompanyFindByClientIdsFetcher;
 use App\Modules\Client\Query\ClientPhone\FindByClientIds\ClientPhoneFindByClientIdsFetcher;
-use App\Modules\Client\ReadModel\Client\ClientFindAll;
+use App\Modules\Client\ReadModel\Client\ClientListItem;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
 
 final readonly class ClientFindAllFetcher
 {
-    private const string TABLE = 'clients';
     public const string ALIAS = 'c';
+    private const string TABLE = 'clients';
 
     public function __construct(
         private Connection $connection,
@@ -29,7 +30,7 @@ final readonly class ClientFindAllFetcher
     }
 
     /**
-     * @return ModelCountItemsResult<ClientFindAll>
+     * @return ModelCountItemsResult<ClientListItem>
      * @throws Exception
      */
     public function fetch(ClientFindAllQuery $query): ModelCountItemsResult
@@ -61,25 +62,15 @@ final readonly class ClientFindAllFetcher
 
         $qb->groupBy('c.id');
 
-        $rows = $qb->select(
-            'c.id',
-            'c.old_full_name',
-            'c.last_name',
-            'c.first_name',
-            'c.middle_name',
-            'c.email',
-            'c.docs',
-            'c.type',
-            'c.created_at'
-        )
+        $rows = $qb->select(...ReadModelFields::select(ClientListItem::fields(), 'c'))
             ->orderBy('c.id', 'DESC')
             ->setFirstResult($query->getOffset())
             ->setMaxResults($query->perPage)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<ClientFindAll> $items */
-        $items = ClientFindAll::fromRows($rows);
+        /** @var list<ClientListItem> $items */
+        $items = ClientListItem::fromRows($rows);
 
         return new ModelCountItemsResult(
             items: $items,

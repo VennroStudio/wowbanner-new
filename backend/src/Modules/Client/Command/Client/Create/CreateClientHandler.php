@@ -11,9 +11,9 @@ use App\Modules\Client\Command\ClientPhone\Create\CreateClientPhoneCommand;
 use App\Modules\Client\Command\ClientPhone\Create\CreateClientPhoneHandler;
 use App\Modules\Client\Entity\Client\Client;
 use App\Modules\Client\Entity\Client\ClientRepository;
-use App\Modules\Client\Entity\Client\Fields\ClientType;
-use App\Modules\Client\Entity\Client\Fields\Docs;
-use App\Modules\Client\Entity\ClientPhone\Fields\PhoneType;
+use App\Modules\Client\Entity\Client\Fields\Enums\ClientType;
+use App\Modules\Client\Entity\Client\Fields\Enums\Docs;
+use App\Modules\Client\Entity\ClientPhone\Fields\Enums\PhoneType;
 use App\Modules\Client\Permission\ClientPermission;
 use App\Modules\Client\ReadModel\ClientCompany\ClientCompanyItem;
 use App\Modules\Client\ReadModel\ClientPhone\ClientPhoneItem;
@@ -34,7 +34,7 @@ final readonly class CreateClientHandler
 
     public function handle(CreateClientCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ClientPermission::CREATE,
         );

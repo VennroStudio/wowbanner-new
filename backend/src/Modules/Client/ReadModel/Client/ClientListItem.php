@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Client\ReadModel\Client;
 
 use App\Components\ReadModel\FromRowsTrait;
-use App\Modules\Client\Entity\Client\Fields\ClientType;
-use App\Modules\Client\Entity\Client\Fields\Docs;
+use App\Modules\Client\Entity\Client\Fields\Enums\ClientType;
+use App\Modules\Client\Entity\Client\Fields\Enums\Docs;
 use App\Modules\Client\ReadModel\Client\Interface\ClientModelInterface;
 use Override;
 
-final readonly class ClientFindAll implements ClientModelInterface
+final readonly class ClientListItem implements ClientModelInterface
 {
     use FromRowsTrait;
 
@@ -27,17 +27,35 @@ final readonly class ClientFindAll implements ClientModelInterface
     ) {}
 
     /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'            => 'id',
+            'old_full_name' => 'old_full_name',
+            'last_name'     => 'last_name',
+            'first_name'    => 'first_name',
+            'middle_name'   => 'middle_name',
+            'email'         => 'email',
+            'docs'          => 'docs',
+            'type'          => 'type',
+            'created_at'    => 'created_at',
+        ];
+    }
+
+    /**
      * @param array{
      *     id: int,
-     *     old_full_name: string,
+     *     old_full_name: string|null,
      *     last_name: string,
      *     first_name: string,
      *     middle_name: string|null,
      *     email: string|null,
      *     docs: int,
      *     type: int,
-     *     created_at: string,
- * } $row
+     *     created_at: string
+     * } $row
      */
     public static function fromRow(array $row): self
     {
@@ -70,8 +88,14 @@ final readonly class ClientFindAll implements ClientModelInterface
             'first_name'    => $this->firstName,
             'middle_name'   => $this->middleName,
             'email'         => $this->email,
-            'docs'          => ['id' => $this->docs->value, 'label' => $this->docs->getLabel()],
-            'type'          => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
+            'docs'          => [
+                'id'    => $this->docs->value,
+                'label' => $this->docs->getLabel(),
+            ],
+            'type' => [
+                'id'    => $this->type->value,
+                'label' => $this->type->getLabel(),
+            ],
         ];
     }
 }

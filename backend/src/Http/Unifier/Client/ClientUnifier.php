@@ -11,8 +11,8 @@ use App\Modules\Client\Query\ClientCompany\FindByClientIds\ClientCompanyFindByCl
 use App\Modules\Client\Query\ClientPhone\FindByClientIds\ClientPhoneFindByClientIdsFetcher;
 use App\Modules\Client\Query\ClientPhone\FindByClientIds\ClientPhoneFindByClientIdsQuery;
 use App\Modules\Client\ReadModel\Client\Interface\ClientModelInterface;
-use App\Modules\Client\ReadModel\ClientCompany\ClientCompanyByClient;
-use App\Modules\Client\ReadModel\ClientPhone\ClientPhoneByClient;
+use App\Modules\Client\ReadModel\ClientCompany\Interface\ClientCompanyModelInterface;
+use App\Modules\Client\ReadModel\ClientPhone\Interface\ClientPhoneModelInterface;
 use Doctrine\DBAL\Exception;
 use Override;
 
@@ -21,14 +21,17 @@ final readonly class ClientUnifier implements UnifierInterface
     public function __construct(
         private ClientPhoneFindByClientIdsFetcher $phoneFetcher,
         private ClientCompanyFindByClientIdsFetcher $companyFetcher,
+        private ClientPhoneUnifier $phoneUnifier,
+        private ClientCompanyUnifier $companyUnifier,
     ) {}
 
     #[Override]
     public function unifyOne(?int $userId, ?object $item): array
     {
-        if ($item === null) {
+        if (!$item instanceof ClientModelInterface) {
             return [];
         }
+
         return $this->unify($userId, [$item])[0] ?? [];
     }
 
@@ -44,13 +47,13 @@ final readonly class ClientUnifier implements UnifierInterface
             return [];
         }
 
-        $ids = array_map(static fn(ClientModelInterface $i): int => $i->getId(), $items);
+        $ids = array_map(static fn (ClientModelInterface $i): int => $i->getId(), $items);
 
         $phones = $this->groupPhones($this->phoneFetcher->fetch(new ClientPhoneFindByClientIdsQuery($ids)));
         $companies = $this->groupCompanies($this->companyFetcher->fetch(new ClientCompanyFindByClientIdsQuery($ids)));
 
         return array_map(
-            fn(ClientModelInterface $item): array => $this->map($item, $phones, $companies),
+            fn (ClientModelInterface $item): array => $this->map($item, $phones, $companies),
             $items
         );
     }
@@ -70,28 +73,40 @@ final readonly class ClientUnifier implements UnifierInterface
     }
 
     /**
-     * @param list<ClientPhoneByClient> $items
+     * @param list<ClientPhoneModelInterface> $items
      * @return array<int, list<array<string, mixed>>>
      */
     private function groupPhones(array $items): array
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->clientId][] = UnifierHelper::toArrayWithout($item, 'client_id');
+            $grouped[$item->getClientId()][] = $item;
         }
-        return $grouped;
+
+        $result = [];
+        foreach ($grouped as $clientId => $group) {
+            $result[$clientId] = $this->phoneUnifier->unify(null, $group);
+        }
+
+        return $result;
     }
 
     /**
-     * @param list<ClientCompanyByClient> $items
+     * @param list<ClientCompanyModelInterface> $items
      * @return array<int, list<array<string, mixed>>>
      */
     private function groupCompanies(array $items): array
     {
         $grouped = [];
         foreach ($items as $item) {
-            $grouped[$item->clientId][] = UnifierHelper::toArrayWithout($item, 'client_id');
+            $grouped[$item->getClientId()][] = $item;
         }
-        return $grouped;
+
+        $result = [];
+        foreach ($grouped as $clientId => $group) {
+            $result[$clientId] = $this->companyUnifier->unify(null, $group);
+        }
+
+        return $result;
     }
 }

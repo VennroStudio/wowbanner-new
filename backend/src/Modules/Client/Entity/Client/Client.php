@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Client\Entity\Client;
 
 use App\Components\Clock\UtcClock;
-use App\Modules\Client\Entity\Client\Fields\ClientType;
-use App\Modules\Client\Entity\Client\Fields\Docs;
-use App\Modules\Client\Entity\ClientCompany\ClientCompany;
+use App\Modules\Client\Entity\Client\Fields\Enums\ClientType;
+use App\Modules\Client\Entity\Client\Fields\Enums\Docs;
 use DateTimeImmutable;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,7 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['last_name'], name: 'idx_last_name')]
 #[ORM\Index(columns: ['type'], name: 'idx_type')]
 #[ORM\Index(columns: ['created_at'], name: 'idx_created_at')]
-final class Client
+class Client
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER)]

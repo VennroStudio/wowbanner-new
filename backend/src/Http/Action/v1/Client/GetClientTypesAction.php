@@ -6,7 +6,7 @@ namespace App\Http\Action\v1\Client;
 
 use App\Components\Enum\EnumModel;
 use App\Components\Http\Response\JsonDataResponse;
-use App\Modules\Client\Entity\Client\Fields\ClientType;
+use App\Modules\Client\Entity\Client\Fields\Enums\ClientType;
 use JsonException;
 use OpenApi\Attributes as OA;
 use Override;

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Action\v1\Client;
 
+use App\Components\Http\Middleware\Identity\RequestIdentity;
 use App\Components\Http\Response\JsonDataSuccessResponse;
 use App\Components\Serializer\Denormalizer;
 use App\Components\Validator\Validator;
 use App\Modules\Client\Command\Client\Create\CreateClientCommand;
 use App\Modules\Client\Command\Client\Create\CreateClientHandler;
-use App\Components\Http\Middleware\Identity\RequestIdentity;
 use OpenApi\Attributes as OA;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -58,6 +59,7 @@ use Psr\Http\Server\RequestHandlerInterface;
     responses: [
         new OA\Response(response: 201, description: 'Клиент создан'),
         new OA\Response(response: 401, description: 'Требуется авторизация'),
+        new OA\Response(response: 403, description: 'Доступ запрещён'),
         new OA\Response(response: 422, description: 'Ошибка валидации'),
     ]
 )]
@@ -69,13 +71,14 @@ final readonly class CreateClientAction implements RequestHandlerInterface
         private Validator $validator,
     ) {}
 
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $identity = RequestIdentity::get($request);
 
         $command = $this->denormalizer->denormalize(
             array_merge((array)$request->getParsedBody(), [
-                'currentUserId' => $identity->id,
+                'currentUserId'   => $identity->id,
                 'currentUserRole' => $identity->role->value,
             ]),
             CreateClientCommand::class

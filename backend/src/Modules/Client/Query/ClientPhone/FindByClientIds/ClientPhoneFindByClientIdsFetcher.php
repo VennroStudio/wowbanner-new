@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Client\Query\ClientPhone\FindByClientIds;
 
-use App\Modules\Client\ReadModel\ClientPhone\ClientPhoneByClient;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Client\ReadModel\ClientPhone\ClientPhoneSummary;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -12,8 +13,8 @@ use Doctrine\DBAL\Query\QueryBuilder;
 
 final readonly class ClientPhoneFindByClientIdsFetcher
 {
-    private const string TABLE = 'client_phones';
     public const string ALIAS = 'cp';
+    private const string TABLE = 'client_phones';
 
     public function __construct(
         private Connection $connection,
@@ -25,7 +26,7 @@ final readonly class ClientPhoneFindByClientIdsFetcher
     }
 
     /**
-     * @return list<ClientPhoneByClient>
+     * @return list<ClientPhoneSummary>
      * @throws Exception
      */
     public function fetch(ClientPhoneFindByClientIdsQuery $query): array
@@ -35,16 +36,14 @@ final readonly class ClientPhoneFindByClientIdsFetcher
         }
 
         $rows = $this->connection->createQueryBuilder()
-            ->select('id', 'client_id', 'type', 'phone')
+            ->select(...ReadModelFields::select(ClientPhoneSummary::fields()))
             ->from(self::TABLE)
             ->where('client_id IN (:clientIds)')
             ->setParameter('clientIds', $query->clientIds, ArrayParameterType::INTEGER)
             ->executeQuery()
             ->fetchAllAssociative();
 
-        /** @var list<ClientPhoneByClient> $items */
-        $items = ClientPhoneByClient::fromRows($rows);
-
-        return $items;
+        /** @var list<ClientPhoneSummary> $items */
+        return ClientPhoneSummary::fromRows($rows);
     }
 }

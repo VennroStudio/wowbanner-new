@@ -48,12 +48,6 @@ final readonly class DoctrineClientRepository implements ClientRepository
     }
 
     #[Override]
-    public function findByPhone(string $phone): ?Client
-    {
-        return $this->repo->findOneBy(['phone' => $phone]);
-    }
-
-    #[Override]
     public function add(Client $client): void
     {
         $this->em->persist($client);

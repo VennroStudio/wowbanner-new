@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Modules\Client\ReadModel\ClientPhone;
 
 use App\Components\ReadModel\FromRowsTrait;
-use App\Modules\Client\Entity\ClientPhone\Fields\PhoneType;
+use App\Modules\Client\Entity\ClientPhone\Fields\Enums\PhoneType;
 use App\Modules\Client\ReadModel\ClientPhone\Interface\ClientPhoneModelInterface;
 use Override;
 
-final readonly class ClientPhoneByClient implements ClientPhoneModelInterface
+final readonly class ClientPhoneSummary implements ClientPhoneModelInterface
 {
     use FromRowsTrait;
 
@@ -19,6 +19,19 @@ final readonly class ClientPhoneByClient implements ClientPhoneModelInterface
         public PhoneType $type,
         public string $phone,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'        => 'id',
+            'client_id' => 'client_id',
+            'type'      => 'type',
+            'phone'     => 'phone',
+        ];
+    }
 
     /**
      * @param array{
@@ -45,13 +58,21 @@ final readonly class ClientPhoneByClient implements ClientPhoneModelInterface
     }
 
     #[Override]
+    public function getClientId(): int
+    {
+        return $this->clientId;
+    }
+
+    #[Override]
     public function toArray(): array
     {
         return [
-            'id'        => $this->id,
-            'client_id' => $this->clientId,
-            'type'      => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
-            'phone'     => $this->phone,
+            'id'   => $this->id,
+            'type' => [
+                'id'    => $this->type->value,
+                'label' => $this->type->getLabel(),
+            ],
+            'phone' => $this->phone,
         ];
     }
 }

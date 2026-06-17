@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Client\Entity\ClientPhone\Fields;
+namespace App\Modules\Client\Entity\ClientPhone\Fields\Enums;
 
 use App\Components\Enum\EnumInterface;
 
 enum PhoneType: int implements EnumInterface
 {
-    case MAIN       = 1;
+    case MAIN = 1;
     case ADDITIONAL = 2;
 
     public function getLabel(): string

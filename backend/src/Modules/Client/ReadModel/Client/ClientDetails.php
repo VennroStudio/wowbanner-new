@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Client\ReadModel\Client;
 
 use App\Components\ReadModel\FromRowsTrait;
-use App\Modules\Client\Entity\Client\Fields\ClientType;
-use App\Modules\Client\Entity\Client\Fields\Docs;
+use App\Modules\Client\Entity\Client\Fields\Enums\ClientType;
+use App\Modules\Client\Entity\Client\Fields\Enums\Docs;
 use App\Modules\Client\ReadModel\Client\Interface\ClientModelInterface;
 use Override;
 
-final readonly class ClientById implements ClientModelInterface
+final readonly class ClientDetails implements ClientModelInterface
 {
     use FromRowsTrait;
 
@@ -27,6 +27,26 @@ final readonly class ClientById implements ClientModelInterface
         public string $createdAt,
         public ?string $updatedAt,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'            => 'id',
+            'old_full_name' => 'old_full_name',
+            'last_name'     => 'last_name',
+            'first_name'    => 'first_name',
+            'middle_name'   => 'middle_name',
+            'email'         => 'email',
+            'info'          => 'info',
+            'docs'          => 'docs',
+            'type'          => 'type',
+            'created_at'    => 'created_at',
+            'updated_at'    => 'updated_at',
+        ];
+    }
 
     /**
      * @param array{
@@ -77,8 +97,14 @@ final readonly class ClientById implements ClientModelInterface
             'middle_name'   => $this->middleName,
             'email'         => $this->email,
             'info'          => $this->info,
-            'docs'          => ['id' => $this->docs->value, 'label' => $this->docs->getLabel()],
-            'type'          => ['id' => $this->type->value, 'label' => $this->type->getLabel()],
+            'docs'          => [
+                'id'    => $this->docs->value,
+                'label' => $this->docs->getLabel(),
+            ],
+            'type' => [
+                'id'    => $this->type->value,
+                'label' => $this->type->getLabel(),
+            ],
         ];
     }
 }

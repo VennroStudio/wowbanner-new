@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Client\Command\ClientPhone\Create;
 
-use App\Modules\Client\Entity\ClientPhone\Fields\PhoneType;
+use App\Modules\Client\Entity\ClientPhone\Fields\Enums\PhoneType;
 
 final readonly class CreateClientPhoneCommand
 {
