@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Unifier\Processing;
 
-use App\Components\Http\Unifier\UnifierHelper;
 use App\Components\Http\Unifier\UnifierInterface;
-use App\Components\Storage\S3Transformer;
 use App\Modules\Processing\Query\ProcessingImage\FindByProcessingIds\ProcessingImageFindByProcessingIdsFetcher;
 use App\Modules\Processing\Query\ProcessingImage\FindByProcessingIds\ProcessingImageFindByProcessingIdsQuery;
 use App\Modules\Processing\ReadModel\Processing\Interface\ProcessingModelInterface;
-use App\Modules\Processing\ReadModel\ProcessingImage\ProcessingImageByProcessing;
+use App\Modules\Processing\ReadModel\ProcessingImage\Interface\ProcessingImageModelInterface;
 use Doctrine\DBAL\Exception;
 use Override;
 
 final readonly class ProcessingUnifier implements UnifierInterface
 {
     public function __construct(
-        private S3Transformer $s3Transformer,
         private ProcessingImageFindByProcessingIdsFetcher $imageFetcher,
+        private ProcessingImageUnifier $imageUnifier,
     ) {}
 
     #[Override]
@@ -32,7 +30,7 @@ final readonly class ProcessingUnifier implements UnifierInterface
     }
 
     /**
-     * @param list<object> $items
+     * @param list<ProcessingModelInterface> $items
      * @return list<array<string, mixed>>
      * @throws Exception
      */
@@ -43,13 +41,13 @@ final readonly class ProcessingUnifier implements UnifierInterface
             return [];
         }
 
-        $ids = array_map(static fn(ProcessingModelInterface $i): int => $i->getId(), $items);
+        $ids = array_map(static fn (ProcessingModelInterface $i): int => $i->getId(), $items);
 
         $groupedImages = $this->groupImagesByProcessingId(
             $this->imageFetcher->fetch(new ProcessingImageFindByProcessingIdsQuery($ids))
         );
 
-        return array_map(fn(ProcessingModelInterface $item): array => $this->map($item, $groupedImages), $items);
+        return array_map(fn (ProcessingModelInterface $item): array => $this->map($item, $groupedImages), $items);
     }
 
     /**
@@ -67,7 +65,7 @@ final readonly class ProcessingUnifier implements UnifierInterface
     }
 
     /**
-     * @param list<ProcessingImageByProcessing> $images
+     * @param list<ProcessingImageModelInterface> $images
      * @return array<int, list<array<string, mixed>>>
      */
     private function groupImagesByProcessingId(array $images): array
@@ -75,11 +73,14 @@ final readonly class ProcessingUnifier implements UnifierInterface
         $grouped = [];
 
         foreach ($images as $image) {
-            $data = UnifierHelper::toArrayWithout($image, 'processing_id');
-            $data = UnifierHelper::transformField($data, 'path', $this->s3Transformer->buildUrl(...));
-            $grouped[$image->getProcessingId()][] = $data;
+            $grouped[$image->getProcessingId()][] = $image;
         }
 
-        return $grouped;
+        $result = [];
+        foreach ($grouped as $processingId => $group) {
+            $result[$processingId] = $this->imageUnifier->unify(null, $group);
+        }
+
+        return $result;
     }
 }

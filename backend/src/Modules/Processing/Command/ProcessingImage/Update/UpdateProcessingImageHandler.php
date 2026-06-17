@@ -22,7 +22,7 @@ final readonly class UpdateProcessingImageHandler
     /** @throws AccessDeniedException */
     public function handle(UpdateProcessingImageCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ProcessingPermission::UPDATE,
         );
@@ -30,7 +30,7 @@ final readonly class UpdateProcessingImageHandler
         $image = $this->repository->getById($command->id);
 
         $image->edit(
-            path: null, // We keep the existing path
+            path: null,
             alt: $command->alt,
         );
 

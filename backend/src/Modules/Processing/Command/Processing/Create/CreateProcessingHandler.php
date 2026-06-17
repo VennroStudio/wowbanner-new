@@ -24,7 +24,7 @@ final readonly class CreateProcessingHandler
     /** @throws AccessDeniedException */
     public function handle(CreateProcessingCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ProcessingPermission::CREATE,
         );

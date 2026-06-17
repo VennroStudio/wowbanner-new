@@ -9,17 +9,19 @@ use App\Components\Router\Route;
 use App\Http\Unifier\Processing\ProcessingUnifier;
 use App\Modules\Processing\Query\Processing\GetById\ProcessingGetByIdFetcher;
 use App\Modules\Processing\Query\Processing\GetById\ProcessingGetByIdQuery;
+use Doctrine\DBAL\Exception;
+use JsonException;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Throwable;
 
 #[OA\Get(
     path: '/processings/{id}',
     description: 'Получение обработки по ID',
     summary: 'Получить обработку по ID',
+    security: [['bearerAuth' => []]],
     tags: ['Processings'],
     parameters: [
         new OA\Parameter(
@@ -28,10 +30,11 @@ use Throwable;
             in: 'path',
             required: true,
             schema: new OA\Schema(type: 'integer')
-        )
+        ),
     ],
     responses: [
         new OA\Response(response: 200, description: 'Успех'),
+        new OA\Response(response: 401, description: 'Не авторизован'),
         new OA\Response(response: 404, description: 'Обработка не найдена'),
     ]
 )]
@@ -42,7 +45,10 @@ final readonly class GetProcessingByIdAction implements RequestHandlerInterface
         private ProcessingUnifier $unifier,
     ) {}
 
-    /** @throws Throwable */
+    /**
+     * @throws Exception
+     * @throws JsonException
+     */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {

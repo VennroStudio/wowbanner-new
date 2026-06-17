@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Processing\Query\Processing\GetById;
 
 use App\Components\Exception\DomainExceptionModule;
-use App\Modules\Processing\ReadModel\Processing\ProcessingById;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Processing\ReadModel\Processing\Interface\ProcessingModelInterface;
+use App\Modules\Processing\ReadModel\Processing\ProcessingDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -17,11 +19,16 @@ final readonly class ProcessingGetByIdFetcher
         private Connection $connection,
     ) {}
 
-    /** @throws Exception */
-    public function fetch(ProcessingGetByIdQuery $query): ProcessingById
+    /**
+     * @template T of ProcessingModelInterface
+     * @param class-string<T> $modelClass
+     * @return T
+     * @throws Exception
+     */
+    public function fetch(ProcessingGetByIdQuery $query, string $modelClass = ProcessingDetails::class): ProcessingModelInterface
     {
         $row = $this->connection->createQueryBuilder()
-            ->select('id', 'name', 'description', 'type', 'cost_price', 'price')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->from(self::TABLE)
             ->where('id = :id')
             ->setParameter('id', $query->id)
@@ -37,6 +44,6 @@ final readonly class ProcessingGetByIdFetcher
             );
         }
 
-        return ProcessingById::fromRow($row);
+        return $modelClass::fromRow($row);
     }
 }

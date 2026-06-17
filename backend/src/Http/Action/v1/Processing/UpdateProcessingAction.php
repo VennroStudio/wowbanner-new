@@ -45,7 +45,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
             in: 'path',
             required: true,
             schema: new OA\Schema(type: 'integer')
-        )
+        ),
     ],
     responses: [
         new OA\Response(response: 200, description: 'Обработка обновлена'),

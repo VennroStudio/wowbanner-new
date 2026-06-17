@@ -20,14 +20,14 @@ enum ProcessingType: int implements EnumInterface
     public function getLabel(): string
     {
         return match ($this) {
-            self::SQUARE_METER_ALL_AREA           => 'метр квадратный по всей площади',
-            self::LINEAR_METER_PERIMETER          => 'метр погонный по всему периметру',
+            self::SQUARE_METER_ALL_AREA             => 'метр квадратный по всей площади',
+            self::LINEAR_METER_PERIMETER            => 'метр погонный по всему периметру',
             self::LINEAR_METER_TWO_SIDES_MAX_LENGTH => 'метр погонный по двум сторонам мак. по длине',
-            self::PERCENT_OF_PRINT_COST           => 'процент от стоимости печати',
-            self::PERCENT_OF_TOTAL_COST           => 'процент от итоговой стоимости',
-            self::CUTTING_LENGTH_PER_METER        => 'по длине реза. за метр',
-            self::PRICE_PER_PIECE                 => 'Цена за штуку',
-            self::COMPLEXITY_COEFFICIENT          => 'Коэффициент сложности',
+            self::PERCENT_OF_PRINT_COST             => 'процент от стоимости печати',
+            self::PERCENT_OF_TOTAL_COST             => 'процент от итоговой стоимости',
+            self::CUTTING_LENGTH_PER_METER          => 'по длине реза. за метр',
+            self::PRICE_PER_PIECE                   => 'Цена за штуку',
+            self::COMPLEXITY_COEFFICIENT            => 'Коэффициент сложности',
         };
     }
 }

@@ -11,16 +11,11 @@ use App\Modules\User\Entity\User\Fields\Enums\UserRole;
 final readonly class ProcessingPermissionService
 {
     /** @throws AccessDeniedException */
-    public function check(UserRole $currentUserRole, ProcessingPermission $action): void
+    public function checkRole(UserRole $currentUserRole, ProcessingPermission $action): void
     {
-        if (!$this->hasAccess($currentUserRole, $action)) {
+        if (!\in_array($currentUserRole, $this->getAllowedRolesForAction($action), true)) {
             throw new AccessDeniedException();
         }
-    }
-
-    public function hasAccess(UserRole $currentUserRole, ProcessingPermission $action): bool
-    {
-        return \in_array($currentUserRole, $this->getAllowedRolesForAction($action), true);
     }
 
     /** @return list<UserRole> */

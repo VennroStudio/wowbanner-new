@@ -50,7 +50,7 @@ final readonly class DeleteProcessingImageAction implements RequestHandlerInterf
         private DeleteProcessingImageHandler $handler,
     ) {}
 
-    /** @throws ExceptionInterface|AccessDeniedException */
+    /** @throws AccessDeniedException|ExceptionInterface */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {

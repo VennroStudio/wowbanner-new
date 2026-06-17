@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Modules\Processing\Query\Processing\FindAll;
 
 use App\Components\ReadModel\ModelCountItemsResult;
-use App\Modules\Processing\ReadModel\Processing\ProcessingFindAll;
+use App\Components\ReadModel\ReadModelFields;
+use App\Modules\Processing\ReadModel\Processing\Interface\ProcessingModelInterface;
+use App\Modules\Processing\ReadModel\Processing\ProcessingDetails;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -18,10 +20,12 @@ final readonly class ProcessingFindAllFetcher
     ) {}
 
     /**
-     * @return ModelCountItemsResult<ProcessingFindAll>
+     * @template T of ProcessingModelInterface
+     * @param class-string<T> $modelClass
+     * @return ModelCountItemsResult<T>
      * @throws Exception
      */
-    public function fetch(ProcessingFindAllQuery $query): ModelCountItemsResult
+    public function fetch(ProcessingFindAllQuery $query, string $modelClass = ProcessingDetails::class): ModelCountItemsResult
     {
         $qb = $this->connection->createQueryBuilder()
             ->from(self::TABLE);
@@ -31,10 +35,10 @@ final readonly class ProcessingFindAllFetcher
                 ->setParameter('search', '%' . $query->search . '%');
         }
 
-        $total = (int) (clone $qb)->select('COUNT(id)')->executeQuery()->fetchOne();
+        $total = (int)(clone $qb)->select('COUNT(id)')->executeQuery()->fetchOne();
 
         $rows = $qb
-            ->select('id', 'name', 'description', 'type', 'cost_price', 'price')
+            ->select(...ReadModelFields::select($modelClass::fields()))
             ->orderBy('id', 'ASC')
             ->setFirstResult($query->getOffset())
             ->setMaxResults($query->perPage)
@@ -42,7 +46,7 @@ final readonly class ProcessingFindAllFetcher
             ->fetchAllAssociative();
 
         return new ModelCountItemsResult(
-            items: ProcessingFindAll::fromRows($rows),
+            items: $modelClass::fromRows($rows),
             count: $total,
         );
     }

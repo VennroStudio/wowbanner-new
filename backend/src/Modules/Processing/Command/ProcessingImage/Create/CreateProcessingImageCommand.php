@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Processing\Command\ProcessingImage\Create;
 
+use App\Modules\Processing\ReadModel\ProcessingImage\ProcessingImageItem;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class CreateProcessingImageCommand
@@ -17,6 +18,7 @@ final readonly class CreateProcessingImageCommand
         #[Assert\NotBlank]
         #[Assert\GreaterThan(0)]
         public int $processingId,
+        /** @var list<ProcessingImageItem> */
         #[Assert\NotBlank(message: 'validation.processing_image_path_required')]
         public array $images,
     ) {}

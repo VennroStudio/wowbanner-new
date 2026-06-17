@@ -11,13 +11,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Override;
 
-final class DoctrineProcessingImageRepository implements ProcessingImageRepository
+final readonly class DoctrineProcessingImageRepository implements ProcessingImageRepository
 {
     /** @var EntityRepository<ProcessingImage> */
     private EntityRepository $repo;
 
     public function __construct(
-        private readonly EntityManagerInterface $em,
+        private EntityManagerInterface $em,
     ) {
         /** @var EntityRepository<ProcessingImage> $repo */
         $repo = $em->getRepository(ProcessingImage::class);

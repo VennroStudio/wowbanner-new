@@ -20,6 +20,19 @@ final readonly class ProcessingImageByProcessing implements ProcessingImageModel
     ) {}
 
     /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'            => 'id',
+            'processing_id' => 'processing_id',
+            'path'          => 'path',
+            'alt'           => 'alt',
+        ];
+    }
+
+    /**
      * @param array{
      *     id: int,
      *     processing_id: int,
@@ -53,10 +66,9 @@ final readonly class ProcessingImageByProcessing implements ProcessingImageModel
     public function toArray(): array
     {
         return [
-            'id'            => $this->id,
-            'processing_id' => $this->processingId,
-            'path'          => $this->path,
-            'alt'           => $this->alt,
+            'id'   => $this->id,
+            'path' => $this->path,
+            'alt'  => $this->alt,
         ];
     }
 }

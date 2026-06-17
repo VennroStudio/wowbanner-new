@@ -11,6 +11,8 @@ final readonly class CreateProcessingCommand
     private const int NAME_MIN_LENGTH = 2;
     private const int NAME_MAX_LENGTH = 255;
     private const int DESCRIPTION_MAX_LENGTH = 65535;
+    private const int TYPE_MIN = 1;
+    private const int TYPE_MAX = 8;
 
     public function __construct(
         #[Assert\NotBlank]
@@ -27,6 +29,11 @@ final readonly class CreateProcessingCommand
         )]
         public string $name,
         #[Assert\NotBlank(message: 'validation.processing_type_required')]
+        #[Assert\Range(
+            notInRangeMessage: 'validation.processing_type_invalid',
+            min: self::TYPE_MIN,
+            max: self::TYPE_MAX
+        )]
         public int $type,
         #[Assert\Length(max: self::DESCRIPTION_MAX_LENGTH, maxMessage: 'validation.processing_description_too_long')]
         public string $description = '',

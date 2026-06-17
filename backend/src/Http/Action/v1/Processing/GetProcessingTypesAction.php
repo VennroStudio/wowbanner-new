@@ -18,9 +18,11 @@ use Psr\Http\Server\RequestHandlerInterface;
     path: '/processings/types',
     description: 'Получение списка типов обработки',
     summary: 'Получить типы обработки',
+    security: [['bearerAuth' => []]],
     tags: ['Processings'],
     responses: [
         new OA\Response(response: 200, description: 'Успех'),
+        new OA\Response(response: 401, description: 'Не авторизован'),
     ]
 )]
 final readonly class GetProcessingTypesAction implements RequestHandlerInterface

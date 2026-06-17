@@ -9,7 +9,7 @@ use App\Modules\Processing\Entity\Processing\Fields\Enums\ProcessingType;
 use App\Modules\Processing\ReadModel\Processing\Interface\ProcessingModelInterface;
 use Override;
 
-final readonly class ProcessingById implements ProcessingModelInterface
+final readonly class ProcessingDetails implements ProcessingModelInterface
 {
     use FromRowsTrait;
 
@@ -21,6 +21,21 @@ final readonly class ProcessingById implements ProcessingModelInterface
         public string $costPrice,
         public string $price,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'          => 'id',
+            'name'        => 'name',
+            'description' => 'description',
+            'type'        => 'type',
+            'cost_price'  => 'cost_price',
+            'price'       => 'price',
+        ];
+    }
 
     /**
      * @param array{
@@ -38,7 +53,7 @@ final readonly class ProcessingById implements ProcessingModelInterface
             id: (int)$row['id'],
             name: $row['name'],
             description: $row['description'],
-            type: ProcessingType::from($row['type']),
+            type: ProcessingType::from((int)$row['type']),
             costPrice: $row['cost_price'],
             price: $row['price'],
         );
@@ -61,8 +76,8 @@ final readonly class ProcessingById implements ProcessingModelInterface
                 'id'    => $this->type->value,
                 'label' => $this->type->getLabel(),
             ],
-            'cost_price'  => $this->costPrice,
-            'price'       => $this->price,
+            'cost_price' => $this->costPrice,
+            'price'      => $this->price,
         ];
     }
 }

@@ -8,6 +8,7 @@ return [
     'validation.processing_name_too_long'        => 'Название обработки слишком длинное.',
     'validation.processing_description_too_long' => 'Описание обработки слишком длинное.',
     'validation.processing_type_required'        => 'Тип обработки обязателен.',
+    'validation.processing_type_invalid'         => 'Тип обработки некорректен.',
     'validation.processing_cost_price_invalid'   => 'Неверная себестоимость.',
     'validation.processing_price_invalid'        => 'Неверная цена.',
     'validation.processing_image_path_required'  => 'Путь к изображению обязателен.',

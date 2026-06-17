@@ -58,7 +58,7 @@ final readonly class UpdateProcessingImageAction implements RequestHandlerInterf
         private UpdateProcessingImageHandler $handler,
     ) {}
 
-    /** @throws ExceptionInterface|AccessDeniedException */
+    /** @throws AccessDeniedException|ExceptionInterface */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {

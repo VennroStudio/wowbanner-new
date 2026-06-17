@@ -10,18 +10,20 @@ use App\Components\Validator\Validator;
 use App\Http\Unifier\Processing\ProcessingUnifier;
 use App\Modules\Processing\Query\Processing\FindAll\ProcessingFindAllFetcher;
 use App\Modules\Processing\Query\Processing\FindAll\ProcessingFindAllQuery;
+use Doctrine\DBAL\Exception;
+use JsonException;
 use OpenApi\Attributes as OA;
 use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Throwable;
 
 #[OA\Get(
     path: '/processings',
     description: 'Получение списка обработок',
     summary: 'Получить список обработок',
+    security: [['bearerAuth' => []]],
     tags: ['Processings'],
     parameters: [
         new OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer', default: 1)),
@@ -30,6 +32,7 @@ use Throwable;
     ],
     responses: [
         new OA\Response(response: 200, description: 'Успех'),
+        new OA\Response(response: 401, description: 'Не авторизован'),
         new OA\Response(response: 422, description: 'Ошибка валидации'),
     ]
 )]
@@ -42,7 +45,11 @@ final readonly class GetProcessingsAction implements RequestHandlerInterface
         private ProcessingUnifier $unifier,
     ) {}
 
-    /** @throws Throwable|ExceptionInterface */
+    /**
+     * @throws ExceptionInterface
+     * @throws Exception
+     * @throws JsonException
+     */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {

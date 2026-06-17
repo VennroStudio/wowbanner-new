@@ -35,12 +35,11 @@ final readonly class CreateProcessingImageHandler
      */
     public function handle(CreateProcessingImageCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ProcessingPermission::UPDATE,
         );
 
-        // Ensure processing entity exists
         $this->processingRepository->getById($command->processingId);
 
         /** @var ProcessingImageItem $item */

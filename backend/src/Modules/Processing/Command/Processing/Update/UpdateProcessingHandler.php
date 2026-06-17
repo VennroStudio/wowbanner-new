@@ -23,7 +23,7 @@ final readonly class UpdateProcessingHandler
     /** @throws AccessDeniedException */
     public function handle(UpdateProcessingCommand $command): void
     {
-        $this->permissionService->check(
+        $this->permissionService->checkRole(
             currentUserRole: UserRole::from($command->currentUserRole),
             action: ProcessingPermission::UPDATE,
         );

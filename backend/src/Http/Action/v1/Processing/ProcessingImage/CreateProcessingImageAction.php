@@ -60,7 +60,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
         ),
     ],
     responses: [
-        new OA\Response(response: 200, description: 'Изображения добавлены'),
+        new OA\Response(response: 201, description: 'Изображения добавлены'),
         new OA\Response(response: 401, description: 'Не авторизован'),
         new OA\Response(response: 403, description: 'Доступ запрещён'),
         new OA\Response(response: 404, description: 'Обработка не найдена'),
@@ -76,7 +76,7 @@ final readonly class CreateProcessingImageAction implements RequestHandlerInterf
     ) {}
 
     /**
-     * @throws ExceptionInterface|RandomException|AccessDeniedException
+     * @throws AccessDeniedException|ExceptionInterface|RandomException
      */
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface

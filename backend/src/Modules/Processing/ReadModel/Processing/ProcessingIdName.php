@@ -8,7 +8,7 @@ use App\Components\ReadModel\FromRowsTrait;
 use App\Modules\Processing\ReadModel\Processing\Interface\ProcessingModelInterface;
 use Override;
 
-final readonly class ProcessingGetBySelect implements ProcessingModelInterface
+final readonly class ProcessingIdName implements ProcessingModelInterface
 {
     use FromRowsTrait;
 
@@ -16,6 +16,17 @@ final readonly class ProcessingGetBySelect implements ProcessingModelInterface
         public int $id,
         public string $name,
     ) {}
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fields(): array
+    {
+        return [
+            'id'   => 'id',
+            'name' => 'name',
+        ];
+    }
 
     /**
      * @param array{
@@ -26,7 +37,7 @@ final readonly class ProcessingGetBySelect implements ProcessingModelInterface
     public static function fromRow(array $row): self
     {
         return new self(
-            id: (int) $row['id'],
+            id: (int)$row['id'],
             name: $row['name'],
         );
     }
